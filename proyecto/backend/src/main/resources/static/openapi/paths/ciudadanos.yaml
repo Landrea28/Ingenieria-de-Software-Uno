@@ -1,0 +1,151 @@
+listado:
+  get:
+    tags:
+    - Ciudadanos
+    summary: Listar y buscar ciudadanos
+    description: Ordenado por apellidos y nombres. La busqueda aplica a identificacion, nombres y apellidos (parcial, sin distinguir mayusculas). Requerira administrador cuando se integre la seguridad.
+    parameters:
+    - in: query
+      name: busqueda
+      description: Texto opcional a buscar.
+      schema:
+        type: string
+        example: Rivera
+    - in: query
+      name: pagina
+      description: Numero de pagina, base 0.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    - in: query
+      name: tamano
+      description: Elementos por pagina.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    responses:
+      '200':
+        description: Pagina de ciudadanos
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/ciudadano.yaml#/PaginaCiudadanos
+      '400':
+        description: Filtros incorrectos (pagina o tamano fuera de rango)
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []
+  post:
+    tags:
+    - Ciudadanos
+    summary: Registrar ciudadano
+    description: La fecha de expedicion debe ser posterior a la de nacimiento. Requerira administrador cuando se integre la seguridad.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/ciudadano.yaml#/CiudadanoRequest
+    responses:
+      '201':
+        description: Creado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/ciudadano.yaml#/CiudadanoResponse
+      '400':
+        description: Datos invalidos
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '409':
+        description: Identificacion duplicada
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []
+detalle:
+  get:
+    tags:
+    - Ciudadanos
+    summary: Consultar ciudadano por identificacion
+    parameters:
+    - in: path
+      name: identificacion
+      required: true
+      description: Entre 6 y 10 digitos. En el perfil demo existen del 9000000001 al 9000000019.
+      schema:
+        type: string
+        pattern: ^[0-9]{6,10}$
+        example: '9000000001'
+    responses:
+      '200':
+        description: Ciudadano encontrado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/ciudadano.yaml#/CiudadanoResponse
+      '400':
+        description: Identificacion con formato invalido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '404':
+        description: No existe
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []
+  put:
+    tags:
+    - Ciudadanos
+    summary: Actualizar ciudadano conservando identificacion
+    description: La identificacion se toma de la ruta y no se modifica. La fecha de expedicion debe ser posterior a la de nacimiento.
+    parameters:
+    - in: path
+      name: identificacion
+      required: true
+      description: Identificacion del ciudadano a actualizar (6 a 10 digitos).
+      schema:
+        type: string
+        pattern: ^[0-9]{6,10}$
+        example: '9000000001'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/ciudadano.yaml#/CiudadanoUpdateRequest
+    responses:
+      '200':
+        description: Actualizado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/ciudadano.yaml#/CiudadanoResponse
+      '400':
+        description: Validacion (identificacion o cuerpo invalido)
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '404':
+        description: No existe
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []

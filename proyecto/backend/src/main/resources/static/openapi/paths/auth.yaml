@@ -1,0 +1,60 @@
+login:
+  post:
+    tags:
+    - Autenticacion
+    summary: Iniciar sesion
+    description: Contrato de autenticacion. Con un cuerpo valido responde 503 hasta integrar la autenticacion.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/auth.yaml#/LoginRequest
+    responses:
+      '200':
+        description: Sesion iniciada tras integrar seguridad
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/auth.yaml#/LoginResponse
+      '400':
+        description: Cuerpo invalido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Credenciales invalidas tras integrar seguridad
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '503':
+        description: Integracion pendiente
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+logout:
+  post:
+    tags:
+    - Autenticacion
+    summary: Cerrar sesion
+    description: Pendiente de integrar la autenticacion. Exige el encabezado Authorization; para probarlo en Swagger pulse Authorize e ingrese cualquier valor, de lo contrario responde 400.
+    responses:
+      '204':
+        description: Sesion finalizada tras integrar seguridad
+      '400':
+        description: Falta el encabezado Authorization
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '503':
+        description: Integracion pendiente
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []

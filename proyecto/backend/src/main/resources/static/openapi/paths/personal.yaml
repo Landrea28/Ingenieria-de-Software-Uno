@@ -1,0 +1,36 @@
+registro:
+  post:
+    tags: [Personal]
+    summary: Registro de personal de fuerza publica
+    description: El flujo existe. La validacion contra Defensa, la generacion de claves, el hash y el correo dependen de la integracion de seguridad. Primero se valida que fuerza y rango coincidan (400); despues, mientras la integracion siga pendiente, devuelve 503, por lo que el 409 aun no es alcanzable.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/personal.yaml#/RegistroPersonalRequest'
+    responses:
+      '201':
+        description: Aceptado tras integrar seguridad
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personal.yaml#/RegistroPersonalResponse'
+      '400':
+        description: Datos invalidos o fuerza y rango no coinciden
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
+      '409':
+        description: Usuario duplicado tras integrar seguridad
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
+      '503':
+        description: Integracion de seguridad pendiente
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'

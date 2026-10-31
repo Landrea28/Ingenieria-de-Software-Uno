@@ -1,0 +1,38 @@
+ciudadanos:
+  get:
+    tags:
+    - Reportes
+    summary: Exportar ciudadanos a PDF filtrado por estado
+    description: Datos ficticios de demostracion. Swagger UI ofrece un enlace para descargar el PDF. Requiere administrador tras integrar seguridad.
+    parameters:
+    - in: query
+      name: estado
+      required: true
+      schema:
+        type: string
+        enum:
+        - REQUERIDO
+        - NO_REQUERIDO
+        example: REQUERIDO
+    responses:
+      '200':
+        description: Archivo PDF
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+      '400':
+        description: Estado ausente o invalido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '404':
+        description: Sin resultados
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []

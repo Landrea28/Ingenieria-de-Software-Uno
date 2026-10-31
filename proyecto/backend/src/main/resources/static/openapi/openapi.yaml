@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Consulta Ciudadano
+  version: 0.1.0
+  description: |
+    API academica con persistencia real y servicios de seguridad pendientes de integracion. Los antecedentes son exclusivamente ficticios.
+
+    **Para probar:** hoy ningun endpoint exige token, aunque aparezca el candado. Solo `POST /api/auth/logout` necesita el encabezado Authorization: pulse Authorize e ingrese cualquier valor. Login y registro de personal responden 503 hasta integrar seguridad. Para tener datos de ejemplo arranque con el perfil `demo`.
+servers:
+  - url: /
+tags:
+  - name: Salud
+  - name: Ciudadanos
+  - name: Antecedentes
+  - name: Catalogos
+  - name: Personal
+  - name: Autenticacion
+  - name: Reportes
+paths:
+  /api/health:
+    $ref: './paths/salud.yaml#/health'
+  /api/ciudadanos:
+    $ref: './paths/ciudadanos.yaml#/listado'
+  /api/ciudadanos/{identificacion}:
+    $ref: './paths/ciudadanos.yaml#/detalle'
+  /api/antecedentes/{identificacion}:
+    $ref: './paths/antecedentes.yaml#/consulta'
+  /api/antecedentes/{identificacion}/estado:
+    $ref: './paths/antecedentes.yaml#/estado'
+  /api/catalogos/fuerzas-rangos:
+    $ref: './paths/catalogos.yaml#/fuerzas'
+  /api/personal/registro:
+    $ref: './paths/personal.yaml#/registro'
+  /api/auth/login:
+    $ref: './paths/auth.yaml#/login'
+  /api/auth/logout:
+    $ref: './paths/auth.yaml#/logout'
+  /api/reportes/ciudadanos:
+    $ref: './paths/reportes.yaml#/ciudadanos'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
