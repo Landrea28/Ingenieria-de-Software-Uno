@@ -1,13 +1,22 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Consulta Ciudadano",
+    "slug": "consulta-ciudadano-movil",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "La cámara se usa únicamente para leer el código de barras de la cédula."
+        }
+      ],
+      "expo-secure-store"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {
