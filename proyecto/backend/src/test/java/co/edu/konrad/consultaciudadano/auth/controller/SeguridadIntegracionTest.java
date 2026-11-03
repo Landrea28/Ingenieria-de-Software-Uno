@@ -197,14 +197,44 @@ class SeguridadIntegracionTest {
     }
 
     @Test
-    void registroRechazaDatosQueNoCoincidenConDefensa() throws Exception {
-        var request = """
+    void identificacionInexistenteYDatosNoCoincidentesDevuelvenElMismoError() throws Exception {
+        var identificacionInexistente = """
                 {"identificacion":"8000000011","nombres":"Desconocido","apellidos":"Prueba",
                  "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
                 """;
-        mvc.perform(post("/api/personal/registro").contentType(MediaType.APPLICATION_JSON).content(request))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.codigo").exists());
+        var datosNoCoincidentes = """
+                {"identificacion":"8000000005","nombres":"Desconocido","apellidos":"Prueba",
+                 "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
+                """;
+
+        var respuestaInexistente = mvc.perform(post("/api/personal/registro")
+                        .contentType(MediaType.APPLICATION_JSON).content(identificacionInexistente))
+                .andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
+        var respuestaNoCoincidente = mvc.perform(post("/api/personal/registro")
+                        .contentType(MediaType.APPLICATION_JSON).content(datosNoCoincidentes))
+                .andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
+
+        assertEquals(respuestaInexistente, respuestaNoCoincidente);
+    }
+
+    @Test
+    void registroConCamposExcesivosOInyeccionSqlDevuelve400() throws Exception {
+        var nombreExcesivo = "A".repeat(101);
+        var requestLongitudExcesiva = """
+                {"identificacion":"8000000011","nombres":"%s","apellidos":"Prueba",
+                 "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
+                """.formatted(nombreExcesivo);
+        var requestInyeccionSql = """
+                {"identificacion":"1' OR '1'='1","nombres":"Desconocido","apellidos":"Prueba",
+                 "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
+                """;
+
+        mvc.perform(post("/api/personal/registro").contentType(MediaType.APPLICATION_JSON)
+                        .content(requestLongitudExcesiva))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/personal/registro").contentType(MediaType.APPLICATION_JSON)
+                        .content(requestInyeccionSql))
+                .andExpect(status().isBadRequest());
     }
 
     private MvcResult respuestaLogin(String identificacion, String contrasena) throws Exception {
