@@ -1,6 +1,6 @@
 ErrorResponse:
   type: object
-  required: [codigo, mensaje, detalles, fecha]
+  required: [codigo, mensaje, detalles]
   properties:
     codigo:
       type: string
@@ -11,6 +11,3 @@ ErrorResponse:
       type: array
       items:
         type: string
-    fecha:
-      type: string
-      format: date-time

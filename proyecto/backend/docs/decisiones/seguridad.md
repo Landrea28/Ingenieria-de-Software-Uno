@@ -11,8 +11,10 @@
 - El administrador inicial se crea al iniciar solo si se proporcionan
   `ADMIN_INITIAL_IDENTIFICACION`, `ADMIN_INITIAL_EMAIL` y
   `ADMIN_INITIAL_PASSWORD`; la base solo recibe el hash BCrypt.
-- El contador de intentos fallidos vive en memoria del proceso; en despliegues
-  con varias réplicas debe trasladarse a almacenamiento compartido.
+- Los contadores y bloqueos de login se persisten en PostgreSQL y se actualizan
+  con transacciones independientes, compartidos entre instancias y reinicios.
+- Las respuestas de error contienen exactamente `codigo`, `mensaje` y
+  `detalles`.
 
 ## Resultados de pruebas
 

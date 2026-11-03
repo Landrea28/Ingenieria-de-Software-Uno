@@ -55,8 +55,8 @@ Sin `demo` se cargan únicamente el esquema, los catálogos de fuerzas y rangos,
 
 `JWT_SECRET` firma los tokens; `recordarContrasena` aumenta su expiración, no
 guarda la contraseña. Tras cinco fallos, la identificación se bloquea por 15
-minutos en la instancia actual. Ver `docs/decisiones/seguridad.md` para límites
-y decisiones.
+minutos en PostgreSQL, también entre instancias. Ver
+`docs/decisiones/seguridad.md` para límites y decisiones.
 
 ## Documentación y calidad
 

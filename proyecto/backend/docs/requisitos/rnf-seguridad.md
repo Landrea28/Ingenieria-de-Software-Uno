@@ -4,7 +4,8 @@
   predeterminada de 15 minutos y de 8 horas cuando recordar está activo.
 - Contraseñas con BCrypt. Las credenciales temporales tienen exactamente seis
   caracteres alfanuméricos, con mayúscula, minúscula y dígito.
-- Cinco fallos consecutivos bloquean la identificación por 15 minutos.
+- Cinco fallos consecutivos bloquean la identificación por 15 minutos; el
+  estado persiste y se comparte entre instancias en PostgreSQL.
 - Logout persiste el `jti` revocado hasta que expire el token.
 - Respuestas 401 y 403 usan `codigo`, `mensaje` y `detalles`; login no revela si
   existe la identificación. Nunca se registra ni responde la contraseña.

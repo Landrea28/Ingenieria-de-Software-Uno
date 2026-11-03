@@ -39,6 +39,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.PlatformTransactionManager;
+import javax.sql.DataSource;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,6 +64,8 @@ class SeguridadIntegracionTest {
     @Autowired PasswordEncoder passwordEncoder;
     @Autowired JdbcTemplate jdbc;
     @Autowired JavaMailSenderImpl mailSender;
+    @Autowired PlatformTransactionManager transactionManager;
+    @Autowired DataSource dataSource;
 
     @AfterAll
     static void detenerSmtp() {
@@ -114,6 +118,9 @@ class SeguridadIntegracionTest {
         for (int intento = 0; intento < 5; intento++) {
             assertEquals(401, respuestaLogin("9000000093", "Wrong1").getResponse().getStatus());
         }
+        var servicioReiniciado = new co.edu.konrad.consultaciudadano.auth.service.ServicioBloqueoLogin(
+                jdbc, transactionManager, dataSource);
+        assertTrue(servicioReiniciado.estaBloqueada("9000000093"));
         mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson("9000000093", "Wrong1", false)))
                 .andExpect(status().isUnauthorized())
@@ -125,7 +132,8 @@ class SeguridadIntegracionTest {
         mvc.perform(get("/api/ciudadanos")).andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.codigo").exists())
                 .andExpect(jsonPath("$.mensaje").exists())
-                .andExpect(jsonPath("$.detalles").isArray());
+                .andExpect(jsonPath("$.detalles").isArray())
+                .andExpect(jsonPath("$.fecha").doesNotExist());
 
         mvc.perform(get("/api/ciudadanos").header("Authorization", "Bearer token-invalido"))
                 .andExpect(status().isUnauthorized());
@@ -135,7 +143,10 @@ class SeguridadIntegracionTest {
         var token = tokenPersonal();
         mvc.perform(get("/api/ciudadanos").header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.codigo").exists());
+                .andExpect(jsonPath("$.codigo").exists())
+                .andExpect(jsonPath("$.mensaje").exists())
+                .andExpect(jsonPath("$.detalles").isArray())
+                .andExpect(jsonPath("$.fecha").doesNotExist());
         mvc.perform(post("/api/auth/logout").header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
         mvc.perform(get("/api/ciudadanos").header("Authorization", "Bearer " + token))
