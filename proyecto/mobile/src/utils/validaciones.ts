@@ -16,7 +16,6 @@ export interface DatosRegistro {
 export type ErroresRegistro = Partial<Record<keyof DatosRegistro, string>>;
 
 const SOLO_DIGITOS = /^[0-9]{6,10}$/;
-const SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/;
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validarIdentificacion(valor: string): string | undefined {
@@ -30,7 +29,6 @@ function validarNombre(valor: string, campo: string): string | undefined {
   const v = valor.trim();
   if (!v) return `${campo} es obligatorio`;
   if (v.length > 100) return `${campo} admite máximo 100 caracteres`;
-  if (!SOLO_LETRAS.test(v)) return `${campo} solo admite letras y espacios`;
   return undefined;
 }
 

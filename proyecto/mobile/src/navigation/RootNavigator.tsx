@@ -3,11 +3,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Cargando } from '../components/Estados';
 import { Pantalla } from '../components/Pantalla';
 import { useAuth } from '../context/AuthContext';
-import { EscanerScreen } from '../screens/EscanerScreen';
+import { EscanerScreen } from '../screens/EscanerScreen.tsx';
 import { InicioScreen } from '../screens/InicioScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegistroScreen } from '../screens/RegistroScreen';
-import { ResultadoScreen } from '../screens/ResultadoScreen';
+import { ResultadoScreen } from '../screens/ResultadoScreen.tsx';
 import type { AccesoStackParamList, PrincipalStackParamList } from './tipos';
 
 const Acceso = createNativeStackNavigator<AccesoStackParamList>();

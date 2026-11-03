@@ -54,14 +54,12 @@ export type CodigoError =
   | 'SIN_INFORMACION'
   | 'SIN_RESULTADOS'
   | 'INTEGRACION_PENDIENTE'
-  | 'ERROR_INTERNO'
-  //Pendientes de acordar con Julián 
-  | 'CREDENCIALES_INVALIDAS'
-  | 'NO_AUTENTICADO';
+  | 'NO_AUTENTICADO'
+  | 'ACCESO_DENEGADO'
+  | 'ERROR_INTERNO';
 
 export interface ErrorResponse {
-  codigo: CodigoError | string;
+  codigo: CodigoError;
   mensaje: string;
   detalles: string[];
-  fecha: string;
 }

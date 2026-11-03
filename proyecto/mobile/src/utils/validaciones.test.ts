@@ -53,8 +53,10 @@ test('los campos obligatorios vacíos se reportan todos', () => {
   ]);
 });
 
-test('los nombres no admiten números ni símbolos pero sí tildes y ñ', () => {
-  assert.ok(validarRegistro({ ...valido, nombres: 'Juan3' }).nombres);
-  assert.ok(validarRegistro({ ...valido, apellidos: 'Pérez-Núñez' }).apellidos);
-  assert.deepEqual(validarRegistro({ ...valido, nombres: 'José Ángel', apellidos: 'Peña Núñez' }), {});
+test('nombres y apellidos admiten caracteres según las restricciones del contrato', () => {
+  assert.deepEqual(
+    validarRegistro({ ...valido, nombres: 'Juan Carlos', apellidos: "Pérez-Núñez O'Connor" }),
+    {},
+  );
+  assert.ok(validarRegistro({ ...valido, apellidos: 'x'.repeat(101) }).apellidos);
 });
