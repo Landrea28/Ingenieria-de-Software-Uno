@@ -20,9 +20,7 @@
 
 Verificado con Java 21 y Maven 3.9.9:
 
-- `mvn test`: 25 pruebas, 0 fallos y 0 errores (antes de agregar las pruebas
-  adicionales de respuestas de Defensa y entradas maliciosas, que se ejecutan
-  en la verificación final).
+- `mvn package`: 26 pruebas, 0 fallos y 0 errores; empaquetado completado.
 - `mvn package`: compilación, suite de pruebas y empaquetado completados.
 - Cobertura de seguridad: 1.000 contraseñas generadas; login válido/inválido,
   bloqueo, expiración y revocación JWT, autorización por rol, registro SIMULADO,
