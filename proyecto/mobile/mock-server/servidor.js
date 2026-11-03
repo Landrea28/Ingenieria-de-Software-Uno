@@ -115,10 +115,17 @@ async function atender(req, res) {
       return error(res, 400, 'VALIDACION', 'Datos invalidos');
     }
     if (PERSONAL_DEFENSA.has(c.identificacion) && c.contrasena === 'Ab123c') {
+      const segundosExpiracion = Number(
+        process.env.MOCK_EXPIRA_SEGUNDOS ?? (c.recordarContrasena ? 28800 : 900),
+      );
+      const expiraEnSegundos = Number.isFinite(segundosExpiracion) && segundosExpiracion > 0
+        ? segundosExpiracion
+        : c.recordarContrasena ? 28800 : 900;
+      const exp = Math.floor(Date.now() / 1000) + expiraEnSegundos;
       return enviar(res, 200, {
-        token: `mock-token-${c.identificacion}-${Date.now()}`,
+        token: `mock.${Buffer.from(JSON.stringify({ exp })).toString('base64url')}.firma-simulada`,
         tipo: 'Bearer',
-        expiraEnSegundos: Number(process.env.MOCK_EXPIRA_SEGUNDOS || 1800),
+        expiraEnSegundos,
       });
     }
     return error(res, 401, 'CREDENCIALES_INVALIDAS', 'Identificacion o contrasena incorrectas');
