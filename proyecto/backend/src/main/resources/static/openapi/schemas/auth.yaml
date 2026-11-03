@@ -1,0 +1,26 @@
+LoginRequest:
+  type: object
+  required: [identificacion, contrasena, recordarContrasena]
+  properties:
+    identificacion:
+      type: string
+      pattern: '^[0-9]{6,10}$'
+      example: '8000000001'
+    contrasena:
+      type: string
+      format: password
+      example: Ab123c
+    recordarContrasena:
+      type: boolean
+      example: false
+LoginResponse:
+  type: object
+  properties:
+    token:
+      type: string
+    tipo:
+      type: string
+      example: Bearer
+    expiraEnSegundos:
+      type: integer
+      format: int64

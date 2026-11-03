@@ -1,0 +1,48 @@
+login:
+  post:
+    tags:
+    - Autenticacion
+    summary: Iniciar sesion
+    description: Emite un JWT firmado. `recordarContrasena` extiende la duracion del token, nunca almacena la contraseña.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/auth.yaml#/LoginRequest
+    responses:
+      '200':
+        description: Sesion iniciada
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/auth.yaml#/LoginResponse
+      '400':
+        description: Cuerpo invalido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Credenciales invalidas; no revela si la identificacion existe
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+logout:
+  post:
+    tags:
+    - Autenticacion
+    summary: Cerrar sesion
+    description: Revoca el `jti` del JWT autenticado hasta su expiracion.
+    responses:
+      '204':
+        description: Sesion finalizada
+      '401':
+        description: Token ausente, invalido, expirado o revocado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []

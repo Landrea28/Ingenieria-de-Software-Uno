@@ -1,0 +1,15 @@
+health:
+  get:
+    tags: [Salud]
+    summary: Verificar estado HTTP del backend
+    responses:
+      '200':
+        description: Activo
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                  example: OK
