@@ -11,7 +11,8 @@
 //                8000000503                                          -> 503 INTEGRACION_PENDIENTE
 //                otra identificación                                 -> 400 (no figura en Defensa)
 //   Antecedentes 9000000001..19 con el mismo estado del seed; 9000000020 -> 404 SIN_INFORMACION;
-//                9000000404 -> 404 NO_ENCONTRADO; 9000000500 -> 500; 9000000600 -> tarda 15 s (timeout)
+//                toda identificación sin antecedente -> 404 SIN_INFORMACION
+//                9000000500 -> 500; 9000000600 -> tarda 15 s (timeout)
 //                Sin encabezado Authorization -> 401
 
 const http = require('node:http');
@@ -34,12 +35,13 @@ const CATALOGO = FUERZAS.map((f) => ({
 const REQUERIDOS = new Set([3, 6, 9, 12, 15, 18]); // como el seed del backend (perfil demo)
 const PERSONAL_DEFENSA = new Set(['8000000001', '8000000002', '8000000003', '8000000004']);
 const registrados = new Set();
+const correosRegistrados = new Set();
 
 const SOLO_DIGITOS = /^[0-9]{6,10}$/;
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function error(res, estado, codigo, mensaje, detalles = []) {
-  enviar(res, estado, { codigo, mensaje, detalles, fecha: new Date().toISOString() });
+  enviar(res, estado, { codigo, mensaje, detalles });
 }
 
 function enviar(res, estado, cuerpo) {
@@ -67,13 +69,13 @@ function leerJson(req) {
 
 function validarRegistro(c) {
   const d = [];
-  if (!SOLO_DIGITOS.test(c.identificacion ?? '')) d.push('identificacion: debe tener entre 6 y 10 digitos');
-  if (!c.nombres || c.nombres.length > 100) d.push('nombres: obligatorio, maximo 100 caracteres');
-  if (!c.apellidos || c.apellidos.length > 100) d.push('apellidos: obligatorio, maximo 100 caracteres');
-  if (!c.fuerzaCodigo) d.push('fuerzaCodigo: obligatorio');
+  if (typeof c.identificacion !== 'string' || !SOLO_DIGITOS.test(c.identificacion)) d.push('identificacion: debe tener entre 6 y 10 digitos');
+  if (typeof c.nombres !== 'string' || !c.nombres.trim() || c.nombres.length > 100) d.push('nombres: obligatorio, maximo 100 caracteres');
+  if (typeof c.apellidos !== 'string' || !c.apellidos.trim() || c.apellidos.length > 100) d.push('apellidos: obligatorio, maximo 100 caracteres');
+  if (typeof c.fuerzaCodigo !== 'string' || !c.fuerzaCodigo.trim()) d.push('fuerzaCodigo: obligatorio');
   if (!Number.isInteger(c.rangoId)) d.push('rangoId: obligatorio');
-  if (!c.idFuerza || c.idFuerza.length > 40) d.push('idFuerza: obligatorio, maximo 40 caracteres');
-  if (!CORREO.test(c.correo ?? '')) d.push('correo: formato invalido');
+  if (typeof c.idFuerza !== 'string' || !c.idFuerza.trim() || c.idFuerza.length > 40) d.push('idFuerza: obligatorio, maximo 40 caracteres');
+  if (typeof c.correo !== 'string' || !c.correo.trim() || !CORREO.test(c.correo) || c.correo.length > 200) d.push('correo: formato invalido');
   return d;
 }
 
@@ -101,16 +103,19 @@ async function atender(req, res) {
     if (!PERSONAL_DEFENSA.has(c.identificacion)) {
       return error(res, 400, 'VALIDACION', 'El personal no figura en la validacion simulada de Defensa');
     }
-    if (registrados.has(c.identificacion)) {
+    const correoNormalizado = c.correo.toLowerCase();
+    if (registrados.has(c.identificacion) || correosRegistrados.has(correoNormalizado)) {
       return error(res, 409, 'DUPLICADO', 'El personal ya se encuentra registrado');
     }
     registrados.add(c.identificacion);
+    correosRegistrados.add(correoNormalizado);
     return enviar(res, 201, { mensaje: 'Registro aceptado. Revise el correo de confirmacion' });
   }
 
   if (clave === 'POST /api/auth/login') {
     const c = await leerJson(req);
-    if (c === null || !SOLO_DIGITOS.test(c.identificacion ?? '') || !c.contrasena ||
+    if (c === null || typeof c.identificacion !== 'string' || !SOLO_DIGITOS.test(c.identificacion) ||
+      typeof c.contrasena !== 'string' || !c.contrasena.trim() ||
         typeof c.recordarContrasena !== 'boolean') {
       return error(res, 400, 'VALIDACION', 'Datos invalidos');
     }
@@ -128,11 +133,11 @@ async function atender(req, res) {
         expiraEnSegundos,
       });
     }
-    return error(res, 401, 'CREDENCIALES_INVALIDAS', 'Identificacion o contrasena incorrectas');
+    return error(res, 401, 'NO_AUTENTICADO', 'Credenciales inválidas');
   }
 
   if (clave === 'POST /api/auth/logout') {
-    if (!req.headers.authorization) return error(res, 400, 'VALIDACION', 'Falta el encabezado Authorization');
+    if (!req.headers.authorization) return error(res, 401, 'NO_AUTENTICADO', 'Se requiere iniciar sesion');
     return enviar(res, 204);
   }
 
@@ -153,7 +158,7 @@ async function atender(req, res) {
         fechaActualizacion: new Date().toISOString(),
       });
     }
-    return error(res, 404, 'NO_ENCONTRADO', 'Ciudadano no encontrado');
+    return error(res, 404, 'SIN_INFORMACION', 'No hay informacion de antecedentes para la identificacion');
   }
 
   return error(res, 404, 'NO_ENCONTRADO', 'Recurso no encontrado');

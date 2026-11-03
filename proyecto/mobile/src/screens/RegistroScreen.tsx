@@ -78,7 +78,7 @@ export function RegistroScreen({ navigation }: Props) {
         idFuerza: datos.idFuerza.trim(),
         correo: datos.correo.trim(),
       });
-      setEnvio({ tipo: 'aceptado', mensaje: respuesta.mensaje });
+      setEnvio({ tipo: 'aceptado', mensaje: respuesta.mensaje ?? 'Registro aceptado.' });
     } catch (error) {
       if (error instanceof ApiError && error.tipo === 'http') {
         if (error.estado === 503 || error.codigo === 'INTEGRACION_PENDIENTE') {

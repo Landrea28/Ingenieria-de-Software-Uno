@@ -85,10 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         contrasena,
         recordarContrasena: recordar,
       });
-      if (!respuesta?.token) {
+      if (!respuesta?.token || respuesta.tipo !== 'Bearer') {
         throw new ApiError('respuesta', 200, null, 'Respuesta inesperada del servidor');
       }
-      if (!Number.isFinite(respuesta.expiraEnSegundos) || respuesta.expiraEnSegundos <= 0) {
+      if (
+        typeof respuesta.expiraEnSegundos !== 'number' ||
+        !Number.isFinite(respuesta.expiraEnSegundos) ||
+        respuesta.expiraEnSegundos <= 0
+      ) {
         throw new ApiError('respuesta', 200, null, 'El servidor no informó un vencimiento válido para la sesión');
       }
       const vencimiento = calcularExpiracion(respuesta.expiraEnSegundos);
