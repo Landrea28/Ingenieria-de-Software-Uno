@@ -1,16 +1,13 @@
 ErrorResponse:
   type: object
-  required: [codigo, mensaje, detalles, fecha]
+  required: [codigo, mensaje, detalles]
   properties:
     codigo:
       type: string
-      enum: [VALIDACION, NO_ENCONTRADO, DUPLICADO, SIN_INFORMACION, SIN_RESULTADOS, INTEGRACION_PENDIENTE, ERROR_INTERNO]
+      enum: [VALIDACION, NO_ENCONTRADO, DUPLICADO, SIN_INFORMACION, SIN_RESULTADOS, INTEGRACION_PENDIENTE, NO_AUTENTICADO, ACCESO_DENEGADO, ERROR_INTERNO]
     mensaje:
       type: string
     detalles:
       type: array
       items:
         type: string
-    fecha:
-      type: string
-      format: date-time

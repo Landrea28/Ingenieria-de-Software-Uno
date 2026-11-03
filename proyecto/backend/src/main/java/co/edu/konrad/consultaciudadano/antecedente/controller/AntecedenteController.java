@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,11 +23,13 @@ public class AntecedenteController {
     private final AntecedenteService service;
 
     @GetMapping("/{identificacion}")
+    @PreAuthorize("hasAnyRole('PERSONAL_FUERZA_PUBLICA', 'ADMINISTRADOR')")
     public AntecedenteResponse consultar(@PathVariable @Pattern(regexp = "[0-9]{6,10}") String identificacion) {
         return service.consultar(identificacion);
     }
 
     @PutMapping("/{identificacion}/estado")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public AntecedenteResponse establecer(@PathVariable @Pattern(regexp = "[0-9]{6,10}") String identificacion,
             @Valid @RequestBody CambiarAntecedenteRequest request) {
         return service.establecer(identificacion, request.estado());

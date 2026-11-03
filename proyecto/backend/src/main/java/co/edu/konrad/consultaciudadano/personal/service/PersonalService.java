@@ -8,6 +8,7 @@ import co.edu.konrad.consultaciudadano.common.error.NegocioException;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalResponse;
 import co.edu.konrad.consultaciudadano.usuario.entity.Usuario;
+import co.edu.konrad.consultaciudadano.usuario.repository.PerfilRepository;
 import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class PersonalService {
     private final FuerzaPublicaRepository fuerzas;
     private final RangoRepository rangos;
     private final UsuarioRepository usuarios;
+    private final PerfilRepository perfiles;
     private final RegistroPersonalIntegracion integracion;
 
     @Transactional
@@ -37,6 +39,10 @@ public class PersonalService {
         var usuario = new Usuario(request.identificacion(), request.nombres(), request.apellidos(),
                 request.correo(), fuerzas.getReferenceById(request.fuerzaCodigo()),
                 rangos.getReferenceById(request.rangoId()), request.idFuerza(), hash);
+        var perfilPersonal = perfiles.findByCodigo("PERSONAL_FUERZA_PUBLICA")
+                .orElseThrow(() -> new NegocioException(HttpStatus.INTERNAL_SERVER_ERROR, CodigoError.ERROR_INTERNO,
+                        "No está configurado el perfil de personal"));
+        usuario.getPerfiles().add(perfilPersonal);
         usuarios.saveAndFlush(usuario);
         integracion.enviarCorreo(request.correo(), contrasena);
         return new RegistroPersonalResponse("Registro aceptado. Revise el correo de confirmacion");

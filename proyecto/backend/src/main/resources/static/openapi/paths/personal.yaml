@@ -2,7 +2,7 @@ registro:
   post:
     tags: [Personal]
     summary: Registro de personal de fuerza publica
-    description: El flujo existe. La validacion contra Defensa, la generacion de claves, el hash y el correo dependen de la integracion de seguridad. Primero se valida que fuerza y rango coincidan (400); despues, mientras la integracion siga pendiente, devuelve 503, por lo que el 409 aun no es alcanzable.
+    description: Valida la identidad contra Defensa SIMULADO, crea una contraseña temporal de seis caracteres, persiste solo su hash BCrypt y la envia por SMTP. La respuesta nunca incluye la contraseña.
     requestBody:
       required: true
       content:
@@ -11,25 +11,31 @@ registro:
             $ref: '../schemas/personal.yaml#/RegistroPersonalRequest'
     responses:
       '201':
-        description: Aceptado tras integrar seguridad
+        description: Registro aceptado; las credenciales se enviaron por correo
         content:
           application/json:
             schema:
               $ref: '../schemas/personal.yaml#/RegistroPersonalResponse'
       '400':
-        description: Datos invalidos o fuerza y rango no coinciden
+        description: Datos invalidos, fuerza/rango no coincidentes o rechazo de Defensa
         content:
           application/json:
             schema:
               $ref: '../schemas/errores.yaml#/ErrorResponse'
       '409':
-        description: Usuario duplicado tras integrar seguridad
+        description: Usuario duplicado
         content:
           application/json:
             schema:
               $ref: '../schemas/errores.yaml#/ErrorResponse'
       '503':
-        description: Integracion de seguridad pendiente
+        description: El adaptador SIMULADO no esta disponible
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
+      '500':
+        description: Fallo al persistir o enviar el correo SMTP
         content:
           application/json:
             schema:

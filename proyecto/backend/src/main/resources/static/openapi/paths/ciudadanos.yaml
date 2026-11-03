@@ -3,7 +3,7 @@ listado:
     tags:
     - Ciudadanos
     summary: Listar y buscar ciudadanos
-    description: Ordenado por apellidos y nombres. La busqueda aplica a identificacion, nombres y apellidos (parcial, sin distinguir mayusculas). Requerira administrador cuando se integre la seguridad.
+    description: Ordenado por apellidos y nombres. La busqueda aplica a identificacion, nombres y apellidos (parcial, sin distinguir mayusculas). Requiere rol ADMINISTRADOR.
     parameters:
     - in: query
       name: busqueda
@@ -39,13 +39,25 @@ listado:
           application/json:
             schema:
               $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere rol ADMINISTRADOR
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
     security:
     - bearerAuth: []
   post:
     tags:
     - Ciudadanos
     summary: Registrar ciudadano
-    description: La fecha de expedicion debe ser posterior a la de nacimiento. Requerira administrador cuando se integre la seguridad.
+    description: La fecha de expedicion debe ser posterior a la de nacimiento. Requiere rol ADMINISTRADOR.
     requestBody:
       required: true
       content:
@@ -67,6 +79,18 @@ listado:
               $ref: ../schemas/errores.yaml#/ErrorResponse
       '409':
         description: Identificacion duplicada
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere rol ADMINISTRADOR
         content:
           application/json:
             schema:
@@ -102,6 +126,18 @@ detalle:
               $ref: ../schemas/errores.yaml#/ErrorResponse
       '404':
         description: No existe
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere rol ADMINISTRADOR
         content:
           application/json:
             schema:
@@ -143,6 +179,18 @@ detalle:
               $ref: ../schemas/errores.yaml#/ErrorResponse
       '404':
         description: No existe
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere rol ADMINISTRADOR
         content:
           application/json:
             schema:

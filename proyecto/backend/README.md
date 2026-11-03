@@ -11,8 +11,8 @@ API REST del sistema de consulta ciudadana. Java 21, Spring Boot (Spring MVC, To
 | Fuerzas y rangos (catálogo) | Implementado |
 | Entidades, repositorios y migraciones | Implementado |
 | Reporte PDF por estado | Implementado |
-| Registro de personal, login y logout | Contrato y endpoints definidos; responden 503 `INTEGRACION_PENDIENTE` mientras no exista la implementación de seguridad |
-| Seguridad de rutas | No incluida: ejecución local con datos ficticios |
+| Registro de personal, login y logout | Implementado con validación SIMULADA, BCrypt, JWT y revocación |
+| Seguridad de rutas | Implementada: roles por URL y `@PreAuthorize` |
 
 **No utilizar con datos reales ni exponer a Internet o a una red compartida.** El servidor escucha por defecto solo en `127.0.0.1`.
 
@@ -25,7 +25,7 @@ API REST del sistema de consulta ciudadana. Java 21, Spring Boot (Spring MVC, To
 ## Ejecutar
 
 1. Arrancar PostgreSQL: `docker compose up -d` (o crear la base `consulta_ciudadano` y el usuario `consulta`).
-2. Definir las variables de entorno de `.env.example`. Maven no carga `.env` automáticamente.
+2. Definir las variables de entorno de `.env.example` (incluyendo `JWT_SECRET` de al menos 32 bytes). Maven no carga `.env` automáticamente. Para crear el administrador inicial, configurar también los tres valores `ADMIN_INITIAL_*`.
 3. `mvn spring-boot:run`
 4. Abrir `http://localhost:8080/swagger-ui.html` y usar **Try it out**.
 
@@ -33,7 +33,7 @@ Las migraciones SQL se aplican al arrancar. El servidor es Tomcat embebido: `mvn
 
 ## Datos de demostración
 
-`mvn spring-boot:run -Dspring-boot.run.profiles=demo` carga 20 ciudadanos y 19 antecedentes ficticios, y cuatro identidades simuladas de personal. El ciudadano `9000000020` no tiene estado a propósito y produce 404 `SIN_INFORMACION`. Usar el perfil `demo` solo sobre una base limpia.
+`docker compose up -d` inicia PostgreSQL y Mailpit (interfaz en `http://localhost:8025`). `mvn spring-boot:run -Dspring-boot.run.profiles=demo` carga 20 ciudadanos, 19 antecedentes y diez identidades **SIMULADAS** de personal distribuidas en cuatro fuerzas. El ciudadano `9000000020` no tiene estado a propósito y produce 404 `SIN_INFORMACION`. Usar el perfil `demo` solo sobre una base limpia.
 
 Sin `demo` se cargan únicamente el esquema, los catálogos de fuerzas y rangos, y los perfiles y permisos básicos. Todos los estados de antecedentes son ficticios.
 
@@ -50,8 +50,13 @@ Sin `demo` se cargan únicamente el esquema, los catálogos de fuerzas y rangos,
 | Establecer estado de demo | PUT `/api/antecedentes/{identificacion}/estado` |
 | Catálogo de fuerzas y rangos | GET `/api/catalogos/fuerzas-rangos` |
 | Reporte PDF | GET `/api/reportes/ciudadanos?estado=REQUERIDO` |
-| Registro de personal | POST `/api/personal/registro` (503 hasta integrar seguridad) |
-| Login / logout | POST `/api/auth/login`, POST `/api/auth/logout` (503 hasta integrar seguridad) |
+| Registro de personal | POST `/api/personal/registro` (público; el sistema envía credenciales por SMTP) |
+| Login / logout | POST `/api/auth/login` (público), POST `/api/auth/logout` (requiere JWT) |
+
+`JWT_SECRET` firma los tokens; `recordarContrasena` aumenta su expiración, no
+guarda la contraseña. Tras cinco fallos, la identificación se bloquea por 15
+minutos en PostgreSQL, también entre instancias. Ver
+`docs/decisiones/seguridad.md` para límites y decisiones.
 
 ## Documentación y calidad
 

@@ -3,7 +3,7 @@ ciudadanos:
     tags:
     - Reportes
     summary: Exportar ciudadanos a PDF filtrado por estado
-    description: Datos ficticios de demostracion. Swagger UI ofrece un enlace para descargar el PDF. Requiere administrador tras integrar seguridad.
+    description: Datos ficticios de demostracion. Swagger UI ofrece un enlace para descargar el PDF. Requiere ADMINISTRADOR.
     parameters:
     - in: query
       name: estado
@@ -30,6 +30,18 @@ ciudadanos:
               $ref: ../schemas/errores.yaml#/ErrorResponse
       '404':
         description: Sin resultados
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere rol ADMINISTRADOR
         content:
           application/json:
             schema:

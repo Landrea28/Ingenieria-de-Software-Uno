@@ -13,6 +13,7 @@ import co.edu.konrad.consultaciudadano.common.error.NegocioException;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
 import co.edu.konrad.consultaciudadano.usuario.entity.Usuario;
 import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
+import co.edu.konrad.consultaciudadano.usuario.repository.PerfilRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,10 +25,11 @@ class PersonalServiceTest {
     @Mock FuerzaPublicaRepository fuerzas;
     @Mock RangoRepository rangos;
     @Mock UsuarioRepository usuarios;
+    @Mock PerfilRepository perfiles;
 
     @Test
     void noPersisteUsuarioSiFaltaValidacionDeSeguridad() {
-        var service = new PersonalService(catalogo, fuerzas, rangos, usuarios,
+        var service = new PersonalService(catalogo, fuerzas, rangos, usuarios, perfiles,
                 new RegistroPersonalIntegracionPendiente());
         var request = new RegistroPersonalRequest("8000000001", "Usuario", "Prueba1", "POLICIA", 1L,
                 "DEMO-001", "demo@example.test");
