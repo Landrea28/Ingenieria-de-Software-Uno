@@ -104,8 +104,8 @@ export function RegistroScreen({ navigation }: Props) {
             Tu contraseña de 6 caracteres llegará a tu correo. La app nunca la muestra ni la guarda.
           </Text>
           <Text style={estilos.nota}>
-            En esta versión, la validación contra el Departamento de Defensa y el envío del correo
-            son simulados.
+            La validación de identidad está simulada por el backend. La entrega del correo depende
+            de la configuración SMTP del entorno.
           </Text>
         </View>
         <Boton titulo="Ir a iniciar sesión" onPress={() => navigation.navigate('Login')} />

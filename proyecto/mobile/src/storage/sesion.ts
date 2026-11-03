@@ -1,12 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
-import { estaVigente } from '../utils/tiempo';
+import { estaVigente, leerExpiracionJwt } from '../utils/tiempo';
 
 // Almacenamiento seguro de la sesión (Keychain en iOS, Keystore en Android).
-// REGLA: aquí solo se guarda el TOKEN que emite el backend y su fecha de expiración.
+// REGLA: aquí solo se guarda el TOKEN que emite el backend. La fecha exp se lee del JWT.
 // La contraseña nunca se guarda: ni aquí, ni en AsyncStorage, ni en ningún otro lugar.
 
 const CLAVE_TOKEN = 'sesion_token';
-const CLAVE_EXPIRA = 'sesion_expira_en';
+const CLAVE_EXPIRA_ANTERIOR = 'sesion_expira_en';
 
 // "THIS_DEVICE_ONLY": el valor no se copia a otros dispositivos mediante respaldos,
 // y solo se puede leer con el teléfono desbloqueado.
@@ -20,9 +20,11 @@ export interface SesionGuardada {
 }
 
 export async function guardarSesion(token: string, expiraEn: number): Promise<void> {
-  if (!(await SecureStore.isAvailableAsync())) return;
+  if (!(await SecureStore.isAvailableAsync())) {
+    throw new Error('El almacenamiento seguro no está disponible en este dispositivo');
+  }
+  if (!estaVigente(expiraEn)) throw new Error('El token recibido ya venció');
   await SecureStore.setItemAsync(CLAVE_TOKEN, token, OPCIONES);
-  await SecureStore.setItemAsync(CLAVE_EXPIRA, String(expiraEn), OPCIONES);
 }
 
 /** Devuelve la sesión guardada solo si existe y no ha vencido; si venció, la borra. */
@@ -30,8 +32,8 @@ export async function leerSesion(): Promise<SesionGuardada | null> {
   try {
     if (!(await SecureStore.isAvailableAsync())) return null;
     const token = await SecureStore.getItemAsync(CLAVE_TOKEN, OPCIONES);
-    const expiraEn = Number(await SecureStore.getItemAsync(CLAVE_EXPIRA, OPCIONES));
-    if (!token || !estaVigente(expiraEn)) {
+    const expiraEn = token ? leerExpiracionJwt(token) : null;
+    if (!token || expiraEn === null || !estaVigente(expiraEn)) {
       await borrarSesion();
       return null;
     }
@@ -44,7 +46,7 @@ export async function leerSesion(): Promise<SesionGuardada | null> {
 export async function borrarSesion(): Promise<void> {
   try {
     await SecureStore.deleteItemAsync(CLAVE_TOKEN, OPCIONES);
-    await SecureStore.deleteItemAsync(CLAVE_EXPIRA, OPCIONES);
+    await SecureStore.deleteItemAsync(CLAVE_EXPIRA_ANTERIOR, OPCIONES);
   } catch {
     // nada que borrar o almacenamiento no disponible
   }
