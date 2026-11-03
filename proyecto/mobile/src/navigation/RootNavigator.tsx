@@ -1,5 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Cargando } from '../components/Estados';
+import { Pantalla } from '../components/Pantalla';
 import { useAuth } from '../context/AuthContext';
 import { EscanerScreen } from '../screens/EscanerScreen';
 import { InicioScreen } from '../screens/InicioScreen';
@@ -37,6 +39,14 @@ function FlujoPrincipal() {
  */
 export function RootNavigator() {
   const { estado } = useAuth();
+  // Mientras se revisa si hay una sesión guardada no se muestra ningún flujo.
+  if (estado === 'cargando') {
+    return (
+      <Pantalla>
+        <Cargando mensaje="Revisando sesión…" />
+      </Pantalla>
+    );
+  }
   return (
     <NavigationContainer>
       {estado === 'con-sesion' ? <FlujoPrincipal /> : <FlujoAcceso />}

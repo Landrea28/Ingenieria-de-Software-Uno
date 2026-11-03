@@ -13,7 +13,7 @@ export function InicioScreen({ navigation }: Props) {
     <Pantalla>
       <Text>Consulta el estado de antecedentes de un ciudadano.</Text>
       <Boton titulo="Escanear cédula" onPress={() => navigation.navigate('Escaner')} />
-      <Boton titulo="Cerrar sesión" variante="secundario" onPress={cerrarSesion} />
+      <Boton titulo="Cerrar sesión" variante="secundario" onPress={() => void cerrarSesion()} />
     </Pantalla>
   );
 }
