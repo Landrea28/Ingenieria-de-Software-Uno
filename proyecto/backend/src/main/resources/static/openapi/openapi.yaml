@@ -3,9 +3,9 @@ info:
   title: Sistema de Consulta Ciudadano
   version: 0.1.0
   description: |
-    API academica con persistencia real y servicios de seguridad pendientes de integracion. Los antecedentes son exclusivamente ficticios.
+    API academica con persistencia real. La consulta de antecedentes, el registro y las credenciales se apoyan en datos SIMULADOS; el control de acceso usa JWT.
 
-    **Para probar:** hoy ningun endpoint exige token, aunque aparezca el candado. Solo `POST /api/auth/logout` necesita el encabezado Authorization: pulse Authorize e ingrese cualquier valor. Login y registro de personal responden 503 hasta integrar seguridad. Para tener datos de ejemplo arranque con el perfil `demo`.
+    **Acceso:** son publicos salud, login, registro de personal y catalogos. Personal autenticado o administradores consultan antecedentes; solo administradores acceden a ciudadanos y reportes. Use un JWT obtenido de `POST /api/auth/login` en Authorize. Para datos ficticios arranque con el perfil `demo`.
 servers:
   - url: /
 tags:

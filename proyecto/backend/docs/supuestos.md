@@ -11,4 +11,4 @@
 | S-07 | Tomcat embebido en Spring Boot (JAR ejecutable) | Cumple el requisito de servidor de aplicaciones |
 | S-08 | Esquema gestionado con Flyway; Hibernate solo valida | Base reconstruible desde cero; cambios de esquema con migración nueva |
 | S-09 | El perfil `demo` carga datos ficticios y solo debe usarse sobre una base limpia | Evita mezclar datos de prueba con datos que se deban conservar |
-| S-10 | El servidor escucha en `127.0.0.1` por defecto | La API no tiene autorización todavía |
+| S-10 | El servidor escucha en `127.0.0.1` por defecto | Limita la exposición de desarrollo; la seguridad de rutas JWT está habilitada, pero las integraciones externas siguen siendo simuladas |

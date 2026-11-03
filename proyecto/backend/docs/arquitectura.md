@@ -23,7 +23,7 @@ flowchart TB
 | Repositorio (`*.repository`) | Acceso a datos con Spring Data JPA (Hibernate). |
 | Entidad (`*.entity`) | Modelo persistente; no depende de capas superiores. |
 
-Recorrido: cliente → (filtro de seguridad, cuando se integre) → controlador → servicio → repositorio → PostgreSQL → servicio (DTO) → controlador → respuesta JSON. Los errores se convierten a un formato uniforme en `GlobalExceptionHandler`. `ArchitectureTest` verifica estas dependencias.
+Recorrido: cliente → filtro JWT y autorización URL → controlador → servicio → repositorio → PostgreSQL → servicio (DTO) → controlador → respuesta JSON. Los errores se convierten a un formato uniforme en `GlobalExceptionHandler` o en los manejadores 401/403. `ArchitectureTest` verifica estas dependencias.
 
 ## Clases principales
 
@@ -35,9 +35,11 @@ Recorrido: cliente → (filtro de seguridad, cuando se integre) → controlador 
 | `AntecedenteService` | Consultar o establecer estado ficticio |
 | `AntecedenteRepository` | Consultas del estado y filtro para reportes |
 | `CatalogoService` | Fuerzas públicas, rangos y coherencia de catálogos |
-| `PersonalService` | Orquestar registro sin implementar credenciales ni correo |
-| `RegistroPersonalIntegracion` | Contrato de validación, credenciales y correo del registro de personal |
-| `AutenticacionIntegracion` | Contrato de login y logout |
+| `PersonalService` | Orquestar registro, hash, asociación de perfil y correo |
+| `ValidadorDefensaSimulada` | Validar datos del personal contra datos ficticios |
+| `ServicioCorreoSmtp` | Enviar credenciales por SMTP configurable |
+| `AutenticacionService` | Login, bloqueo temporal y logout con revocación de JWT |
+| `SeguridadConfig` / `FiltroJwt` | Sesiones stateless, reglas de URL y autenticación por token |
 | `ReporteService` | Composición del PDF con datos consultados |
 | `GlobalExceptionHandler` | Estructura y códigos de error HTTP |
 | `ArchitectureTest` | Verificación automática de dependencias entre capas y módulos |
@@ -48,6 +50,6 @@ La identificación es `String` para evitar pérdidas de ceros iniciales y se val
 
 El estado de antecedentes se guarda en una tabla separada con un registro por ciudadano. La ausencia de registro devuelve `404 SIN_INFORMACION` y jamás se interpreta como `NO_REQUERIDO`. La fuente es `SIMULADA`.
 
-`PUT /api/antecedentes/{identificacion}/estado` es una operación adicional para las demostraciones, no forma parte literal del enunciado. Debe limitarse a administradores cuando se habilite seguridad.
+`PUT /api/antecedentes/{identificacion}/estado` es una operación adicional para las demostraciones y está limitada a administradores.
 
 Las migraciones V1 y V2 se aplican siempre. V100 solo se incluye con perfil `demo`. Las entidades JPA se validan contra el esquema y no lo generan automáticamente.

@@ -1,4 +1,7 @@
 spring:
+  mail:
+    host: 127.0.0.1
+    port: 25251
   datasource:
     url: jdbc:h2:mem:ciudadano;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
@@ -9,3 +12,12 @@ spring:
       ddl-auto: validate
   flyway:
     locations: classpath:db/migration,classpath:db/demo
+management:
+  health:
+    mail:
+      enabled: false
+security:
+  jwt:
+    secret: test-only-secret-with-at-least-32-characters
+    short-ttl: PT15M
+    remember-ttl: PT8H

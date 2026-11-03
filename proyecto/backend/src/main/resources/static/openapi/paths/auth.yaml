@@ -3,7 +3,7 @@ login:
     tags:
     - Autenticacion
     summary: Iniciar sesion
-    description: Contrato de autenticacion. Con un cuerpo valido responde 503 hasta integrar la autenticacion.
+    description: Emite un JWT firmado. `recordarContrasena` extiende la duracion del token, nunca almacena la contraseña.
     requestBody:
       required: true
       content:
@@ -12,7 +12,7 @@ login:
             $ref: ../schemas/auth.yaml#/LoginRequest
     responses:
       '200':
-        description: Sesion iniciada tras integrar seguridad
+        description: Sesion iniciada
         content:
           application/json:
             schema:
@@ -24,13 +24,7 @@ login:
             schema:
               $ref: ../schemas/errores.yaml#/ErrorResponse
       '401':
-        description: Credenciales invalidas tras integrar seguridad
-        content:
-          application/json:
-            schema:
-              $ref: ../schemas/errores.yaml#/ErrorResponse
-      '503':
-        description: Integracion pendiente
+        description: Credenciales invalidas; no revela si la identificacion existe
         content:
           application/json:
             schema:
@@ -40,18 +34,12 @@ logout:
     tags:
     - Autenticacion
     summary: Cerrar sesion
-    description: Pendiente de integrar la autenticacion. Exige el encabezado Authorization; para probarlo en Swagger pulse Authorize e ingrese cualquier valor, de lo contrario responde 400.
+    description: Revoca el `jti` del JWT autenticado hasta su expiracion.
     responses:
       '204':
-        description: Sesion finalizada tras integrar seguridad
-      '400':
-        description: Falta el encabezado Authorization
-        content:
-          application/json:
-            schema:
-              $ref: ../schemas/errores.yaml#/ErrorResponse
-      '503':
-        description: Integracion pendiente
+        description: Sesion finalizada
+      '401':
+        description: Token ausente, invalido, expirado o revocado
         content:
           application/json:
             schema:
