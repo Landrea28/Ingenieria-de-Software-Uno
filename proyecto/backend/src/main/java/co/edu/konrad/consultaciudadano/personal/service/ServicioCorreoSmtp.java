@@ -21,8 +21,8 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
         var mensaje = new SimpleMailMessage();
         mensaje.setFrom(remitente);
         mensaje.setTo(correo);
-        mensaje.setSubject("Credenciales de acceso - Sistema de Consulta Ciudadano");
-        mensaje.setText("Su registro fue aprobado. Su contraseña temporal es: " + contrasena
+        mensaje.setSubject("[SIMULADO] Credenciales de acceso - Sistema de Consulta Ciudadano");
+        mensaje.setText("[SIMULADO] Su registro fue aprobado. Su contraseña temporal es: " + contrasena
                 + "\nEsta contraseña es personal y no debe compartirse.");
         mailSender.send(mensaje);
     }

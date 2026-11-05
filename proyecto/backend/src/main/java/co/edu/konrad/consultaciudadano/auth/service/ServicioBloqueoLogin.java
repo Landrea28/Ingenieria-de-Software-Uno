@@ -3,7 +3,10 @@ package co.edu.konrad.consultaciudadano.auth.service;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ServicioBloqueoLogin {
-    private static final int MAX_INTENTOS = 5;
+    private static final int MAX_INTENTOS = 6;
     private static final Duration DURACION_BLOQUEO = Duration.ofMinutes(15);
     private static final String SQL_POSTGRES_UPSERT = """
             INSERT INTO auth_login_intento (identificacion, fallos, ultimo_intento, bloqueado_hasta)
@@ -23,15 +26,15 @@ public class ServicioBloqueoLogin {
                     WHEN auth_login_intento.ultimo_intento <= CURRENT_TIMESTAMP - INTERVAL '15 minutes'
                         OR (auth_login_intento.bloqueado_hasta IS NOT NULL
                             AND auth_login_intento.bloqueado_hasta <= CURRENT_TIMESTAMP)
-                    THEN 1 ELSE LEAST(auth_login_intento.fallos + 1, 5)
+                    THEN 1 ELSE LEAST(auth_login_intento.fallos + 1, 6)
                 END,
                 bloqueado_hasta = CASE
                     WHEN CASE
                         WHEN auth_login_intento.ultimo_intento <= CURRENT_TIMESTAMP - INTERVAL '15 minutes'
                             OR (auth_login_intento.bloqueado_hasta IS NOT NULL
                                 AND auth_login_intento.bloqueado_hasta <= CURRENT_TIMESTAMP)
-                        THEN 1 ELSE LEAST(auth_login_intento.fallos + 1, 5)
-                    END >= 5
+                        THEN 1 ELSE LEAST(auth_login_intento.fallos + 1, 6)
+                    END >= 6
                     THEN CURRENT_TIMESTAMP + INTERVAL '15 minutes'
                     ELSE NULL
                 END,
@@ -41,12 +44,15 @@ public class ServicioBloqueoLogin {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate transaccionNueva;
     private final boolean postgres;
+    private final Clock clock;
 
+    @Autowired
     public ServicioBloqueoLogin(JdbcTemplate jdbc, PlatformTransactionManager transactionManager,
-            DataSource dataSource) {
+            DataSource dataSource, Clock clock) {
         this.jdbc = jdbc;
         this.transaccionNueva = new TransactionTemplate(transactionManager);
         this.transaccionNueva.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        this.clock = clock;
         try (var connection = dataSource.getConnection()) {
             this.postgres = connection.getMetaData().getDatabaseProductName().toLowerCase().contains("postgresql");
         } catch (java.sql.SQLException error) {
@@ -54,10 +60,15 @@ public class ServicioBloqueoLogin {
         }
     }
 
+    public ServicioBloqueoLogin(JdbcTemplate jdbc, PlatformTransactionManager transactionManager,
+            DataSource dataSource) {
+        this(jdbc, transactionManager, dataSource, Clock.systemUTC());
+    }
+
     public boolean estaBloqueada(String identificacion) {
         var bloqueadaHasta = jdbc.query("SELECT bloqueado_hasta FROM auth_login_intento WHERE identificacion = ?",
                 resultado -> resultado.next() ? resultado.getTimestamp(1) : null, identificacion);
-        return bloqueadaHasta != null && bloqueadaHasta.toInstant().isAfter(Instant.now());
+        return bloqueadaHasta != null && bloqueadaHasta.toInstant().isAfter(instanteActual());
     }
 
     public void registrarFallo(String identificacion) {
@@ -81,11 +92,11 @@ public class ServicioBloqueoLogin {
                 DELETE FROM auth_login_intento
                 WHERE ultimo_intento <= ?
                   AND (bloqueado_hasta IS NULL OR bloqueado_hasta <= CURRENT_TIMESTAMP)
-                """, Timestamp.from(Instant.now().minus(DURACION_BLOQUEO)));
+                """, Timestamp.from(instanteActual().minus(DURACION_BLOQUEO)));
     }
 
     private void registrarFalloPortable(String identificacion) {
-        var ahora = Instant.now();
+        var ahora = instanteActual();
         var intentosPrevios = jdbc.query("""
                 SELECT fallos, ultimo_intento, bloqueado_hasta
                 FROM auth_login_intento WHERE identificacion = ?
@@ -113,4 +124,8 @@ public class ServicioBloqueoLogin {
     }
 
     private record EstadoIntentos(int fallos, Instant ultimoIntento, Instant bloqueadoHasta) {}
+
+    private Instant instanteActual() {
+        return clock.instant().truncatedTo(ChronoUnit.MICROS);
+    }
 }

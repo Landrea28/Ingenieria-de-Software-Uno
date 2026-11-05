@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/personal")
@@ -19,7 +20,8 @@ public class PersonalController {
     private final PersonalService service;
 
     @PostMapping("/registro")
-    public ResponseEntity<RegistroPersonalResponse> registrar(@Valid @RequestBody RegistroPersonalRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.registrar(request));
+    public ResponseEntity<RegistroPersonalResponse> registrar(@Valid @RequestBody RegistroPersonalRequest request,
+            HttpServletRequest servletRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.registrar(request, servletRequest.getRemoteAddr()));
     }
 }

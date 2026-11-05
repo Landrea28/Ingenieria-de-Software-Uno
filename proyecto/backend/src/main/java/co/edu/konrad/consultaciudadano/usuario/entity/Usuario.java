@@ -3,6 +3,7 @@ package co.edu.konrad.consultaciudadano.usuario.entity;
 import co.edu.konrad.consultaciudadano.catalogo.entity.FuerzaPublica;
 import co.edu.konrad.consultaciudadano.catalogo.entity.Rango;
 import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -54,11 +55,15 @@ public class Usuario {
     private String idFuerza;
 
     @Getter(AccessLevel.NONE)
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
     @Column(nullable = false)
     private boolean activo = true;
+
+    @Column(name = "version_seguridad", nullable = false)
+    private long versionSeguridad;
 
     @Column(name = "fecha_creacion", nullable = false)
     private OffsetDateTime fechaCreacion;
@@ -78,6 +83,24 @@ public class Usuario {
         this.rango = rango;
         this.idFuerza = idFuerza;
         this.passwordHash = passwordHash;
+    }
+
+    public boolean tienePerfilCodigo(String codigo) {
+        return perfiles.stream().anyMatch(perfil -> perfil.getCodigo().equals(codigo));
+    }
+
+    public void actualizar(String nombres, String apellidos, String correo, Perfil perfil, boolean activo) {
+        var cambiaAcceso = this.activo != activo || perfiles.size() != 1
+                || perfiles.stream().noneMatch(actual -> actual.getId().equals(perfil.getId()));
+        this.nombres = nombres;
+        this.apellidos = apellidos;
+        this.correo = correo;
+        this.activo = activo;
+        perfiles.clear();
+        perfiles.add(perfil);
+        if (cambiaAcceso) {
+            versionSeguridad++;
+        }
     }
 
     @PrePersist

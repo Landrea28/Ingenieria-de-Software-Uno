@@ -9,12 +9,13 @@ LoginRequest:
     contrasena:
       type: string
       format: password
-      example: Ab123c
+      maxLength: 128
     recordarContrasena:
       type: boolean
       example: false
 LoginResponse:
   type: object
+  required: [token, tipo, expiraEnSegundos]
   properties:
     token:
       type: string

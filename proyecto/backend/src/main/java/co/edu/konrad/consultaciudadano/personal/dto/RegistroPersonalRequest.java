@@ -10,7 +10,7 @@ public record RegistroPersonalRequest(
         @NotBlank @Pattern(regexp = "[0-9]{6,10}") String identificacion,
         @NotBlank @Size(max = 100) String nombres,
         @NotBlank @Size(max = 100) String apellidos,
-        @NotBlank String fuerzaCodigo,
-        @NotNull Long rangoId,
+        @NotBlank @Size(max = 30) String fuerzaCodigo,
+        @NotNull @jakarta.validation.constraints.Positive Long rangoId,
         @NotBlank @Size(max = 40) String idFuerza,
         @NotBlank @Email @Size(max = 200) String correo) {}
