@@ -6,6 +6,7 @@ import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.NegocioException;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +54,11 @@ public class RegistroPersonalSeguridad implements RegistroPersonalIntegracion {
 
     @Override
     public void enviarCorreo(String correo, String contrasena) {
-        servicioCorreo.enviarCredenciales(correo, contrasena);
+        try {
+            servicioCorreo.enviarCredenciales(correo, contrasena);
+        } catch (MailException error) {
+            throw new NegocioException(HttpStatus.SERVICE_UNAVAILABLE, CodigoError.INTEGRACION_PENDIENTE,
+                    "El correo SIMULADO no esta disponible");
+        }
     }
 }

@@ -1,0 +1,140 @@
+{
+  "info": {
+    "_postman_id": "944c3ac8-54b3-4f15-9c60-54b598e629a2",
+    "name": "Seguridad - Consulta Ciudadano",
+    "description": "Pruebas negativas y de autorizacion. Requiere datos demo y credenciales configuradas localmente; el entorno exportado no contiene secretos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Publicos",
+      "item": [
+        {
+          "name": "Health publico",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api", "health"] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('health responde 200', function () { pm.response.to.have.status(200); });", "pm.test('incluye cabecera anti-sniff', function () { pm.expect(pm.response.headers.get('X-Content-Type-Options')).to.eql('nosniff'); });"] } }]
+        },
+        {
+          "name": "Catalogo publico",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/catalogos/fuerzas-rangos", "host": ["{{baseUrl}}"], "path": ["api", "catalogos", "fuerzas-rangos"] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('catalogo responde 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Login inexistente no enumera",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"identificacion\":\"0000000000\",\"contrasena\":\"Incorrecta123\",\"recordarContrasena\":false}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('credenciales inexistentes responden 401', function () { pm.response.to.have.status(401); });", "pm.test('respuesta generica', function () { pm.expect(pm.response.json().mensaje).to.eql('Credenciales inválidas'); });"] } }]
+        },
+        {
+          "name": "Registro rechaza inyeccion SQL",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"identificacion\":\"1' OR '1'='1\",\"nombres\":\"Prueba\",\"apellidos\":\"Negativa\",\"fuerzaCodigo\":\"POLICIA\",\"rangoId\":1,\"idFuerza\":\"POSTMAN-01\",\"correo\":\"postman@example.test\"}" },
+            "url": { "raw": "{{baseUrl}}/api/personal/registro", "host": ["{{baseUrl}}"], "path": ["api", "personal", "registro"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('entrada SQL invalida responde 400', function () { pm.response.to.have.status(400); });", "pm.test('error respeta contrato', function () { const body = pm.response.json(); pm.expect(body).to.have.property('codigo'); pm.expect(body.detalles).to.be.an('array'); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Login PERSONAL (guarda token)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"identificacion\":\"{{identificacionPersonal}}\",\"contrasena\":\"{{contrasenaPersonal}}\",\"recordarContrasena\":false}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('login PERSONAL responde 200', function () { pm.response.to.have.status(200); });", "pm.test('no devuelve contrasena', function () { const body = pm.response.json(); pm.expect(body).not.to.have.property('contrasena'); pm.expect(body).to.have.property('token'); });", "pm.environment.set('tokenPersonal', pm.response.json().token);"] } }]
+        },
+        {
+          "name": "Login ADMINISTRADOR (guarda token)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"identificacion\":\"{{identificacionAdministrador}}\",\"contrasena\":\"{{contrasenaAdministrador}}\",\"recordarContrasena\":true}" },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('login ADMIN responde 200', function () { pm.response.to.have.status(200); });", "pm.test('devuelve token Bearer', function () { pm.expect(pm.response.json().tipo).to.eql('Bearer'); });", "pm.environment.set('tokenAdministrador', pm.response.json().token);"] } }]
+        },
+        {
+          "name": "Logout sin token",
+          "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('logout requiere autenticacion', function () { pm.response.to.have.status(401); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Autorizacion",
+      "item": [
+        {
+          "name": "Usuarios sin token",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('usuarios requiere token', function () { pm.response.to.have.status(401); });"] } }]
+        },
+        {
+          "name": "Usuarios con token PERSONAL",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenPersonal}}" }],
+            "url": { "raw": "{{baseUrl}}/api/usuarios", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('PERSONAL no administra usuarios', function () { pm.response.to.have.status(403); });"] } }]
+        },
+        {
+          "name": "Usuarios con token ADMINISTRADOR",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdministrador}}" }],
+            "url": { "raw": "{{baseUrl}}/api/usuarios?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "usuarios"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('ADMIN lista usuarios', function () { pm.response.to.have.status(200); });", "pm.test('la lista no incluye hash', function () { pm.expect(JSON.stringify(pm.response.json())).not.to.include('passwordHash'); });"] } }]
+        },
+        {
+          "name": "Perfiles sin token",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/perfiles", "host": ["{{baseUrl}}"], "path": ["api", "perfiles"] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('perfiles requiere token', function () { pm.response.to.have.status(401); });"] } }]
+        },
+        {
+          "name": "Permisos ADMINISTRADOR",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdministrador}}" }],
+            "url": { "raw": "{{baseUrl}}/api/permisos", "host": ["{{baseUrl}}"], "path": ["api", "permisos"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('ADMIN consulta permisos', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Antecedentes sin token",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/antecedentes/9000000001", "host": ["{{baseUrl}}"], "path": ["api", "antecedentes", "9000000001"] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('antecedentes requiere token', function () { pm.response.to.have.status(401); });"] } }]
+        },
+        {
+          "name": "Antecedentes PERSONAL",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenPersonal}}" }],
+            "url": { "raw": "{{baseUrl}}/api/antecedentes/9000000001", "host": ["{{baseUrl}}"], "path": ["api", "antecedentes", "9000000001"] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('PERSONAL consulta antecedentes', function () { pm.expect([200, 404]).to.include(pm.response.code); });"] } }]
+        },
+        {
+          "name": "Reporte solo ADMINISTRADOR",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenPersonal}}" }],
+            "url": { "raw": "{{baseUrl}}/api/reportes/ciudadanos?estado=REQUERIDO", "host": ["{{baseUrl}}"], "path": ["api", "reportes", "ciudadanos"], "query": [{ "key": "estado", "value": "REQUERIDO" }] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('PERSONAL no descarga el reporte', function () { pm.response.to.have.status(403); });"] } }]
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,11 @@
 package co.edu.konrad.consultaciudadano.common.error;
 
 import jakarta.validation.ConstraintViolationException;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,9 +18,23 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+    private final ObjectProvider<AuditoriaSeguridad> auditoria;
+
     @ExceptionHandler(NegocioException.class)
-    public ResponseEntity<ErrorResponse> negocio(NegocioException error) {
+    public ResponseEntity<ErrorResponse> negocio(NegocioException error, HttpServletRequest request) {
+        if (error.getEstadoHttp() == HttpStatus.UNAUTHORIZED) {
+            var auditoriaSeguridad = auditoria.getIfAvailable();
+            if (auditoriaSeguridad != null) {
+                auditoriaSeguridad.noAutorizado(request);
+            }
+        } else if (error.getEstadoHttp() == HttpStatus.FORBIDDEN) {
+            var auditoriaSeguridad = auditoria.getIfAvailable();
+            if (auditoriaSeguridad != null) {
+                auditoriaSeguridad.accesoDenegado(request);
+            }
+        }
         return ResponseEntity.status(error.getEstadoHttp())
                 .body(ErrorResponse.crear(error.getCodigo(), error.getMessage(), List.of()));
     }

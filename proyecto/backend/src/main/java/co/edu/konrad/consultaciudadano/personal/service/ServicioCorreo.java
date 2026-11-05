@@ -1,5 +1,3 @@
 package co.edu.konrad.consultaciudadano.personal.service;
 
-public interface ServicioCorreo {
-    void enviarCredenciales(String correo, String contrasena);
-}
+public interface ServicioCorreo extends co.edu.konrad.consultaciudadano.common.service.ServicioCorreo {}

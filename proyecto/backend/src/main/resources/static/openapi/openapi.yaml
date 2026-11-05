@@ -16,6 +16,8 @@ tags:
   - name: Personal
   - name: Autenticacion
   - name: Reportes
+  - name: Usuarios
+  - name: Perfiles y permisos
 paths:
   /api/health:
     $ref: './paths/salud.yaml#/health'
@@ -37,6 +39,16 @@ paths:
     $ref: './paths/auth.yaml#/logout'
   /api/reportes/ciudadanos:
     $ref: './paths/reportes.yaml#/ciudadanos'
+  /api/usuarios:
+    $ref: './paths/usuarios.yaml#/usuarios'
+  /api/usuarios/{identificacion}:
+    $ref: './paths/usuarios.yaml#/usuario'
+  /api/perfiles:
+    $ref: './paths/perfiles.yaml#/perfiles'
+  /api/permisos:
+    $ref: './paths/perfiles.yaml#/permisos'
+  /api/perfiles/{id}/permisos:
+    $ref: './paths/perfiles.yaml#/permisosPerfil'
 components:
   securitySchemes:
     bearerAuth:

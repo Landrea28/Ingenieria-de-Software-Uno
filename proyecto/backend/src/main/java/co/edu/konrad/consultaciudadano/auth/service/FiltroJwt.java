@@ -2,6 +2,8 @@ package co.edu.konrad.consultaciudadano.auth.service;
 
 import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.ErrorResponse;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
+import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -25,11 +27,16 @@ public class FiltroJwt extends OncePerRequestFilter {
     private final ServicioJwt jwt;
     private final ServicioRevocacionToken revocacion;
     private final ObjectMapper objectMapper;
+    private final AuditoriaSeguridad auditoria;
+    private final UsuarioRepository usuarios;
 
-    public FiltroJwt(ServicioJwt jwt, ServicioRevocacionToken revocacion, ObjectMapper objectMapper) {
+    public FiltroJwt(ServicioJwt jwt, ServicioRevocacionToken revocacion, ObjectMapper objectMapper,
+            AuditoriaSeguridad auditoria, UsuarioRepository usuarios) {
         this.jwt = jwt;
         this.revocacion = revocacion;
         this.objectMapper = objectMapper;
+        this.auditoria = auditoria;
+        this.usuarios = usuarios;
     }
 
     @Override
@@ -51,8 +58,15 @@ public class FiltroJwt extends OncePerRequestFilter {
                     || claims.getSubject().isBlank() || revocacion.estaRevocado(claims.getId())) {
                 throw new IllegalArgumentException("Token no valido");
             }
+            var usuario = usuarios.findByIdentificacion(claims.getSubject()).orElse(null);
+            var version = claims.get("version", Number.class);
+            if (usuario == null || !usuario.isActivo() || version == null
+                    || usuario.getVersionSeguridad() != version.longValue()) {
+                throw new IllegalArgumentException("Token no valido");
+            }
         } catch (JwtException | IllegalArgumentException error) {
             SecurityContextHolder.clearContext();
+            auditoria.noAutorizado(request);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             objectMapper.writeValue(response.getOutputStream(),

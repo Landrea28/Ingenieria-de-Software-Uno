@@ -41,7 +41,7 @@ public class ServicioJwt {
         var jti = UUID.randomUUID().toString();
         var roles = usuario.getPerfiles().stream().map(perfil -> perfil.getCodigo()).distinct().toList();
         var token = Jwts.builder().subject(usuario.getIdentificacion()).id(jti)
-                .claim("roles", roles)
+                .claim("roles", roles).claim("version", usuario.getVersionSeguridad())
                 .issuedAt(Date.from(ahora)).expiration(Date.from(expira))
                 .signWith(clave).compact();
         return new TokenEmitido(token, jti, expira, Duration.between(ahora, expira).toSeconds());
