@@ -3,6 +3,7 @@ package co.edu.konrad.consultaciudadano.personal.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import co.edu.konrad.consultaciudadano.auth.service.GeneradorContrasena;
 import co.edu.konrad.consultaciudadano.auth.service.ValidadorContrasena;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.MailSendException;
 
 @ExtendWith(MockitoExtension.class)
 class RegistroPersonalSeguridadTest {
@@ -35,6 +37,16 @@ class RegistroPersonalSeguridadTest {
     void defensaNoDisponibleProduceRespuestaControlada503Nunca500() {
         when(defensa.validar(solicitud())).thenReturn(ResultadoValidacionDefensa.NO_DISPONIBLE);
         var error = assertThrows(NegocioException.class, () -> integracion().validarContraDefensa(solicitud()));
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getEstadoHttp());
+        assertEquals(CodigoError.INTEGRACION_PENDIENTE, error.getCodigo());
+    }
+
+    @Test
+    void correoNoDisponibleProduceRespuestaControlada503Nunca500() {
+        doThrow(new MailSendException("SMTP no disponible"))
+                .when(correo).enviarCredenciales("usuario@example.test", "Abc123");
+        var error = assertThrows(NegocioException.class,
+                () -> integracion().enviarCorreo("usuario@example.test", "Abc123"));
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getEstadoHttp());
         assertEquals(CodigoError.INTEGRACION_PENDIENTE, error.getCodigo());
     }

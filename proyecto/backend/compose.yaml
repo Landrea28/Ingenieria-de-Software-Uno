@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: consulta_ciudadano
       POSTGRES_USER: consulta
-      POSTGRES_PASSWORD: consulta_local
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
     ports:
       - '127.0.0.1:5432:5432'
     volumes:

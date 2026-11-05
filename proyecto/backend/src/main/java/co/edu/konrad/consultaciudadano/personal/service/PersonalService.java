@@ -35,8 +35,8 @@ public class PersonalService {
             throw new NegocioException(HttpStatus.CONFLICT, CodigoError.LIMITE_REGISTRO,
                     "Se excedio el limite de intentos de registro");
         }
-        catalogo.validar(request.fuerzaCodigo(), request.rangoId());
         try {
+            catalogo.validar(request.fuerzaCodigo(), request.rangoId());
             integracion.validarContraDefensa(request);
         } catch (NegocioException error) {
             auditoria.registroPersonalFallido(request.identificacion());

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,7 +76,12 @@ public class UsuarioService {
                 request.correo(), null, null, null, passwordEncoder.encode(contrasena));
         usuario.getPerfiles().add(perfil);
         var guardado = usuarios.saveAndFlush(usuario);
-        correo.enviarCredenciales(request.correo(), contrasena);
+        try {
+            correo.enviarCredenciales(request.correo(), contrasena);
+        } catch (MailException error) {
+            throw new NegocioException(HttpStatus.SERVICE_UNAVAILABLE, CodigoError.INTEGRACION_PENDIENTE,
+                    "El correo SIMULADO no esta disponible");
+        }
         auditoria.usuarioCreado(request.identificacion(), perfil.getCodigo());
         return UsuarioResponse.desde(guardado);
     }
