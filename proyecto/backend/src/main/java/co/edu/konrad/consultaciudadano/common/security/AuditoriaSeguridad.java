@@ -27,6 +27,10 @@ public class AuditoriaSeguridad {
         LOG.info("Evento seguridad=registro_personal identificacion={} ip={}", identificacion, ipActual());
     }
 
+    public void registroPersonalFallido(String identificacion) {
+        LOG.warn("Evento seguridad=registro_personal_fallido identificacion={} ip={}", identificacion, ipActual());
+    }
+
     public void usuarioCreado(String identificacion, String perfil) {
         LOG.info("Evento seguridad=usuario_creado identificacion={} perfil={} ip={}",
                 identificacion, perfil, ipActual());

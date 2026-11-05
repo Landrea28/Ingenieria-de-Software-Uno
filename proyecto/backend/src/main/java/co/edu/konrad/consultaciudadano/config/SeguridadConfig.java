@@ -25,6 +25,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
+import java.time.Clock;
 
 @Configuration
 @EnableMethodSecurity
@@ -80,6 +81,11 @@ public class SeguridadConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    Clock securityClock() {
+        return Clock.systemUTC();
     }
 
     @Bean

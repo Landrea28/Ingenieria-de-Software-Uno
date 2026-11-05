@@ -25,9 +25,9 @@ spring:
       mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
 springdoc:
   api-docs:
-    enabled: ${app.dev-endpoints-enabled:false}
+    enabled: false
   swagger-ui:
-    enabled: ${app.dev-endpoints-enabled:false}
+    enabled: false
     url: /openapi/openapi.yaml
     path: /swagger-ui.html
     disable-swagger-default-url: true
@@ -36,7 +36,7 @@ management:
     enabled-by-default: false
     web:
       exposure:
-        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:}
+        include: []
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200}

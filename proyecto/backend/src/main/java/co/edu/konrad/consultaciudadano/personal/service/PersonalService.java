@@ -26,13 +26,25 @@ public class PersonalService {
     private final PerfilRepository perfiles;
     private final RegistroPersonalIntegracion integracion;
     private final AuditoriaSeguridad auditoria;
+    private final ControlIntentosRegistro controlIntentos;
 
     @Transactional
-    public RegistroPersonalResponse registrar(RegistroPersonalRequest request) {
+    public RegistroPersonalResponse registrar(RegistroPersonalRequest request, String ip) {
+        if (!controlIntentos.permitido(ip)) {
+            auditoria.registroPersonalFallido(request.identificacion());
+            throw new NegocioException(HttpStatus.CONFLICT, CodigoError.LIMITE_REGISTRO,
+                    "Se excedio el limite de intentos de registro");
+        }
         catalogo.validar(request.fuerzaCodigo(), request.rangoId());
-        integracion.validarContraDefensa(request);
+        try {
+            integracion.validarContraDefensa(request);
+        } catch (NegocioException error) {
+            auditoria.registroPersonalFallido(request.identificacion());
+            throw error;
+        }
         if (usuarios.existsByIdentificacion(request.identificacion()) ||
                 usuarios.existsByCorreoIgnoreCase(request.correo())) {
+            auditoria.registroPersonalFallido(request.identificacion());
             throw new NegocioException(HttpStatus.CONFLICT, CodigoError.DUPLICADO,
                     "El personal ya se encuentra registrado");
         }
@@ -49,5 +61,10 @@ public class PersonalService {
         integracion.enviarCorreo(request.correo(), contrasena);
         auditoria.registroPersonal(request.identificacion());
         return new RegistroPersonalResponse("Registro aceptado. Revise el correo de confirmacion");
+    }
+
+    @Transactional
+    public RegistroPersonalResponse registrar(RegistroPersonalRequest request) {
+        return registrar(request, "local");
     }
 }

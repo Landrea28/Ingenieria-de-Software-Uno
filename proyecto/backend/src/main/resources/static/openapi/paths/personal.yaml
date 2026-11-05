@@ -2,7 +2,7 @@ registro:
   post:
     tags: [Personal]
     summary: Registro de personal de fuerza publica
-    description: Valida la identidad contra Defensa SIMULADO, crea una contraseña temporal de seis caracteres, persiste solo su hash BCrypt y la envia por SMTP. La respuesta nunca incluye la contraseña.
+    description: Valida la identidad contra Defensa SIMULADO, crea una contraseña temporal de seis caracteres, persiste solo su hash BCrypt y la envia por correo SIMULADO. La respuesta nunca incluye la contraseña.
     requestBody:
       required: true
       content:
@@ -23,7 +23,7 @@ registro:
             schema:
               $ref: '../schemas/errores.yaml#/ErrorResponse'
       '409':
-        description: Usuario duplicado
+        description: Usuario duplicado o limite de intentos excedido
         content:
           application/json:
             schema:

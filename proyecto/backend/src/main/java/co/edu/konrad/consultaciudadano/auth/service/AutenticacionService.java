@@ -49,6 +49,9 @@ public class AutenticacionService implements AutenticacionIntegracion {
         if (usuario.isEmpty() || !hashValido || !usuario.get().isActivo()) {
             bloqueos.registrarFallo(request.identificacion());
             auditoria.loginFallido(request.identificacion());
+            if (bloqueos.estaBloqueada(request.identificacion())) {
+                auditoria.bloqueoLogin(request.identificacion());
+            }
             throw credencialesInvalidas();
         }
         bloqueos.limpiar(request.identificacion());
