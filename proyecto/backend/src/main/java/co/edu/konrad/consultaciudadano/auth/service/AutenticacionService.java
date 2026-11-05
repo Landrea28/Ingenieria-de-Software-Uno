@@ -4,6 +4,7 @@ import co.edu.konrad.consultaciudadano.auth.dto.LoginRequest;
 import co.edu.konrad.consultaciudadano.auth.dto.LoginResponse;
 import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.NegocioException;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
 import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
 import io.jsonwebtoken.Claims;
 import java.util.UUID;
@@ -20,15 +21,17 @@ public class AutenticacionService implements AutenticacionIntegracion {
     private final ServicioJwt jwt;
     private final ServicioRevocacionToken revocacion;
     private final ServicioBloqueoLogin bloqueos;
+    private final AuditoriaSeguridad auditoria;
     private final String hashInexistente;
 
     public AutenticacionService(UsuarioRepository usuarios, PasswordEncoder passwordEncoder, ServicioJwt jwt,
-            ServicioRevocacionToken revocacion, ServicioBloqueoLogin bloqueos) {
+            ServicioRevocacionToken revocacion, ServicioBloqueoLogin bloqueos, AuditoriaSeguridad auditoria) {
         this.usuarios = usuarios;
         this.passwordEncoder = passwordEncoder;
         this.jwt = jwt;
         this.revocacion = revocacion;
         this.bloqueos = bloqueos;
+        this.auditoria = auditoria;
         this.hashInexistente = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
@@ -36,6 +39,7 @@ public class AutenticacionService implements AutenticacionIntegracion {
     @Transactional
     public LoginResponse login(LoginRequest request) {
         if (bloqueos.estaBloqueada(request.identificacion())) {
+            auditoria.bloqueoLogin(request.identificacion());
             throw credencialesInvalidas();
         }
         var usuario = usuarios.findByIdentificacion(request.identificacion());
@@ -44,9 +48,11 @@ public class AutenticacionService implements AutenticacionIntegracion {
                 .orElseGet(() -> passwordEncoder.matches(request.contrasena(), hashInexistente));
         if (usuario.isEmpty() || !hashValido || !usuario.get().isActivo()) {
             bloqueos.registrarFallo(request.identificacion());
+            auditoria.loginFallido(request.identificacion());
             throw credencialesInvalidas();
         }
         bloqueos.limpiar(request.identificacion());
+        auditoria.loginExitoso(request.identificacion());
         var token = jwt.emitir(usuario.get(), Boolean.TRUE.equals(request.recordarContrasena()));
         return new LoginResponse(token.valor(), "Bearer", token.expiraEnSegundos());
     }
@@ -61,6 +67,7 @@ public class AutenticacionService implements AutenticacionIntegracion {
         if (!revocacion.estaRevocado(claims.getId())) {
             revocacion.revocar(claims.getId(), claims.getExpiration().toInstant());
         }
+        auditoria.logout(claims.getSubject());
     }
 
     private Claims validarToken(String token) {

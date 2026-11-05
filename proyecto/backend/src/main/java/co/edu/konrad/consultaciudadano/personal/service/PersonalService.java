@@ -5,6 +5,7 @@ import co.edu.konrad.consultaciudadano.catalogo.repository.RangoRepository;
 import co.edu.konrad.consultaciudadano.catalogo.service.CatalogoService;
 import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.NegocioException;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalResponse;
 import co.edu.konrad.consultaciudadano.usuario.entity.Usuario;
@@ -24,6 +25,7 @@ public class PersonalService {
     private final UsuarioRepository usuarios;
     private final PerfilRepository perfiles;
     private final RegistroPersonalIntegracion integracion;
+    private final AuditoriaSeguridad auditoria;
 
     @Transactional
     public RegistroPersonalResponse registrar(RegistroPersonalRequest request) {
@@ -45,6 +47,7 @@ public class PersonalService {
         usuario.getPerfiles().add(perfilPersonal);
         usuarios.saveAndFlush(usuario);
         integracion.enviarCorreo(request.correo(), contrasena);
+        auditoria.registroPersonal(request.identificacion());
         return new RegistroPersonalResponse("Registro aceptado. Revise el correo de confirmacion");
     }
 }

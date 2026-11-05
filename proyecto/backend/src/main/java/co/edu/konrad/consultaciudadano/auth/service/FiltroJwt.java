@@ -2,6 +2,7 @@ package co.edu.konrad.consultaciudadano.auth.service;
 
 import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.ErrorResponse;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -25,11 +26,14 @@ public class FiltroJwt extends OncePerRequestFilter {
     private final ServicioJwt jwt;
     private final ServicioRevocacionToken revocacion;
     private final ObjectMapper objectMapper;
+    private final AuditoriaSeguridad auditoria;
 
-    public FiltroJwt(ServicioJwt jwt, ServicioRevocacionToken revocacion, ObjectMapper objectMapper) {
+    public FiltroJwt(ServicioJwt jwt, ServicioRevocacionToken revocacion, ObjectMapper objectMapper,
+            AuditoriaSeguridad auditoria) {
         this.jwt = jwt;
         this.revocacion = revocacion;
         this.objectMapper = objectMapper;
+        this.auditoria = auditoria;
     }
 
     @Override
@@ -53,6 +57,7 @@ public class FiltroJwt extends OncePerRequestFilter {
             }
         } catch (JwtException | IllegalArgumentException error) {
             SecurityContextHolder.clearContext();
+            auditoria.noAutorizado(request);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             objectMapper.writeValue(response.getOutputStream(),

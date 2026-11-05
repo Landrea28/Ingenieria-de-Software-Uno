@@ -10,6 +10,7 @@ import co.edu.konrad.consultaciudadano.catalogo.repository.RangoRepository;
 import co.edu.konrad.consultaciudadano.catalogo.service.CatalogoService;
 import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.NegocioException;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
 import co.edu.konrad.consultaciudadano.usuario.entity.Usuario;
 import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
@@ -30,7 +31,7 @@ class PersonalServiceTest {
     @Test
     void noPersisteUsuarioSiFaltaValidacionDeSeguridad() {
         var service = new PersonalService(catalogo, fuerzas, rangos, usuarios, perfiles,
-                new RegistroPersonalIntegracionPendiente());
+                new RegistroPersonalIntegracionPendiente(), new AuditoriaSeguridad());
         var request = new RegistroPersonalRequest("8000000001", "Usuario", "Prueba1", "POLICIA", 1L,
                 "DEMO-001", "demo@example.test");
         var error = assertThrows(NegocioException.class, () -> service.registrar(request));

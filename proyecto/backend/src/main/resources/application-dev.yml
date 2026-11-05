@@ -1,0 +1,11 @@
+app:
+  dev-endpoints-enabled: true
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: health
+springdoc:
+  api-docs:
+    enabled: true

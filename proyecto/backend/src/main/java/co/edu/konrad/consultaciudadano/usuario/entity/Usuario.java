@@ -3,6 +3,7 @@ package co.edu.konrad.consultaciudadano.usuario.entity;
 import co.edu.konrad.consultaciudadano.catalogo.entity.FuerzaPublica;
 import co.edu.konrad.consultaciudadano.catalogo.entity.Rango;
 import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -54,6 +55,7 @@ public class Usuario {
     private String idFuerza;
 
     @Getter(AccessLevel.NONE)
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
