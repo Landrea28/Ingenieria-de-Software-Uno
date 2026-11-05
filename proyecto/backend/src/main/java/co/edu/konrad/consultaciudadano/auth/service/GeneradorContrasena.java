@@ -4,16 +4,18 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import co.edu.konrad.consultaciudadano.common.security.GeneradorCredenciales;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GeneradorContrasena {
+public class GeneradorContrasena implements GeneradorCredenciales {
     private static final String MAYUSCULAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String MINUSCULAS = "abcdefghijklmnopqrstuvwxyz";
     private static final String DIGITOS = "0123456789";
     private static final String ALFANUMERICOS = MAYUSCULAS + MINUSCULAS + DIGITOS;
     private final SecureRandom random = new SecureRandom();
 
+    @Override
     public String generar() {
         List<Character> caracteres = new ArrayList<>(6);
         caracteres.add(caracterAleatorio(MAYUSCULAS));

@@ -62,6 +62,9 @@ public class Usuario {
     @Column(nullable = false)
     private boolean activo = true;
 
+    @Column(name = "version_seguridad", nullable = false)
+    private long versionSeguridad;
+
     @Column(name = "fecha_creacion", nullable = false)
     private OffsetDateTime fechaCreacion;
 
@@ -80,6 +83,24 @@ public class Usuario {
         this.rango = rango;
         this.idFuerza = idFuerza;
         this.passwordHash = passwordHash;
+    }
+
+    public boolean tienePerfilCodigo(String codigo) {
+        return perfiles.stream().anyMatch(perfil -> perfil.getCodigo().equals(codigo));
+    }
+
+    public void actualizar(String nombres, String apellidos, String correo, Perfil perfil, boolean activo) {
+        var cambiaAcceso = this.activo != activo || perfiles.size() != 1
+                || perfiles.stream().noneMatch(actual -> actual.getId().equals(perfil.getId()));
+        this.nombres = nombres;
+        this.apellidos = apellidos;
+        this.correo = correo;
+        this.activo = activo;
+        perfiles.clear();
+        perfiles.add(perfil);
+        if (cambiaAcceso) {
+            versionSeguridad++;
+        }
     }
 
     @PrePersist

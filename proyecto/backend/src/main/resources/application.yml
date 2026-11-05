@@ -27,6 +27,7 @@ springdoc:
   api-docs:
     enabled: ${app.dev-endpoints-enabled:false}
   swagger-ui:
+    enabled: ${app.dev-endpoints-enabled:false}
     url: /openapi/openapi.yaml
     path: /swagger-ui.html
     disable-swagger-default-url: true

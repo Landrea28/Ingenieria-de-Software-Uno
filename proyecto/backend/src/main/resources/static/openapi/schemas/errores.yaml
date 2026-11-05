@@ -4,10 +4,40 @@ ErrorResponse:
   properties:
     codigo:
       type: string
-      enum: [VALIDACION, NO_ENCONTRADO, DUPLICADO, SIN_INFORMACION, SIN_RESULTADOS, INTEGRACION_PENDIENTE, NO_AUTENTICADO, ACCESO_DENEGADO, ERROR_INTERNO]
+      enum: [VALIDACION, NO_ENCONTRADO, DUPLICADO, SIN_INFORMACION, SIN_RESULTADOS, INTEGRACION_PENDIENTE, NO_AUTENTICADO, ACCESO_DENEGADO, ERROR_INTERNO, ULTIMO_ADMIN_ACTIVO, AUTODESACTIVACION_NO_PERMITIDA, PERMISOS_ADMIN_REQUERIDOS]
     mensaje:
       type: string
     detalles:
       type: array
       items:
         type: string
+BadRequest:
+  description: Solicitud invalida
+  content:
+    application/json:
+      schema:
+        $ref: '#/ErrorResponse'
+Unauthorized:
+  description: No autenticado
+  content:
+    application/json:
+      schema:
+        $ref: '#/ErrorResponse'
+Forbidden:
+  description: Acceso denegado
+  content:
+    application/json:
+      schema:
+        $ref: '#/ErrorResponse'
+NotFound:
+  description: Recurso no encontrado
+  content:
+    application/json:
+      schema:
+        $ref: '#/ErrorResponse'
+Conflict:
+  description: Conflicto con el estado actual
+  content:
+    application/json:
+      schema:
+        $ref: '#/ErrorResponse'

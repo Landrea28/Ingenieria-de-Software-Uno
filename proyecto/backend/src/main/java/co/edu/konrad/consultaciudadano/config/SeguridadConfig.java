@@ -65,7 +65,8 @@ public class SeguridadConfig {
                         .requestMatchers(HttpMethod.GET, "/api/antecedentes/*")
                         .hasAnyRole("PERSONAL_FUERZA_PUBLICA", "ADMINISTRADOR")
                         .requestMatchers("/api/antecedentes/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/ciudadanos/**", "/api/reportes/**", "/api/usuarios/**", "/api/perfiles/**")
+                        .requestMatchers("/api/ciudadanos/**", "/api/reportes/**", "/api/usuarios/**",
+                                "/api/perfiles/**", "/api/permisos/**")
                         .hasRole("ADMINISTRADOR")
                         .requestMatchers("/error").permitAll()
                         .anyRequest().denyAll())

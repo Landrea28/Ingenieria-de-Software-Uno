@@ -27,6 +27,20 @@ public class AuditoriaSeguridad {
         LOG.info("Evento seguridad=registro_personal identificacion={} ip={}", identificacion, ipActual());
     }
 
+    public void usuarioCreado(String identificacion, String perfil) {
+        LOG.info("Evento seguridad=usuario_creado identificacion={} perfil={} ip={}",
+                identificacion, perfil, ipActual());
+    }
+
+    public void cambioPerfilEstado(String identificacion, String perfil, String estado) {
+        LOG.info("Evento seguridad=cambio_perfil_estado identificacion={} perfil={} estado={} ip={}",
+                identificacion, perfil, estado, ipActual());
+    }
+
+    public void cambioPermisos(String perfil) {
+        LOG.info("Evento seguridad=cambio_permisos perfil={} ip={}", perfil, ipActual());
+    }
+
     public void logout(String identificacion) {
         LOG.info("Evento seguridad=logout identificacion={} ip={}", identificacion, ipActual());
     }

@@ -3,6 +3,7 @@ package co.edu.konrad.consultaciudadano.auth.service;
 import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.ErrorResponse;
 import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
+import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -27,13 +28,15 @@ public class FiltroJwt extends OncePerRequestFilter {
     private final ServicioRevocacionToken revocacion;
     private final ObjectMapper objectMapper;
     private final AuditoriaSeguridad auditoria;
+    private final UsuarioRepository usuarios;
 
     public FiltroJwt(ServicioJwt jwt, ServicioRevocacionToken revocacion, ObjectMapper objectMapper,
-            AuditoriaSeguridad auditoria) {
+            AuditoriaSeguridad auditoria, UsuarioRepository usuarios) {
         this.jwt = jwt;
         this.revocacion = revocacion;
         this.objectMapper = objectMapper;
         this.auditoria = auditoria;
+        this.usuarios = usuarios;
     }
 
     @Override
@@ -53,6 +56,12 @@ public class FiltroJwt extends OncePerRequestFilter {
             claims = jwt.validar(token);
             if (claims.getId() == null || claims.getExpiration() == null || claims.getSubject() == null
                     || claims.getSubject().isBlank() || revocacion.estaRevocado(claims.getId())) {
+                throw new IllegalArgumentException("Token no valido");
+            }
+            var usuario = usuarios.findByIdentificacion(claims.getSubject()).orElse(null);
+            var version = claims.get("version", Number.class);
+            if (usuario == null || !usuario.isActivo() || version == null
+                    || usuario.getVersionSeguridad() != version.longValue()) {
                 throw new IllegalArgumentException("Token no valido");
             }
         } catch (JwtException | IllegalArgumentException error) {

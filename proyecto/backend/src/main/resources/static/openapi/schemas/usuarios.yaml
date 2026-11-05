@@ -1,0 +1,65 @@
+UsuarioResponse:
+  type: object
+  required: [identificacion, nombres, apellidos, correo, estado]
+  properties:
+    identificacion:
+      type: string
+    nombres:
+      type: string
+    apellidos:
+      type: string
+    correo:
+      type: string
+      format: email
+    perfil:
+      type: string
+    estado:
+      type: string
+      enum: [ACTIVO, INACTIVO]
+CrearUsuarioRequest:
+  type: object
+  required: [identificacion, nombres, apellidos, correo, perfilId]
+  properties:
+    identificacion:
+      type: string
+      pattern: '^[0-9]{6,10}$'
+    nombres:
+      type: string
+      maxLength: 100
+    apellidos:
+      type: string
+      maxLength: 100
+    correo:
+      type: string
+      format: email
+      maxLength: 200
+    perfilId:
+      type: integer
+      format: int64
+ActualizarUsuarioRequest:
+  type: object
+  required: [nombres, apellidos, correo, perfilId, estado]
+  properties:
+    nombres:
+      type: string
+      maxLength: 100
+    apellidos:
+      type: string
+      maxLength: 100
+    correo:
+      type: string
+      format: email
+      maxLength: 200
+    perfilId:
+      type: integer
+      format: int64
+    estado:
+      type: string
+      enum: [ACTIVO, INACTIVO]
+IdentificacionPath:
+  name: identificacion
+  in: path
+  required: true
+  schema:
+    type: string
+    pattern: '^[0-9]{6,10}$'
