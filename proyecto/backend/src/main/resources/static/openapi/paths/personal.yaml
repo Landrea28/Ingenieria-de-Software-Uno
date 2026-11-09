@@ -1,0 +1,42 @@
+registro:
+  post:
+    tags: [Personal]
+    summary: Registro de personal de fuerza publica
+    description: Valida la identidad contra Defensa SIMULADO, crea una contraseña temporal de seis caracteres, persiste solo su hash BCrypt y la envia por correo SIMULADO. La respuesta nunca incluye la contraseña.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/personal.yaml#/RegistroPersonalRequest'
+    responses:
+      '201':
+        description: Registro aceptado; las credenciales se enviaron por correo
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personal.yaml#/RegistroPersonalResponse'
+      '400':
+        description: Datos invalidos, fuerza/rango no coincidentes o rechazo de Defensa
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
+      '409':
+        description: Usuario duplicado o limite de intentos excedido
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
+      '503':
+        description: El adaptador SIMULADO no esta disponible
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
+      '500':
+        description: Fallo al persistir o enviar el correo SMTP
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errores.yaml#/ErrorResponse'
