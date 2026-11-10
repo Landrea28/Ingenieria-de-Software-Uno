@@ -61,6 +61,9 @@ public class LoginController {
             case EXITO -> {
                 // Nuevo id de sesión tras autenticarse (evita la fijación de sesión).
                 request.changeSessionId();
+                // La sesión web dura lo mismo que el token (15 min, u 8 h con "Recordar contraseña"),
+                // en lugar de los 30 min fijos de server.servlet.session.timeout.
+                request.getSession().setMaxInactiveInterval((int) Math.max(sesion.segundosRestantes(), 60));
                 return "redirect:/";
             }
             case SIN_PERMISO_ADMIN -> model.addAttribute("mensajeError", "Su usuario no tiene permisos de administrador.");

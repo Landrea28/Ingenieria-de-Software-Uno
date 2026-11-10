@@ -24,8 +24,14 @@
     </div>
 
     <th:block th:if="${pagina}">
+      <!-- Página fuera de rango (p. ej. ?pagina=99): sí hay datos, pero no en esa página -->
+      <div th:if="${pagina.vacia() and pagina.totalElements > 0}" class="estado">
+        <p>La página solicitada no existe.</p>
+        <a th:href="@{/ciudadanos(busqueda=${busqueda})}" class="boton primario" data-cargando>Ir a la primera página</a>
+      </div>
+
       <!-- Estado vacío: dos casos distintos (sin registros / sin resultados de la búsqueda) -->
-      <div th:if="${pagina.vacia()}" class="estado">
+      <div th:if="${pagina.vacia() and pagina.totalElements == 0}" class="estado">
         <p th:if="${busqueda}" th:text="|No hay resultados para «${busqueda}».|">No hay resultados.</p>
         <p th:unless="${busqueda}">Aún no hay ciudadanos registrados.</p>
         <a th:href="@{/ciudadanos/nuevo}" class="boton primario">Registrar ciudadano</a>

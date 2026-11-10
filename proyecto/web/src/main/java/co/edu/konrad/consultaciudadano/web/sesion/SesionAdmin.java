@@ -1,6 +1,7 @@
 package co.edu.konrad.consultaciudadano.web.sesion;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -33,6 +34,11 @@ public class SesionAdmin implements Serializable {
     /** true si hay token y aún no venció. */
     public boolean activa() {
         return token != null && expiraEn != null && Instant.now().isBefore(expiraEn);
+    }
+
+    /** Segundos de vida que le quedan al token (0 si no hay sesión o ya venció). */
+    public long segundosRestantes() {
+        return activa() ? Duration.between(Instant.now(), expiraEn).toSeconds() : 0;
     }
 
     /** true si hubo sesión pero el token ya venció. */

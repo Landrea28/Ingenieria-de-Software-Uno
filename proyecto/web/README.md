@@ -1,29 +1,30 @@
-# Aplicación web administrativa
+# Sistema de Consulta Ciudadano — Web administrativa
 
-Aplicación del administrador del Sistema de Consulta Ciudadano. Usa Spring MVC con vistas Thymeleaf del lado del servidor y consume la API REST de `../backend`. **No accede directamente a la base de datos.**
+Aplicación del **administrador**: inicia sesión, consulta, registra y edita ciudadanos, y solicita reportes en PDF.
+Está hecha con Spring MVC + Thymeleaf (vistas del lado del servidor) y **consume la API REST de [`../backend`](../backend)**;
+no accede directamente a la base de datos. La lógica de negocio y la seguridad están en el backend.
 
-> Estado actual: **login, listado, búsqueda, detalle, registro y edición conectados a la API real**. Los reportes todavía son simulados.
+| Documento | Para qué |
+|---|---|
+| [docs/manual-usuario.md](docs/manual-usuario.md) | Manual breve para el administrador |
+| [docs/pruebas.md](docs/pruebas.md) | Casos de prueba, resultados y defectos corregidos |
+| [docs/demo.md](docs/demo.md) | Guion de la demo, plan B y lista de verificación para la integración |
+
+## Estado de implementación
+
+| Funcionalidad | Estado |
+|---|---|
+| Login y cierre de sesión del administrador | Conectado a la API |
+| Listado paginado y filtro de ciudadanos | Conectado a la API |
+| Consulta por identificación y detalle | Conectado a la API |
+| Registro y edición (10 campos) con validación | Conectado a la API |
+| Reporte PDF por estado (Requerido / No requerido) | Conectado a la API (el PDF lo genera el backend) |
 
 ## Requisitos
 
-- JDK 21 o superior (`java -version`)
-- No hace falta instalar Maven: se usa el wrapper incluido (`mvnw`)
-
-## Configuración
-
-| Variable                 | Valor por defecto       | Descripción                                  |
-|--------------------------|-------------------------|----------------------------------------------|
-| `API_BASE_URL`           | `http://localhost:8080` | URL base de la API REST del backend          |
-| `SERVER_PORT`            | `8081`                  | Puerto de la web (el backend usa el 8080)    |
-| `SPRING_PROFILES_ACTIVE` | `api`                   | `api` = backend real; `mock` = datos simulados sin backend |
-
-`.env.example` muestra los valores. Para cambiarlos, exporta las variables antes de ejecutar:
-
-```bash
-export API_BASE_URL=http://localhost:8080
-```
-
-No subas archivos `.env` con valores reales; ya están en `.gitignore`.
+- JDK 21 o superior (`java -version`). No hace falta instalar Maven: se usa el wrapper incluido (`mvnw`).
+- Para usar datos reales: el backend en ejecución (ver [`../backend/README.md`](../backend/README.md)).
+  El backend usa Lombok y **necesita un JDK 21 completo** para compilar (con JDK más nuevos falla con `EndPosTable`).
 
 ## Ejecutar
 
@@ -32,97 +33,90 @@ cd proyecto/web
 ./mvnw spring-boot:run          # Windows: mvnw.cmd spring-boot:run
 ```
 
-1. Levantar primero el backend (ver [`../backend/README.md`](../backend/README.md)). Con el perfil `demo` del backend se cargan 19 ciudadanos ficticios.
-2. Abrir <http://localhost:8081/login> e ingresar con un usuario **ADMINISTRADOR** del backend (por ejemplo el admin inicial configurado con `ADMIN_INITIAL_*`).
+Abrir <http://localhost:8081/login> e ingresar con un usuario **ADMINISTRADOR** del backend
+(por ejemplo, el admin inicial que el backend crea con `ADMIN_INITIAL_*`). Con el perfil `demo` del backend
+se cargan ciudadanos ficticios (`9000000001` a `9000000019`).
 
-Sin backend, para una demo: `SPRING_PROFILES_ACTIVE=mock ./mvnw spring-boot:run`. Con ese perfil el login acepta cualquier credencial y todas las pantallas muestran **DATOS SIMULADOS — PRUEBA**.
+**Sin backend (demo o desarrollo):**
 
-> El backend usa Lombok y necesita un **JDK 21** para compilar; con JDK más nuevos falla (`EndPosTable`). La web compila con JDK 21 o superior.
+```bash
+SPRING_PROFILES_ACTIVE=mock ./mvnw spring-boot:run
+```
 
-## Conexión con la API
+Con el perfil `mock` el login acepta cualquier credencial, los datos son ficticios (`1000000001` a `1000000003`) y
+todas las pantallas muestran **DATOS SIMULADOS — PRUEBA**. El reporte "Requerido" trae un PDF simulado y
+"No requerido" sale vacío, para mostrar el mensaje de sin resultados.
 
-| Pantalla | Endpoint |
-|---|---|
-| Login / Cerrar sesión | `POST /api/auth/login`, `POST /api/auth/logout` |
-| Listado y búsqueda (paginado de 20) | `GET /api/ciudadanos?busqueda=&pagina=&tamano=` |
-| Registrar | `POST /api/ciudadanos` |
-| Consultar por identificación / Detalle | `GET /api/ciudadanos/{identificacion}` |
-| Editar: carga de datos | `GET /api/ciudadanos/{identificacion}` |
-| Editar: guardar cambios | `PUT /api/ciudadanos/{identificacion}` (9 campos; la identificación no cambia) |
+### Configuración
 
-El navegador solo envía GET y POST: el formulario de edición hace `POST /ciudadanos/{identificacion}` a la web y la web hace el `PUT` a la API.
+| Variable | Por defecto | Descripción |
+|---|---|---|
+| `API_BASE_URL` | `http://localhost:8080` | URL base de la API REST |
+| `SERVER_PORT` | `8081` | Puerto de la web (el backend usa el 8080) |
+| `SPRING_PROFILES_ACTIVE` | `api` | `api` = backend real; `mock` = datos simulados sin backend |
 
-- **Sesión:** el token JWT se guarda en la sesión del servidor web (`SesionAdmin`); el navegador solo recibe la cookie `JSESSIONID` (`HttpOnly`, `SameSite=Lax`, sin `;jsessionid` en las URL).
-- **Solo administradores:** la respuesta del login no incluye el rol, así que tras el login se hace una consulta que exige `ADMINISTRADOR`; si la API responde 403 se cierra la sesión y se muestra "Su usuario no tiene permisos de administrador".
-- **401 / 403 en cualquier pantalla** (token vencido, revocado o sin rol): se cierra la sesión y se redirige a `/login` con un mensaje (`ManejoErroresApi`).
-- **Errores:** `TraductorErroresApi` convierte cada respuesta en una excepción: 400 → validación (los `detalles` "campo: mensaje" se muestran en su campo), 404 → no encontrado, 409 → duplicado, 5xx / red / tiempo agotado (3 s conexión, 10 s lectura) → "No fue posible conectar con el servidor".
-
-### Estados de la interfaz
-
-| Estado | Cómo se ve |
-|---|---|
-| Carga | Barra de progreso arriba y contenido atenuado al enviar formularios o paginar (`js/estados.js`) |
-| Vacío | "Aún no hay ciudadanos registrados" o "No hay resultados para «…»", con botón para registrar |
-| Éxito | Mensaje verde y la fila nueva resaltada (el listado se filtra por la identificación registrada) |
-| Error | Mensaje rojo con **Reintentar**; en el registro se conservan los datos escritos |
+`.env.example` muestra los valores. **No subas archivos `.env` con valores reales ni credenciales**; están en `.gitignore`.
 
 ## Pruebas
 
 ```bash
-./mvnw test
+./mvnw test                         # 83 pruebas automáticas, no necesitan backend
 ```
 
-| Prueba | Qué cubre |
-|---|---|
-| `ClientesRestTest` | Clientes REST contra un servidor HTTP simulado: URL, token, JSON del contrato y traducción de 400/401/403/404/409/5xx/red |
-| `AccesoYEstadosTest` | Redirección al login, solo administradores, 401/403 en pantallas, estados vacío y error |
-| `RegistroCiudadanoTest` | Validaciones del formulario y registro con confirmación (mock) |
-| `ConsultaYEdicionTest` | Consulta por identificación, detalle y edición con confirmación (mock) |
-| `VistasTest` | Cada pantalla responde y renderiza su vista |
+Prueba de humo contra un entorno en ejecución (integración o antes de sustentar). Las credenciales van en variables,
+nunca en el script:
 
-## Estructura
-
-```
-src/main/java/co/edu/konrad/consultaciudadano/web/
-├── config/      ApiProperties, ApiRestConfig (RestClient), TraductorErroresApi, WebConfig
-├── controller/  Login, Panel, Ciudadano, Reporte + ModeloGlobal y ManejoErroresApi (401/403/red)
-├── dto/         CiudadanoDto, PaginaCiudadanos, LoginResponse, ErrorApi (esquemas del contrato OpenAPI)
-├── form/        CiudadanoForm y ReglasCiudadano
-├── service/     CiudadanoApiClient y AuthApiClient (interfaces) con implementación Rest (perfil "api")
-│                y Mock (perfil "mock"), AccesoAdminService y excepciones Api*
-└── sesion/      SesionAdmin (token en la sesión) y SesionInterceptor (exige sesión)
-src/main/resources/
-├── templates/
-│   ├── fragments/layout.html       estructura: head, barra de navegación, encabezado
-│   ├── fragments/componentes.html  componentes: alertas, tabla, campo, selector
-│   └── login, panel, ciudadanos/{lista,formulario}, reportes
-├── messages.properties             textos de error de conversión
-└── static/css/  admin.css
+```bash
+ADMIN_IDENTIFICACION=... ADMIN_CONTRASENA='...' ./scripts/prueba-humo.sh
+# Opcional: AGENTE_IDENTIFICACION / AGENTE_CONTRASENA (rol incorrecto), ESCRITURA=1 (registra y edita), WEB_URL
 ```
 
-### Componentes reutilizables
+Detalle de casos y resultados en [docs/pruebas.md](docs/pruebas.md).
 
-| Fragmento | Uso |
-|---|---|
-| `layout :: menu('activo')` | Barra de navegación lateral; resalta la opción actual |
-| `componentes :: alertas` | Muestra `mensajeExito`, `mensajeInfo` y `mensajeError` (modelo o flash) |
-| `componentes :: tabla(columnas, ~{::filas}, vacia, 'mensaje')` | Tabla con encabezados, filas propias y mensaje cuando no hay datos |
-| `componentes :: campo('propiedad', 'Etiqueta', 'tipo', soloLectura)` | Input con su mensaje de validación (dentro de un `th:object`) |
-| `componentes :: selector('propiedad', 'Etiqueta', opciones)` | Select con su mensaje de validación |
+## Pantallas y endpoints
 
-## Registro y validaciones
+| Ruta web | Pantalla | API |
+|---|---|---|
+| `/login`, `/logout` | Ingreso y cierre de sesión | `POST /api/auth/login`, `POST /api/auth/logout` |
+| `/` | Panel principal (total de ciudadanos) | `GET /api/ciudadanos` |
+| `/ciudadanos?busqueda=&pagina=` | Listado con filtro parcial, 20 por página | `GET /api/ciudadanos` |
+| `/ciudadanos/consulta?identificacion=` | Consulta exacta (acepta puntos y espacios) → detalle | — |
+| `/ciudadanos/{identificacion}` | Detalle | `GET /api/ciudadanos/{identificacion}` |
+| `/ciudadanos/nuevo` | Registrar | `POST /api/ciudadanos` |
+| `/ciudadanos/{identificacion}/editar` | Editar (precargado) | `GET` y `PUT /api/ciudadanos/{identificacion}` |
+| `/reportes` | Filtro Requerido / No requerido | — |
+| `/reportes/pdf?estado=&modo=ver\|descargar` | PDF en el navegador o descargado | `GET /api/reportes/ciudadanos?estado=` |
 
-- **Registrar** envía `POST /api/ciudadanos` (perfil `api`) y vuelve al listado con un mensaje de confirmación y la fila nueva resaltada. Con el perfil `mock` se guarda solo en memoria y se pierde al reiniciar. Una identificación repetida (409) muestra "Ya existe un ciudadano con esta identificación."
-- **Guardar cambios** envía `PUT` y vuelve al detalle con "Cambios guardados para …". Si el backend rechaza datos (400) los errores se muestran en cada campo y no se confirma nada; si el ciudadano ya no existe (404) vuelve al listado; si la API no responde se conservan los cambios escritos.
-- Las reglas viven en `form/ReglasCiudadano.java` y se aplican en dos capas:
-  1. **Navegador** (`static/js/validacion.js`): atributos HTML5 (`required`, `pattern`, `min`, `max`, `step`, `maxlength`) con mensajes en español junto a cada campo. Valida al salir del campo y al enviar.
-  2. **Servidor web** (`CiudadanoForm` con Bean Validation): mismas reglas, por si el navegador no ejecuta JavaScript.
+Las rutas con `{identificacion}` solo aceptan 6 a 10 dígitos; otra ruta da 404 con la página `error.html`.
+El navegador solo envía GET y POST: al editar, el formulario hace POST a la web y la web hace el `PUT` a la API.
 
-  El backend vuelve a validar todo; la validación de la web solo mejora la experiencia.
+## Cómo funciona
+
+- **Sesión:** el token JWT se guarda en la sesión del servidor web (`SesionAdmin`), nunca en el navegador. El navegador
+  solo tiene la cookie `JSESSIONID` (`HttpOnly`, `SameSite=Lax`, sin `;jsessionid` en las URL). La sesión web dura
+  lo mismo que el token: 15 min, u 8 h con "Recordar contraseña".
+- **Solo administradores:** la respuesta del login no trae el rol; tras el login se hace una consulta que exige
+  `ADMINISTRADOR`. Si la API responde 403, se cierra la sesión y se informa que el usuario no tiene permisos.
+- **Acceso:** `SesionInterceptor` envía al login a quien no tenga sesión. Si la API responde 401/403 en cualquier
+  pantalla (token vencido, revocado o sin rol), `ManejoErroresApi` cierra la sesión y vuelve al login con un mensaje.
+- **Errores de la API:** `TraductorErroresApi` convierte cada respuesta en una excepción con nombre: 400 validación
+  (los detalles "campo: mensaje" se muestran en su campo), 404 no encontrado / sin resultados, 409 duplicado,
+  5xx, red o tiempo agotado (3 s conexión, 10 s lectura) → "No fue posible conectar con el servidor".
+- **Validación en dos capas** con las reglas de `form/ReglasCiudadano.java` (copiadas de `CiudadanoRequest` del backend):
+  en el navegador (`static/js/validacion.js`, mensajes en español junto a cada campo) y en el servidor web
+  (`CiudadanoForm` con Bean Validation), por si el navegador no ejecuta JavaScript. El backend vuelve a validar todo.
+- **Cabeceras de seguridad** (`CabecerasSeguridadFilter`): `Cache-Control: no-store` en las pantallas (tras cerrar sesión,
+  "Atrás" no muestra datos), `X-Frame-Options: DENY` y CSP `frame-ancestors 'none'` (no se puede incrustar en otro sitio),
+  `default-src 'self'`, `nosniff` y `Referrer-Policy: same-origin`.
+- **Estados de la interfaz:** carga (barra de progreso, `js/estados.js`), vacío ("Aún no hay ciudadanos…" o
+  "No hay resultados para…"), éxito (mensaje verde, fila resaltada) y error (mensaje con **Reintentar**; los formularios
+  conservan lo escrito).
+
+### Reglas de los campos
 
 | Campo | Regla |
 |---|---|
-| identificacion | obligatorio, 6 a 10 dígitos |
+| identificacion | obligatorio, 6 a 10 dígitos; no se puede cambiar al editar |
 | nombres, apellidos | obligatorio, máx. 100, solo letras y espacios |
 | fechaNacimiento | obligatorio, no futura |
 | fechaExpedicion | obligatorio, no futura, posterior a la fecha de nacimiento |
@@ -131,21 +125,33 @@ src/main/resources/
 | grupoSanguineo | A, B, AB u O (lista) |
 | estatura | 0.50 a 2.50 m, máx. 2 decimales |
 
-## Pantallas
+## Estructura
 
-| Ruta                                | Pantalla                             |
-|-------------------------------------|--------------------------------------|
-| `/login`                            | Ingreso del administrador            |
-| `/`                                 | Panel principal                      |
-| `/ciudadanos?busqueda=&pagina=`     | Listado con filtro parcial y paginación |
-| `/ciudadanos/consulta?identificacion=` | Consulta exacta (acepta puntos y espacios) → detalle |
-| `/ciudadanos/{identificacion}`      | Detalle del ciudadano                |
-| `/ciudadanos/nuevo`                 | Registrar ciudadano                  |
-| `/ciudadanos/{identificacion}/editar` | Editar ciudadano (precargado)      |
+```
+src/main/java/co/edu/konrad/consultaciudadano/web/
+├── config/      ApiRestConfig (RestClient), TraductorErroresApi, CabecerasSeguridadFilter, WebConfig, ApiProperties
+├── controller/  Login, Panel, Ciudadano, Reporte + ModeloGlobal y ManejoErroresApi (401/403/red)
+├── dto/         CiudadanoDto, PaginaCiudadanos, LoginResponse, ErrorApi, EstadoAntecedente (contrato OpenAPI)
+├── form/        CiudadanoForm y ReglasCiudadano
+├── service/     Clientes de la API (interfaz + implementación Rest para "api" y Mock para "mock"),
+│                AccesoAdminService y excepciones Api*
+└── sesion/      SesionAdmin (token en la sesión) y SesionInterceptor (exige sesión)
+src/main/resources/
+├── templates/   fragments/{layout,componentes}, login, panel, ciudadanos/{lista,detalle,formulario},
+│                reportes, error, error-api
+├── static/      css/admin.css, js/validacion.js, js/estados.js
+└── messages.properties
+scripts/prueba-humo.sh
+docs/            manual-usuario.md, pruebas.md, demo.md
+```
 
-Las rutas con `{identificacion}` solo aceptan 6 a 10 dígitos; otra cosa da 404 con la página `error.html`.
-| `/reportes`                         | Solicitar reporte (Requerido / No requerido) |
+### Componentes reutilizables (`templates/fragments`)
 
-## Datos simulados
-
-`CiudadanoApiClientMock` tiene 3 ciudadanos ficticios (`1000000001` a `1000000003`, nombres "Prueba …"). No coinciden con el seed del backend (`9000000001…`). Mientras el perfil `mock` esté activo, todas las pantallas muestran el aviso **DATOS SIMULADOS — PRUEBA**.
+| Fragmento | Uso |
+|---|---|
+| `layout :: head('Título')`, `menu('activo')`, `encabezado('Título')` | Estructura común de todas las pantallas |
+| `componentes :: alertas` | Mensajes `mensajeExito`, `mensajeInfo`, `mensajeError` |
+| `componentes :: tabla(columnas, ~{::filas}, vacia, 'mensaje')` | Tabla con encabezados y filas propias |
+| `componentes :: campo('propiedad', 'Etiqueta', 'tipo', reglas, soloLectura)` | Input con su mensaje de validación |
+| `componentes :: selector('propiedad', 'Etiqueta', opciones)` | Lista desplegable con su mensaje de validación |
+| `componentes :: consultaIdentificacion` | Consulta exacta por identificación (panel y listado) |

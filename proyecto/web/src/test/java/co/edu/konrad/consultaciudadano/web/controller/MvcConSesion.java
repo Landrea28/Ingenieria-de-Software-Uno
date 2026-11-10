@@ -4,6 +4,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
+import jakarta.servlet.Filter;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,7 +27,17 @@ final class MvcConSesion {
     }
 
     static MockMvc crear(WebApplicationContext contexto) throws Exception {
-        MockHttpSession sesion = iniciarSesion(MockMvcBuilders.webAppContextSetup(contexto).build());
-        return MockMvcBuilders.webAppContextSetup(contexto).defaultRequest(get("/").session(sesion)).build();
+        Filter[] filtros = filtros(contexto);
+        MockHttpSession sesion = iniciarSesion(MockMvcBuilders.webAppContextSetup(contexto).addFilters(filtros).build());
+        return MockMvcBuilders.webAppContextSetup(contexto).addFilters(filtros)
+                .defaultRequest(get("/").session(sesion)).build();
+    }
+
+    // Igual que el MockMvc de Spring Boot: todos los filtros de la app (codificación, cabeceras de
+    // seguridad...) en su orden.
+    private static Filter[] filtros(WebApplicationContext contexto) {
+        List<Filter> filtros = new ArrayList<>(contexto.getBeansOfType(Filter.class).values());
+        AnnotationAwareOrderComparator.sort(filtros);
+        return filtros.toArray(Filter[]::new);
     }
 }
