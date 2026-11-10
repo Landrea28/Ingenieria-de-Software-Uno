@@ -6,19 +6,21 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /**
  * DATOS SIMULADOS DE PRUEBA. Solo se activa con el perfil "mock".
  * Las identificaciones 1000000001..3 no existen en el seed del backend (9000000001..)
- * y los nombres son ficticios.
+ * y los nombres son ficticios. Lo que se registra vive en memoria y se pierde al reiniciar.
  */
 @Service
 @Profile("mock")
 public class CiudadanoApiClientMock implements CiudadanoApiClient {
 
-    private static final List<CiudadanoDto> CIUDADANOS = List.of(
+    private final List<CiudadanoDto> ciudadanos = new CopyOnWriteArrayList<>(List.of(
             new CiudadanoDto(1L, "1000000001", "Prueba Uno", "Simulado Mock",
                     LocalDate.of(1990, 1, 15), "Bogota", LocalDate.of(2008, 2, 20), "Bogota",
                     "+", "O", new BigDecimal("1.70")),
@@ -27,15 +29,17 @@ public class CiudadanoApiClientMock implements CiudadanoApiClient {
                     "-", "A", new BigDecimal("1.62")),
             new CiudadanoDto(3L, "1000000003", "Prueba Tres", "Simulado Mock",
                     LocalDate.of(2000, 11, 28), "Cali", LocalDate.of(2018, 12, 5), "Bogota",
-                    "+", "AB", new BigDecimal("1.81")));
+                    "+", "AB", new BigDecimal("1.81"))));
+
+    private final AtomicLong siguienteId = new AtomicLong(ciudadanos.size() + 1);
 
     @Override
     public List<CiudadanoDto> listar(String busqueda) {
         if (busqueda == null || busqueda.isBlank()) {
-            return CIUDADANOS;
+            return List.copyOf(ciudadanos);
         }
         String texto = busqueda.trim().toLowerCase(Locale.ROOT);
-        return CIUDADANOS.stream()
+        return ciudadanos.stream()
                 .filter(c -> c.identificacion().contains(texto)
                         || (c.nombres() + " " + c.apellidos()).toLowerCase(Locale.ROOT).contains(texto))
                 .toList();
@@ -43,7 +47,20 @@ public class CiudadanoApiClientMock implements CiudadanoApiClient {
 
     @Override
     public Optional<CiudadanoDto> buscar(String identificacion) {
-        return CIUDADANOS.stream().filter(c -> c.identificacion().equals(identificacion)).findFirst();
+        return ciudadanos.stream().filter(c -> c.identificacion().equals(identificacion)).findFirst();
+    }
+
+    // synchronized: la verificación de duplicado y el alta deben ocurrir juntas.
+    @Override
+    public synchronized CiudadanoDto registrar(CiudadanoDto c) {
+        if (buscar(c.identificacion()).isPresent()) {
+            throw new CiudadanoDuplicadoException(c.identificacion());
+        }
+        CiudadanoDto creado = new CiudadanoDto(siguienteId.getAndIncrement(), c.identificacion(), c.nombres(),
+                c.apellidos(), c.fechaNacimiento(), c.lugarNacimiento(), c.fechaExpedicion(), c.lugarExpedicion(),
+                c.rh(), c.grupoSanguineo(), c.estatura());
+        ciudadanos.add(creado);
+        return creado;
     }
 
     @Override

@@ -21,7 +21,7 @@
            ${#lists.isEmpty(ciudadanos)},
            'No se encontraron ciudadanos.')}">
       <th:block th:fragment="filasCiudadanos">
-        <tr th:each="c : ${ciudadanos}">
+        <tr th:each="c : ${ciudadanos}" th:classappend="${c.identificacion == resaltado} ? 'resaltado'">
           <td th:text="${c.identificacion}">1000000001</td>
           <td th:text="${c.nombres}">Nombres</td>
           <td th:text="${c.apellidos}">Apellidos</td>

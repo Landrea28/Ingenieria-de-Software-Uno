@@ -1,7 +1,14 @@
 package co.edu.konrad.consultaciudadano.web.controller;
 
+import co.edu.konrad.consultaciudadano.web.dto.CiudadanoDto;
 import co.edu.konrad.consultaciudadano.web.form.CiudadanoForm;
+import co.edu.konrad.consultaciudadano.web.form.ReglasCiudadano;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoApiClient;
+import co.edu.konrad.consultaciudadano.web.service.CiudadanoDuplicadoException;
+import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +34,22 @@ public class CiudadanoController {
         this.ciudadanos = ciudadanos;
     }
 
+    // Disponibles en las vistas de este controlador: atributos HTML de cada campo y catálogos.
+    @ModelAttribute("reglas")
+    public Map<String, Map<String, Object>> reglas() {
+        return ReglasCiudadano.paraFormulario(LocalDate.now());
+    }
+
+    @ModelAttribute("opcionesRh")
+    public List<String> opcionesRh() {
+        return ReglasCiudadano.RH;
+    }
+
+    @ModelAttribute("gruposSanguineos")
+    public List<String> gruposSanguineos() {
+        return ReglasCiudadano.GRUPOS_SANGUINEOS;
+    }
+
     @GetMapping
     public String lista(@RequestParam(required = false) String busqueda, Model model) {
         model.addAttribute("busqueda", busqueda);
@@ -41,15 +64,26 @@ public class CiudadanoController {
         return VISTA_FORMULARIO;
     }
 
-    // BindingResult debe ir justo después del formulario: recoge los errores de conversión
-    // (p. ej. estatura "abc") en lugar de lanzar una excepción.
+    // @Valid aplica las reglas de CiudadanoForm. BindingResult debe ir justo después del
+    // formulario: recoge los errores (de validación o de conversión, p. ej. estatura "abc").
     @PostMapping
-    public String crear(@ModelAttribute CiudadanoForm ciudadanoForm, BindingResult resultado,
+    public String crear(@Valid @ModelAttribute CiudadanoForm ciudadanoForm, BindingResult resultado,
             Model model, RedirectAttributes redirect) {
+        validarFechas(ciudadanoForm, resultado);
         if (resultado.hasErrors()) {
             return mostrarErrores(model, false);
         }
-        redirect.addFlashAttribute("mensajeInfo", MENSAJE_SIMULADO);
+        CiudadanoDto creado;
+        try {
+            creado = ciudadanos.registrar(ciudadanoForm.aDto());
+        } catch (CiudadanoDuplicadoException e) {
+            resultado.rejectValue("identificacion", "duplicado", "Ya existe un ciudadano con esta identificación.");
+            return mostrarErrores(model, false);
+        }
+        String sufijo = ciudadanos.esSimulado() ? " (SIMULADO: guardado solo en memoria, no en la API)." : ".";
+        redirect.addFlashAttribute("mensajeExito", "Ciudadano registrado: " + creado.nombres() + " "
+                + creado.apellidos() + ", identificación " + creado.identificacion() + sufijo);
+        redirect.addFlashAttribute("resaltado", creado.identificacion());
         return "redirect:/ciudadanos";
     }
 
@@ -69,15 +103,27 @@ public class CiudadanoController {
     }
 
     @PostMapping("/{identificacion}")
-    public String actualizar(@PathVariable String identificacion, @ModelAttribute CiudadanoForm ciudadanoForm,
+    public String actualizar(@PathVariable String identificacion, @Valid @ModelAttribute CiudadanoForm ciudadanoForm,
             BindingResult resultado, Model model, RedirectAttributes redirect) {
-        // La identificación de la URL manda; el campo del formulario es de solo lectura.
-        ciudadanoForm.setIdentificacion(identificacion);
+        // El campo es de solo lectura: si llega distinto a la URL, alguien lo alteró.
+        if (!identificacion.equals(ciudadanoForm.getIdentificacion())) {
+            redirect.addFlashAttribute("mensajeError", "La identificación de un ciudadano no se puede modificar.");
+            return "redirect:/ciudadanos";
+        }
+        validarFechas(ciudadanoForm, resultado);
         if (resultado.hasErrors()) {
             return mostrarErrores(model, true);
         }
         redirect.addFlashAttribute("mensajeInfo", MENSAJE_SIMULADO);
         return "redirect:/ciudadanos";
+    }
+
+    // Regla entre dos campos: no cabe en una anotación de un solo campo.
+    private static void validarFechas(CiudadanoForm form, BindingResult resultado) {
+        if (!form.fechasCoherentes() && !resultado.hasFieldErrors("fechaExpedicion")) {
+            resultado.rejectValue("fechaExpedicion", "fechas",
+                    "Debe ser posterior a la fecha de nacimiento.");
+        }
     }
 
     private String mostrarErrores(Model model, boolean modoEdicion) {

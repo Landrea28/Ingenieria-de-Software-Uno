@@ -17,6 +17,12 @@ public interface CiudadanoApiClient {
     /** GET /api/ciudadanos/{identificacion} */
     Optional<CiudadanoDto> buscar(String identificacion);
 
+    /**
+     * POST /api/ciudadanos. Devuelve el ciudadano creado (con id).
+     * @throws CiudadanoDuplicadoException si la identificación ya existe
+     */
+    CiudadanoDto registrar(CiudadanoDto ciudadano);
+
     /** true si los datos son simulados (se muestra un aviso en pantalla). */
     boolean esSimulado();
 }

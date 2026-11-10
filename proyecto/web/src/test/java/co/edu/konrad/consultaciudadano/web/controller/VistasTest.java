@@ -82,14 +82,6 @@ class VistasTest {
     }
 
     @Test
-    void guardarNuevoEsSimuladoYRedirigeConAviso() throws Exception {
-        mvc.perform(post("/ciudadanos").param("nombres", "Prueba").param("estatura", "1.70"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ciudadanos"))
-                .andExpect(flash().attribute("mensajeInfo", containsString("SIMULACIÓN")));
-    }
-
-    @Test
     void valorInvalidoMuestraMensajeDeValidacionEnElCampo() throws Exception {
         mvc.perform(post("/ciudadanos").param("estatura", "abc"))
                 .andExpect(status().isOk())
@@ -100,8 +92,15 @@ class VistasTest {
     }
 
     @Test
-    void actualizarConservaLaIdentificacionDeLaUrl() throws Exception {
-        mvc.perform(post("/ciudadanos/1000000001").param("identificacion", "otro").param("estatura", "x"))
+    void actualizarRechazaIdentificacionAlterada() throws Exception {
+        mvc.perform(post("/ciudadanos/1000000001").param("identificacion", "1000000002"))
+                .andExpect(redirectedUrl("/ciudadanos"))
+                .andExpect(flash().attribute("mensajeError", containsString("no se puede modificar")));
+    }
+
+    @Test
+    void actualizarConErroresVuelveAlFormularioDeEdicion() throws Exception {
+        mvc.perform(post("/ciudadanos/1000000001").param("identificacion", "1000000001").param("estatura", "x"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("modoEdicion", true))
                 .andExpect(content().string(containsString("value=\"1000000001\"")));

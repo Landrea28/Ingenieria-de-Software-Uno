@@ -70,7 +70,26 @@ src/main/resources/
 | `componentes :: campo('propiedad', 'Etiqueta', 'tipo', soloLectura)` | Input con su mensaje de validación (dentro de un `th:object`) |
 | `componentes :: selector('propiedad', 'Etiqueta', opciones)` | Select con su mensaje de validación |
 
-"Guardar" en el formulario es **simulado**: no envía nada a la API y vuelve al listado con un aviso "SIMULACIÓN".
+## Registro y validaciones
+
+- **Registrar** guarda el ciudadano **solo en memoria** (mock): vuelve al listado con un mensaje de confirmación y la fila nueva resaltada. Se pierde al reiniciar. Una identificación repetida muestra "Ya existe un ciudadano con esta identificación."
+- **Guardar cambios** (edición) sigue siendo simulado.
+- Las reglas viven en `form/ReglasCiudadano.java` y se aplican en dos capas:
+  1. **Navegador** (`static/js/validacion.js`): atributos HTML5 (`required`, `pattern`, `min`, `max`, `step`, `maxlength`) con mensajes en español junto a cada campo. Valida al salir del campo y al enviar.
+  2. **Servidor web** (`CiudadanoForm` con Bean Validation): mismas reglas, por si el navegador no ejecuta JavaScript.
+
+  El backend vuelve a validar todo; la validación de la web solo mejora la experiencia.
+
+| Campo | Regla |
+|---|---|
+| identificacion | obligatorio, 6 a 10 dígitos |
+| nombres, apellidos | obligatorio, máx. 100, solo letras y espacios |
+| fechaNacimiento | obligatorio, no futura |
+| fechaExpedicion | obligatorio, no futura, posterior a la fecha de nacimiento |
+| lugarNacimiento, lugarExpedicion | obligatorio, máx. 150 |
+| rh | `+` o `-` (lista) |
+| grupoSanguineo | A, B, AB u O (lista) |
+| estatura | 0.50 a 2.50 m, máx. 2 decimales |
 
 ## Pantallas
 
