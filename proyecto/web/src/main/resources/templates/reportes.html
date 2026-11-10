@@ -7,17 +7,23 @@
     <header th:replace="~{fragments/layout :: encabezado('Reportes')}"></header>
     <div th:replace="~{fragments/componentes :: alertas}"></div>
 
-    <!-- Placeholder: el PDF lo generará el backend. Valores iguales a EstadoAntecedente. -->
-    <form class="tarjeta formulario" onsubmit="return false;">
-      <label class="campo">
-        <span>Estado</span>
-        <select name="estado">
-          <option value="REQUERIDO">Requerido</option>
-          <option value="NO_REQUERIDO">No requerido</option>
-        </select>
-      </label>
+    <!-- El PDF lo genera el backend (GET /api/reportes/ciudadanos?estado=); la web solo lo solicita.
+         Sin data-cargando: al descargar, el navegador no cambia de página y la barra quedaría activa. -->
+    <form class="tarjeta formulario" th:action="@{/reportes/pdf}" method="get">
+      <fieldset>
+        <legend>Reporte de ciudadanos por estado</legend>
+        <p class="nota">Lista la identificación, nombres y apellidos de los ciudadanos con el estado elegido.</p>
+        <div class="opciones">
+          <label class="opcion" th:each="e, it : ${estados}">
+            <input type="radio" name="estado" th:value="${e.name()}" required
+                   th:checked="${e == estadoSeleccionado or (estadoSeleccionado == null and it.first)}">
+            <span th:text="${e.etiqueta}">Requerido</span>
+          </label>
+        </div>
+      </fieldset>
       <div class="acciones">
-        <button type="submit" class="primario" disabled title="Disponible cuando el backend exponga el reporte">Generar PDF</button>
+        <button type="submit" name="modo" value="ver">Ver PDF</button>
+        <button type="submit" name="modo" value="descargar" class="primario">Descargar PDF</button>
       </div>
     </form>
   </main>

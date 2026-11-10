@@ -14,6 +14,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import co.edu.konrad.consultaciudadano.web.config.ApiRestConfig;
 import co.edu.konrad.consultaciudadano.web.dto.CiudadanoDto;
+import co.edu.konrad.consultaciudadano.web.dto.EstadoAntecedente;
 import co.edu.konrad.consultaciudadano.web.dto.LoginResponse;
 import co.edu.konrad.consultaciudadano.web.dto.PaginaCiudadanos;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +58,7 @@ class ClientesRestTest {
     private MockRestServiceServer servidor;
     private CiudadanoApiClientRest ciudadanos;
     private AuthApiClientRest auth;
+    private ReporteApiClientRest reportes;
 
     @BeforeEach
     void configurar() {
@@ -66,6 +68,7 @@ class ClientesRestTest {
         RestClient restClient = builder.build();
         ciudadanos = new CiudadanoApiClientRest(restClient);
         auth = new AuthApiClientRest(restClient);
+        reportes = new ReporteApiClientRest(restClient);
     }
 
     @Test
@@ -197,6 +200,45 @@ class ClientesRestTest {
         assertThatThrownBy(() -> ciudadanos.actualizar("9000000099", nuevo()))
                 .isInstanceOfSatisfying(ApiValidacionException.class,
                         e -> assertThat(e.getDetalles()).containsExactly("estatura: debe ser menor o igual a 2.50"));
+    }
+
+    @Test
+    void reporteDevuelveLosBytesDelPdf() {
+        byte[] pdf = "%PDF-1.4 contenido".getBytes();
+        servidor.expect(requestTo(API + "/api/reportes/ciudadanos?estado=NO_REQUERIDO"))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(header("Accept", "application/pdf, application/json"))
+                .andRespond(withSuccess(pdf, MediaType.APPLICATION_PDF));
+        assertThat(reportes.ciudadanosPorEstado(EstadoAntecedente.NO_REQUERIDO)).isEqualTo(pdf);
+    }
+
+    @Test
+    void reporteSinResultadosSeDistingueDeRutaInexistente() {
+        responderError(HttpStatus.NOT_FOUND, "SIN_RESULTADOS", "No hay ciudadanos para el estado solicitado", "");
+        assertThatThrownBy(() -> reportes.ciudadanosPorEstado(EstadoAntecedente.REQUERIDO))
+                .isInstanceOf(ReporteSinResultadosException.class)
+                .hasMessageContaining("«Requerido»");
+        servidor.reset();
+        // Backend sin el endpoint: 404 NO_ENCONTRADO no es "sin resultados".
+        responderError(HttpStatus.NOT_FOUND, "NO_ENCONTRADO", "Recurso no encontrado", "");
+        assertThatThrownBy(() -> reportes.ciudadanosPorEstado(EstadoAntecedente.REQUERIDO))
+                .isInstanceOf(ApiNoDisponibleException.class);
+    }
+
+    @Test
+    void reporteQueNoEsPdfSeRechaza() {
+        servidor.expect(requestTo(API + "/api/reportes/ciudadanos?estado=REQUERIDO"))
+                .andRespond(withSuccess("{\"no\":\"pdf\"}", MediaType.APPLICATION_JSON));
+        assertThatThrownBy(() -> reportes.ciudadanosPorEstado(EstadoAntecedente.REQUERIDO))
+                .isInstanceOf(ApiNoDisponibleException.class);
+    }
+
+    @Test
+    void reporteSinRolAdministradorLanza403() {
+        responderError(HttpStatus.FORBIDDEN, "ACCESO_DENEGADO", "Acceso denegado", "");
+        assertThatThrownBy(() -> reportes.ciudadanosPorEstado(EstadoAntecedente.REQUERIDO))
+                .isInstanceOf(ApiAccesoDenegadoException.class);
     }
 
     @Test

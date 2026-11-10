@@ -22,6 +22,7 @@ import co.edu.konrad.consultaciudadano.web.service.ApiNoDisponibleException;
 import co.edu.konrad.consultaciudadano.web.service.ApiNoEncontradoException;
 import co.edu.konrad.consultaciudadano.web.service.ApiValidacionException;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoApiClient;
+import co.edu.konrad.consultaciudadano.web.service.ReporteApiClient;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,9 @@ class AccesoYEstadosTest {
 
     @MockitoBean
     private CiudadanoApiClient ciudadanos;
+
+    @MockitoBean
+    private ReporteApiClient reportes;
 
     @Test
     void sinSesionCualquierPantallaRedirigeAlLogin() throws Exception {
@@ -221,6 +225,24 @@ class AccesoYEstadosTest {
         MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
         when(ciudadanos.actualizar(eq("1000000099"), any())).thenThrow(new ApiNoAutorizadoException("No autenticado"));
         mvc.perform(edicionValida().session(sesion)).andExpect(redirectedUrl("/login?expirada"));
+    }
+
+    @Test
+    void reporteConApiCaidaVuelveConMensajeDeError() throws Exception {
+        MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
+        when(reportes.ciudadanosPorEstado(any())).thenThrow(new ApiNoDisponibleException());
+        mvc.perform(get("/reportes/pdf").param("estado", "REQUERIDO").session(sesion))
+                .andExpect(redirectedUrl("http://localhost/reportes?estado=REQUERIDO&resultado=error"));
+        mvc.perform(get("/reportes").param("estado", "REQUERIDO").param("resultado", "error").session(sesion))
+                .andExpect(content().string(containsString("No se generó el reporte.")));
+    }
+
+    @Test
+    void reporteConRolIncorrectoVuelveAlLogin() throws Exception {
+        MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
+        when(reportes.ciudadanosPorEstado(any())).thenThrow(new ApiAccesoDenegadoException("Acceso denegado"));
+        mvc.perform(get("/reportes/pdf").param("estado", "REQUERIDO").session(sesion))
+                .andExpect(redirectedUrl("/login?denegado"));
     }
 
     private static MockHttpServletRequestBuilder edicionValida() {

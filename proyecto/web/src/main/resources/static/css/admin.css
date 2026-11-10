@@ -180,6 +180,21 @@ body.cargando::before {
 
 .acciones-fila a + a { margin-left: 12px; }
 
+/* Opciones de radio (filtro de reportes) */
+.opciones { display: flex; gap: 12px; flex-wrap: wrap; }
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  color: var(--texto);
+  cursor: pointer;
+}
+.opcion input { width: auto; margin: 0; }
+.opcion:has(input:checked) { border-color: var(--primario); background: #eff6ff; }
+
 .menu .usuario { display: block; color: #dbe4f0; opacity: .8; margin-bottom: 6px; word-break: break-all; }
 
 /* Login */

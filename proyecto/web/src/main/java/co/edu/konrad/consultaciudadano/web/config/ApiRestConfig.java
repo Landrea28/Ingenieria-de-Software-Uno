@@ -39,10 +39,11 @@ public class ApiRestConfig {
         TraductorErroresApi traductor = new TraductorErroresApi(objectMapper);
         return builder
                 .baseUrl(baseUrl)
-                .messageConverters(convertidores -> {
-                    convertidores.removeIf(c -> c instanceof MappingJackson2HttpMessageConverter);
-                    convertidores.add(0, new MappingJackson2HttpMessageConverter(objectMapper));
-                })
+                // Se reemplaza en su misma posición: si quedara primero, Jackson intentaría leer
+                // también las respuestas byte[] (el PDF de reportes).
+                .messageConverters(convertidores -> convertidores.replaceAll(c ->
+                        c instanceof MappingJackson2HttpMessageConverter
+                                ? new MappingJackson2HttpMessageConverter(objectMapper) : c))
                 .requestInterceptor((request, body, execution) -> {
                     String valor = token.get();
                     if (valor != null) {
