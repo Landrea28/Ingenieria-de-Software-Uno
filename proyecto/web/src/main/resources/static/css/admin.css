@@ -7,6 +7,7 @@
   --primario: #1d4e89;
   --menu: #14284b;
   --aviso: #b45309;
+  --error: #b42318;
 }
 
 * { box-sizing: border-box; }
@@ -100,8 +101,23 @@ th { font-size: .85rem; color: var(--tenue); }
 td.vacio { text-align: center; color: var(--tenue); }
 
 .formulario { max-width: 760px; }
+.formulario fieldset { border: 0; padding: 0; margin: 0 0 20px; }
+.formulario legend { font-weight: 600; margin-bottom: 10px; }
 .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .acciones { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+/* Componente 'campo': mensaje de validación debajo del input */
+.campo.con-error input, .campo.con-error select { border-color: var(--error); }
+.error-campo { display: block; margin-top: 4px; color: var(--error); font-size: .8rem; }
+input[readonly] { background: var(--fondo); color: var(--tenue); }
+
+/* Componente 'alertas' */
+.alerta { border: 1px solid; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; }
+.alerta.exito { background: #ecfdf3; border-color: #2f855a; color: #22543d; }
+.alerta.info { background: #eff6ff; border-color: var(--primario); color: var(--primario); }
+.alerta.error { background: #fef2f2; border-color: var(--error); color: var(--error); }
+
+.cifra { font-size: 2rem; font-weight: 700; margin: 0; color: var(--primario); }
 
 /* Login */
 body.pagina-login { display: grid; place-items: center; min-height: 100vh; padding: 16px; }
@@ -110,6 +126,9 @@ body.pagina-login { display: grid; place-items: center; min-height: 100vh; paddi
 .login .sub { color: var(--tenue); margin-top: 4px; }
 .login label { margin-top: 14px; }
 .login button { width: 100%; margin-top: 20px; }
+.login .aviso-mock { margin-bottom: 12px; }
+.login .recordar { display: flex; align-items: center; gap: 8px; }
+.login .recordar input { width: auto; margin: 0; }
 
 @media (max-width: 700px) {
   body.panel { flex-direction: column; }

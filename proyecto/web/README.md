@@ -49,11 +49,28 @@ src/main/java/co/edu/konrad/consultaciudadano/web/
 ├── config/      ApiProperties (api.base-url ← API_BASE_URL)
 ├── controller/  Login, Panel, Ciudadano, Reporte + ModeloGlobal (aviso "datos simulados")
 ├── dto/         CiudadanoDto (mismos campos que CiudadanoResponse del backend)
+├── form/        CiudadanoForm (objeto que respalda el formulario de registro/edición)
 └── service/     CiudadanoApiClient (interfaz) + CiudadanoApiClientMock (perfil "mock")
 src/main/resources/
-├── templates/   fragments/layout.html, login, panel, ciudadanos/{lista,formulario}, reportes
+├── templates/
+│   ├── fragments/layout.html       estructura: head, barra de navegación, encabezado
+│   ├── fragments/componentes.html  componentes: alertas, tabla, campo, selector
+│   └── login, panel, ciudadanos/{lista,formulario}, reportes
+├── messages.properties             textos de error de conversión
 └── static/css/  admin.css
 ```
+
+### Componentes reutilizables
+
+| Fragmento | Uso |
+|---|---|
+| `layout :: menu('activo')` | Barra de navegación lateral; resalta la opción actual |
+| `componentes :: alertas` | Muestra `mensajeExito`, `mensajeInfo` y `mensajeError` (modelo o flash) |
+| `componentes :: tabla(columnas, ~{::filas}, vacia, 'mensaje')` | Tabla con encabezados, filas propias y mensaje cuando no hay datos |
+| `componentes :: campo('propiedad', 'Etiqueta', 'tipo', soloLectura)` | Input con su mensaje de validación (dentro de un `th:object`) |
+| `componentes :: selector('propiedad', 'Etiqueta', opciones)` | Select con su mensaje de validación |
+
+"Guardar" en el formulario es **simulado**: no envía nada a la API y vuelve al listado con un aviso "SIMULACIÓN".
 
 ## Pantallas
 

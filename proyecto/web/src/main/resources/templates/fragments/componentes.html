@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- Componentes reutilizables. Se incluyen con th:replace="~{fragments/componentes :: nombre(...)}". -->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- Mensajes generales. Lee mensajeExito, mensajeInfo y mensajeError del modelo
+       (o de un flash attribute después de un redirect). -->
+  <div th:fragment="alertas" class="alertas">
+    <div th:if="${mensajeExito}" class="alerta exito" role="status" th:text="${mensajeExito}">Éxito</div>
+    <div th:if="${mensajeInfo}" class="alerta info" role="status" th:text="${mensajeInfo}">Información</div>
+    <div th:if="${mensajeError}" class="alerta error" role="alert" th:text="${mensajeError}">Error</div>
+  </div>
+
+  <!-- Tabla genérica.
+       columnas: lista de títulos; filas: fragmento con los <tr>;
+       vacia: true si no hay datos; mensajeVacio: texto a mostrar en ese caso. -->
+  <div th:fragment="tabla(columnas, filas, vacia, mensajeVacio)" class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th scope="col" th:each="columna : ${columnas}" th:text="${columna}">Columna</th></tr>
+      </thead>
+      <tbody>
+        <th:block th:replace="${filas}"></th:block>
+        <tr th:if="${vacia}">
+          <td class="vacio" th:colspan="${#lists.size(columnas)}" th:text="${mensajeVacio}">Sin datos</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Campo de texto/fecha/número con su mensaje de validación.
+       Debe usarse dentro de un <form th:object="...">; 'nombre' es la propiedad del objeto. -->
+  <label th:fragment="campo(nombre, etiqueta, tipo, soloLectura)" class="campo"
+         th:classappend="${#fields.hasErrors(nombre)} ? 'con-error'">
+    <span th:text="${etiqueta}">Etiqueta</span>
+    <input th:type="${tipo}" th:field="*{__${nombre}__}" th:readonly="${soloLectura}"
+           th:step="${tipo == 'number'} ? '0.01'">
+    <small class="error-campo" th:if="${#fields.hasErrors(nombre)}" th:errors="*{__${nombre}__}">Error</small>
+  </label>
+
+  <!-- Lista desplegable con su mensaje de validación. -->
+  <label th:fragment="selector(nombre, etiqueta, opciones)" class="campo"
+         th:classappend="${#fields.hasErrors(nombre)} ? 'con-error'">
+    <span th:text="${etiqueta}">Etiqueta</span>
+    <select th:field="*{__${nombre}__}">
+      <option value="">Seleccione…</option>
+      <option th:each="opcion : ${opciones}" th:value="${opcion}" th:text="${opcion}">Opción</option>
+    </select>
+    <small class="error-campo" th:if="${#fields.hasErrors(nombre)}" th:errors="*{__${nombre}__}">Error</small>
+  </label>
+
+</body>
+</html>

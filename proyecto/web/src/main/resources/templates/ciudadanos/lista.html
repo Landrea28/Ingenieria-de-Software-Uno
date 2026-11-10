@@ -5,40 +5,32 @@
   <nav th:replace="~{fragments/layout :: menu('ciudadanos')}"></nav>
   <main>
     <header th:replace="~{fragments/layout :: encabezado('Listado de ciudadanos')}"></header>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
 
     <form th:action="@{/ciudadanos}" method="get" class="busqueda">
-      <input name="busqueda" type="search" th:value="${busqueda}"
+      <input name="busqueda" type="search" th:value="${busqueda}" aria-label="Buscar"
              placeholder="Buscar por identificación, nombres o apellidos">
       <button type="submit">Buscar</button>
       <a th:href="@{/ciudadanos/nuevo}" class="boton primario">Registrar ciudadano</a>
     </form>
 
-    <div class="tabla-contenedor">
-      <table>
-        <thead>
-          <tr>
-            <th>Identificación</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>Fecha de nacimiento</th>
-            <th>RH</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="c : ${ciudadanos}">
-            <td th:text="${c.identificacion}">1000000001</td>
-            <td th:text="${c.nombres}">Nombres</td>
-            <td th:text="${c.apellidos}">Apellidos</td>
-            <td th:text="${#temporals.format(c.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
-            <td th:text="${c.grupoSanguineo + c.rh}">O+</td>
-            <td><a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}">Editar</a></td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(ciudadanos)}">
-            <td colspan="6" class="vacio">No se encontraron ciudadanos.</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- El bloque interno define las filas; el componente 'tabla' las pinta dentro de su <tbody>. -->
+    <div th:replace="~{fragments/componentes :: tabla(
+           ${ {'Identificación', 'Nombres', 'Apellidos', 'Fecha de nacimiento', 'Grupo / RH', 'Estatura', 'Acciones'} },
+           ~{::filasCiudadanos},
+           ${#lists.isEmpty(ciudadanos)},
+           'No se encontraron ciudadanos.')}">
+      <th:block th:fragment="filasCiudadanos">
+        <tr th:each="c : ${ciudadanos}">
+          <td th:text="${c.identificacion}">1000000001</td>
+          <td th:text="${c.nombres}">Nombres</td>
+          <td th:text="${c.apellidos}">Apellidos</td>
+          <td th:text="${#temporals.format(c.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
+          <td th:text="${c.grupoSanguineo + c.rh}">O+</td>
+          <td th:text="${c.estatura} + ' m'">1.70 m</td>
+          <td><a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}">Editar</a></td>
+        </tr>
+      </th:block>
     </div>
   </main>
 </body>

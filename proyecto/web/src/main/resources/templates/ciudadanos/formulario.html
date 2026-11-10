@@ -5,50 +5,44 @@
   <nav th:replace="~{fragments/layout :: menu(${modoEdicion} ? 'ciudadanos' : 'nuevo')}"></nav>
   <main>
     <header th:replace="~{fragments/layout :: encabezado(${modoEdicion} ? 'Editar ciudadano' : 'Registrar ciudadano')}"></header>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
 
-    <!-- Placeholder: los 10 campos con los nombres de la API. Sin validaciones ni envío todavía. -->
-    <form class="tarjeta formulario" onsubmit="return false;">
-      <div class="campos">
-        <label>Identificación
-          <input name="identificacion" th:value="${ciudadano?.identificacion}" th:readonly="${modoEdicion}">
-        </label>
-        <label>Nombres
-          <input name="nombres" th:value="${ciudadano?.nombres}">
-        </label>
-        <label>Apellidos
-          <input name="apellidos" th:value="${ciudadano?.apellidos}">
-        </label>
-        <label>Fecha de nacimiento
-          <input name="fechaNacimiento" type="date" th:value="${ciudadano?.fechaNacimiento}">
-        </label>
-        <label>Lugar de nacimiento
-          <input name="lugarNacimiento" th:value="${ciudadano?.lugarNacimiento}">
-        </label>
-        <label>Fecha de expedición
-          <input name="fechaExpedicion" type="date" th:value="${ciudadano?.fechaExpedicion}">
-        </label>
-        <label>Lugar de expedición
-          <input name="lugarExpedicion" th:value="${ciudadano?.lugarExpedicion}">
-        </label>
-        <label>RH
-          <select name="rh">
-            <option value="+" th:selected="${ciudadano?.rh == '+'}">+</option>
-            <option value="-" th:selected="${ciudadano?.rh == '-'}">-</option>
-          </select>
-        </label>
-        <label>Grupo sanguíneo
-          <select name="grupoSanguineo">
-            <option th:each="g : ${ {'A','B','AB','O'} }" th:value="${g}" th:text="${g}"
-                    th:selected="${ciudadano?.grupoSanguineo == g}">A</option>
-          </select>
-        </label>
-        <label>Estatura (m)
-          <input name="estatura" type="number" step="0.01" min="0.50" max="2.50" th:value="${ciudadano?.estatura}">
-        </label>
-      </div>
+    <!-- Los 10 campos con los nombres de la API. En edición la identificación no se cambia
+         porque el backend la usa como clave (PUT /api/ciudadanos/{identificacion}). -->
+    <form class="tarjeta formulario" method="post" th:object="${ciudadanoForm}"
+          th:action="${modoEdicion} ? @{/ciudadanos/{id}(id=*{identificacion})} : @{/ciudadanos}">
+
+      <fieldset>
+        <legend>Datos personales</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: campo('identificacion', 'Identificación', 'text', ${modoEdicion})}"></label>
+          <label th:replace="~{fragments/componentes :: campo('nombres', 'Nombres', 'text', false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('apellidos', 'Apellidos', 'text', false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('fechaNacimiento', 'Fecha de nacimiento', 'date', false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('lugarNacimiento', 'Lugar de nacimiento', 'text', false)}"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Documento</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: campo('fechaExpedicion', 'Fecha de expedición', 'date', false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('lugarExpedicion', 'Lugar de expedición', 'text', false)}"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Datos físicos</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: selector('grupoSanguineo', 'Grupo sanguíneo', ${ {'A', 'B', 'AB', 'O'} })}"></label>
+          <label th:replace="~{fragments/componentes :: selector('rh', 'RH', ${ {'+', '-'} })}"></label>
+          <label th:replace="~{fragments/componentes :: campo('estatura', 'Estatura (m)', 'number', false)}"></label>
+        </div>
+      </fieldset>
+
       <div class="acciones">
         <a th:href="@{/ciudadanos}" class="boton">Cancelar</a>
-        <button type="submit" class="primario" disabled title="Disponible cuando se conecte la API">Guardar</button>
+        <button type="submit" class="primario">Guardar (simulado)</button>
       </div>
     </form>
   </main>
