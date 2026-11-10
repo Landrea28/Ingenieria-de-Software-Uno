@@ -4,6 +4,7 @@ import co.edu.konrad.consultaciudadano.web.dto.CiudadanoDto;
 import co.edu.konrad.consultaciudadano.web.form.CiudadanoForm;
 import co.edu.konrad.consultaciudadano.web.form.ReglasCiudadano;
 import co.edu.konrad.consultaciudadano.web.service.ApiNoDisponibleException;
+import co.edu.konrad.consultaciudadano.web.service.ApiNoEncontradoException;
 import co.edu.konrad.consultaciudadano.web.service.ApiValidacionException;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoApiClient;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoDuplicadoException;
@@ -22,13 +23,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Pantallas de ciudadanos. Las rutas con {identificacion} solo aceptan 6 a 10 dígitos
+ * (ID = expresión regular), así no se confunden con /nuevo ni /consulta.
+ */
 @Controller
 @RequestMapping("/ciudadanos")
 public class CiudadanoController {
 
+    private static final String ID = "{identificacion:[0-9]{6,10}}";
     private static final String VISTA_FORMULARIO = "ciudadanos/formulario";
-    private static final String MENSAJE_SIMULADO =
-            "SIMULACIÓN: la edición aún no está conectada a la API; los cambios no se guardaron.";
 
     private final CiudadanoApiClient ciudadanos;
 
@@ -66,6 +70,32 @@ public class CiudadanoController {
         return "ciudadanos/lista";
     }
 
+    /**
+     * Búsqueda exacta por identificación: va directo al detalle. Acepta "1.012.345.678" o con
+     * espacios, como suele escribirse la cédula.
+     */
+    @GetMapping("/consulta")
+    public String consultar(@RequestParam(defaultValue = "") String identificacion, RedirectAttributes redirect) {
+        String limpia = identificacion.replaceAll("[.\\s]", "");
+        if (!limpia.matches(ReglasCiudadano.PATRON_IDENTIFICACION)) {
+            redirect.addFlashAttribute("mensajeError", "Identificación inválida: " + ReglasCiudadano.MSG_IDENTIFICACION);
+            return "redirect:/ciudadanos";
+        }
+        // Seguro concatenar: 'limpia' ya se validó como solo dígitos.
+        return "redirect:/ciudadanos/" + limpia;
+    }
+
+    /** Detalle de un ciudadano: GET /api/ciudadanos/{identificacion}. */
+    @GetMapping("/" + ID)
+    public String detalle(@PathVariable String identificacion, Model model, RedirectAttributes redirect) {
+        return ciudadanos.buscar(identificacion)
+                .map(c -> {
+                    model.addAttribute("ciudadano", c);
+                    return "ciudadanos/detalle";
+                })
+                .orElseGet(() -> noEncontrado(identificacion, redirect));
+    }
+
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         model.addAttribute("ciudadanoForm", new CiudadanoForm());
@@ -80,36 +110,27 @@ public class CiudadanoController {
             Model model, RedirectAttributes redirect) {
         validarFechas(ciudadanoForm, resultado);
         if (resultado.hasErrors()) {
-            return mostrarErrores(model, false);
+            return mostrarErrores(model, false, "Revisa los campos marcados.");
         }
         CiudadanoDto creado;
         try {
             creado = ciudadanos.registrar(ciudadanoForm.aDto());
         } catch (CiudadanoDuplicadoException e) {
             resultado.rejectValue("identificacion", "duplicado", "Ya existe un ciudadano con esta identificación.");
-            return mostrarErrores(model, false);
-        } catch (ApiValidacionException e) {
-            // El backend validó de nuevo y rechazó algo: se muestra en cada campo y en general.
-            aplicarErroresApi(e, resultado);
-            model.addAttribute("modoEdicion", false);
-            model.addAttribute("mensajeError", "El servidor rechazó los datos: " + e.getMessage());
-            return VISTA_FORMULARIO;
-        } catch (ApiNoDisponibleException e) {
-            // Se conserva lo escrito para que el usuario pueda reintentar.
-            model.addAttribute("modoEdicion", false);
-            model.addAttribute("mensajeError", e.getMessage() + " Los datos no se guardaron.");
-            return VISTA_FORMULARIO;
+            return mostrarErrores(model, false, "Revisa los campos marcados.");
+        } catch (ApiValidacionException | ApiNoDisponibleException e) {
+            return errorAlGuardar(e, resultado, model, false);
         }
-        String sufijo = ciudadanos.esSimulado() ? " (SIMULADO: guardado solo en memoria, no en la API)." : ".";
         redirect.addFlashAttribute("mensajeExito", "Ciudadano registrado: " + creado.nombres() + " "
-                + creado.apellidos() + ", identificación " + creado.identificacion() + sufijo);
+                + creado.apellidos() + ", identificación " + creado.identificacion() + sufijoSimulado());
         redirect.addFlashAttribute("resaltado", creado.identificacion());
         // El listado se ordena por apellidos: se filtra por la identificación para que la fila nueva se vea.
         redirect.addAttribute("busqueda", creado.identificacion());
         return "redirect:/ciudadanos";
     }
 
-    @GetMapping("/{identificacion}/editar")
+    /** Formulario de edición precargado con los datos actuales de la API. */
+    @GetMapping("/" + ID + "/editar")
     public String editar(@PathVariable String identificacion, Model model, RedirectAttributes redirect) {
         return ciudadanos.buscar(identificacion)
                 .map(c -> {
@@ -117,14 +138,14 @@ public class CiudadanoController {
                     model.addAttribute("modoEdicion", true);
                     return VISTA_FORMULARIO;
                 })
-                .orElseGet(() -> {
-                    redirect.addFlashAttribute("mensajeError",
-                            "No se encontró el ciudadano con identificación " + identificacion + ".");
-                    return "redirect:/ciudadanos";
-                });
+                .orElseGet(() -> noEncontrado(identificacion, redirect));
     }
 
-    @PostMapping("/{identificacion}")
+    /**
+     * Guarda la edición. El navegador solo puede enviar GET/POST, así que el formulario hace POST
+     * a la web y la web hace PUT /api/ciudadanos/{identificacion}.
+     */
+    @PostMapping("/" + ID)
     public String actualizar(@PathVariable String identificacion, @Valid @ModelAttribute CiudadanoForm ciudadanoForm,
             BindingResult resultado, Model model, RedirectAttributes redirect) {
         // El campo es de solo lectura: si llega distinto a la URL, alguien lo alteró.
@@ -134,18 +155,40 @@ public class CiudadanoController {
         }
         validarFechas(ciudadanoForm, resultado);
         if (resultado.hasErrors()) {
-            return mostrarErrores(model, true);
+            return mostrarErrores(model, true, "Revisa los campos marcados.");
         }
-        redirect.addFlashAttribute("mensajeInfo", MENSAJE_SIMULADO);
-        return "redirect:/ciudadanos";
+        CiudadanoDto actualizado;
+        try {
+            actualizado = ciudadanos.actualizar(identificacion, ciudadanoForm.aDto());
+        } catch (ApiNoEncontradoException e) {
+            // Pudo eliminarse mientras se editaba.
+            return noEncontrado(identificacion, redirect);
+        } catch (ApiValidacionException | ApiNoDisponibleException e) {
+            return errorAlGuardar(e, resultado, model, true);
+        }
+        redirect.addFlashAttribute("mensajeExito", "Cambios guardados para " + actualizado.nombres() + " "
+                + actualizado.apellidos() + sufijoSimulado());
+        return "redirect:/ciudadanos/{identificacion}";
     }
 
     // Regla entre dos campos: no cabe en una anotación de un solo campo.
     private static void validarFechas(CiudadanoForm form, BindingResult resultado) {
         if (!form.fechasCoherentes() && !resultado.hasFieldErrors("fechaExpedicion")) {
-            resultado.rejectValue("fechaExpedicion", "fechas",
-                    "Debe ser posterior a la fecha de nacimiento.");
+            resultado.rejectValue("fechaExpedicion", "fechas", ReglasCiudadano.MSG_FECHAS);
         }
+    }
+
+    /**
+     * Error de la API al registrar o actualizar: se vuelve al formulario con lo escrito.
+     * 400: los detalles "campo: mensaje" se muestran debajo de cada campo.
+     * Red o 5xx: mensaje general para reintentar.
+     */
+    private String errorAlGuardar(RuntimeException e, BindingResult resultado, Model model, boolean modoEdicion) {
+        if (e instanceof ApiValidacionException validacion) {
+            aplicarErroresApi(validacion, resultado);
+            return mostrarErrores(model, modoEdicion, "El servidor rechazó los datos: " + e.getMessage());
+        }
+        return mostrarErrores(model, modoEdicion, e.getMessage() + " Los datos no se guardaron.");
     }
 
     // Los detalles de la API llegan como "campo: mensaje"; si el campo existe en el formulario
@@ -162,9 +205,19 @@ public class CiudadanoController {
         }
     }
 
-    private String mostrarErrores(Model model, boolean modoEdicion) {
+    private static String mostrarErrores(Model model, boolean modoEdicion, String mensaje) {
         model.addAttribute("modoEdicion", modoEdicion);
-        model.addAttribute("mensajeError", "Revisa los campos marcados.");
+        model.addAttribute("mensajeError", mensaje);
         return VISTA_FORMULARIO;
+    }
+
+    private static String noEncontrado(String identificacion, RedirectAttributes redirect) {
+        redirect.addFlashAttribute("mensajeError",
+                "No se encontró el ciudadano con identificación " + identificacion + ".");
+        return "redirect:/ciudadanos";
+    }
+
+    private String sufijoSimulado() {
+        return ciudadanos.esSimulado() ? " (SIMULADO: guardado solo en memoria, no en la API)." : ".";
     }
 }

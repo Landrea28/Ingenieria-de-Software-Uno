@@ -165,6 +165,41 @@ class ClientesRestTest {
     }
 
     @Test
+    void actualizarHacePutConNueveCamposSinIdentificacionNiId() {
+        servidor.expect(requestTo(API + "/api/ciudadanos/9000000099"))
+                .andExpect(method(HttpMethod.PUT))
+                .andExpect(header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.identificacion").doesNotExist())
+                .andExpect(jsonPath("$.id").doesNotExist())
+                .andExpect(jsonPath("$.nombres").value("Clara"))
+                .andExpect(jsonPath("$.fechaExpedicion").value("2013-03-22"))
+                .andExpect(jsonPath("$.grupoSanguineo").value("B"))
+                .andExpect(jsonPath("$.estatura").value(1.71))
+                .andRespond(withSuccess(CIUDADANO_JSON, MediaType.APPLICATION_JSON));
+
+        CiudadanoDto actualizado = ciudadanos.actualizar("9000000099", nuevo());
+
+        assertThat(actualizado.id()).isEqualTo(7L);
+        servidor.verify();
+    }
+
+    @Test
+    void actualizarInexistenteLanzaNoEncontrado() {
+        responderError(HttpStatus.NOT_FOUND, "NO_ENCONTRADO", "Ciudadano no encontrado", "");
+        assertThatThrownBy(() -> ciudadanos.actualizar("9000000098", nuevo()))
+                .isInstanceOf(ApiNoEncontradoException.class);
+    }
+
+    @Test
+    void actualizarConDatosRechazadosTraeLosDetalles() {
+        responderError(HttpStatus.BAD_REQUEST, "VALIDACION", "Datos invalidos", "\"estatura: debe ser menor o igual a 2.50\"");
+        assertThatThrownBy(() -> ciudadanos.actualizar("9000000099", nuevo()))
+                .isInstanceOfSatisfying(ApiValidacionException.class,
+                        e -> assertThat(e.getDetalles()).containsExactly("estatura: debe ser menor o igual a 2.50"));
+    }
+
+    @Test
     void buscarInexistenteDevuelveVacio() {
         servidor.expect(requestTo(API + "/api/ciudadanos/9000000098"))
                 .andRespond(withStatus(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON)

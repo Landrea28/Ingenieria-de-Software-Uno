@@ -65,8 +65,29 @@ public class CiudadanoApiClientRest implements CiudadanoApiClient {
     }
 
     @Override
+    public CiudadanoDto actualizar(String identificacion, CiudadanoDto datos) {
+        return api.put()
+                .uri("/api/ciudadanos/{identificacion}", identificacion)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(CiudadanoUpdateRequest.desde(datos))
+                .retrieve()
+                .body(CiudadanoDto.class);
+    }
+
+    @Override
     public boolean esSimulado() {
         return false;
+    }
+
+    /** Cuerpo de PUT /api/ciudadanos/{identificacion} (esquema CiudadanoUpdateRequest): sin identificación. */
+    record CiudadanoUpdateRequest(String nombres, String apellidos, LocalDate fechaNacimiento,
+            String lugarNacimiento, LocalDate fechaExpedicion, String lugarExpedicion, String rh,
+            String grupoSanguineo, BigDecimal estatura) {
+
+        static CiudadanoUpdateRequest desde(CiudadanoDto c) {
+            return new CiudadanoUpdateRequest(c.nombres(), c.apellidos(), c.fechaNacimiento(), c.lugarNacimiento(),
+                    c.fechaExpedicion(), c.lugarExpedicion(), c.rh(), c.grupoSanguineo(), c.estatura());
+        }
     }
 
     /** Cuerpo de POST /api/ciudadanos (esquema CiudadanoRequest): los 10 campos, sin id. */

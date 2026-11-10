@@ -28,6 +28,14 @@ public interface CiudadanoApiClient {
      */
     CiudadanoDto registrar(CiudadanoDto ciudadano);
 
+    /**
+     * PUT /api/ciudadanos/{identificacion}. La identificación se toma de la ruta y no cambia;
+     * se envían los otros 9 campos. Devuelve el ciudadano actualizado.
+     * @throws ApiNoEncontradoException si el ciudadano no existe (404)
+     * @throws ApiValidacionException si el backend rechaza los datos (400)
+     */
+    CiudadanoDto actualizar(String identificacion, CiudadanoDto datos);
+
     /** true si los datos son simulados (se muestra un aviso en pantalla). */
     boolean esSimulado();
 }

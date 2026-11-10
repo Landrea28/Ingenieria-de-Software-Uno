@@ -45,9 +45,10 @@
       </fieldset>
 
       <div class="acciones">
-        <a th:href="@{/ciudadanos}" class="boton">Cancelar</a>
+        <!-- En edición, cancelar vuelve al detalle del ciudadano. -->
+        <a th:href="${modoEdicion} ? @{/ciudadanos/{id}(id=*{identificacion})} : @{/ciudadanos}" class="boton">Cancelar</a>
         <button type="submit" class="primario"
-                th:text="${modoEdicion} ? 'Guardar cambios (simulado)' : 'Registrar ciudadano'">Registrar ciudadano</button>
+                th:text="${modoEdicion} ? 'Guardar cambios' : 'Registrar ciudadano'">Registrar ciudadano</button>
       </div>
     </form>
   </main>

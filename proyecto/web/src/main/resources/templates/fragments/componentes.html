@@ -11,6 +11,17 @@
     <div th:if="${mensajeError}" class="alerta error" role="alert" th:text="${mensajeError}">Error</div>
   </div>
 
+  <!-- Consulta exacta por identificación: lleva directo al detalle del ciudadano. -->
+  <form th:fragment="consultaIdentificacion" th:action="@{/ciudadanos/consulta}" method="get"
+        class="consulta-id" data-cargando role="search">
+    <label for="consulta-identificacion">Consultar por identificación</label>
+    <div>
+      <input id="consulta-identificacion" name="identificacion" type="text" inputmode="numeric"
+             required placeholder="Ej. 9000000001" autocomplete="off">
+      <button type="submit" class="primario">Consultar</button>
+    </div>
+  </form>
+
   <!-- Tabla genérica.
        columnas: lista de títulos; filas: fragmento con los <tr>;
        vacia: true si no hay datos; mensajeVacio: texto a mostrar en ese caso. -->

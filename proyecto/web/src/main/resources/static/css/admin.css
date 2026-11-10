@@ -161,6 +161,25 @@ body.cargando::before {
   body.cargando::before { animation: none; width: 100%; }
 }
 
+/* Consulta exacta por identificación (panel y listado) */
+.consulta-id { margin-bottom: 16px; }
+.consulta-id div { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.consulta-id input { flex: 1; min-width: 180px; max-width: 320px; width: auto; }
+
+/* Vista de detalle: etiqueta y valor en dos columnas */
+.detalle { max-width: 760px; }
+.detalle section + section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--borde); }
+.detalle h2 { font-size: 1rem; margin: 0 0 10px; }
+.detalle dl { display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 8px 16px; margin: 0; }
+.detalle dt { color: var(--tenue); }
+.detalle dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .detalle dl { grid-template-columns: 1fr; gap: 2px; }
+  .detalle dd { margin-bottom: 8px; }
+}
+
+.acciones-fila a + a { margin-left: 12px; }
+
 .menu .usuario { display: block; color: #dbe4f0; opacity: .8; margin-bottom: 6px; word-break: break-all; }
 
 /* Login */

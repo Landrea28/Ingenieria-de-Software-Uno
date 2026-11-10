@@ -71,6 +71,22 @@ public class CiudadanoApiClientMock implements CiudadanoApiClient {
     }
 
     @Override
+    public synchronized CiudadanoDto actualizar(String identificacion, CiudadanoDto d) {
+        for (int i = 0; i < ciudadanos.size(); i++) {
+            CiudadanoDto actual = ciudadanos.get(i);
+            if (actual.identificacion().equals(identificacion)) {
+                // Igual que el backend: se conservan el id y la identificación.
+                CiudadanoDto actualizado = new CiudadanoDto(actual.id(), identificacion, d.nombres(), d.apellidos(),
+                        d.fechaNacimiento(), d.lugarNacimiento(), d.fechaExpedicion(), d.lugarExpedicion(), d.rh(),
+                        d.grupoSanguineo(), d.estatura());
+                ciudadanos.set(i, actualizado);
+                return actualizado;
+            }
+        }
+        throw new ApiNoEncontradoException("Ciudadano no encontrado");
+    }
+
+    @Override
     public boolean esSimulado() {
         return true;
     }

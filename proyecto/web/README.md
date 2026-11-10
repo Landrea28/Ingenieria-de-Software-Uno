@@ -2,7 +2,7 @@
 
 Aplicación del administrador del Sistema de Consulta Ciudadano. Usa Spring MVC con vistas Thymeleaf del lado del servidor y consume la API REST de `../backend`. **No accede directamente a la base de datos.**
 
-> Estado actual: **login, listado y registro conectados a la API real**. La edición (PUT) y los reportes todavía son simulados.
+> Estado actual: **login, listado, búsqueda, detalle, registro y edición conectados a la API real**. Los reportes todavía son simulados.
 
 ## Requisitos
 
@@ -46,7 +46,11 @@ Sin backend, para una demo: `SPRING_PROFILES_ACTIVE=mock ./mvnw spring-boot:run`
 | Login / Cerrar sesión | `POST /api/auth/login`, `POST /api/auth/logout` |
 | Listado y búsqueda (paginado de 20) | `GET /api/ciudadanos?busqueda=&pagina=&tamano=` |
 | Registrar | `POST /api/ciudadanos` |
-| Editar (carga de datos) | `GET /api/ciudadanos/{identificacion}` |
+| Consultar por identificación / Detalle | `GET /api/ciudadanos/{identificacion}` |
+| Editar: carga de datos | `GET /api/ciudadanos/{identificacion}` |
+| Editar: guardar cambios | `PUT /api/ciudadanos/{identificacion}` (9 campos; la identificación no cambia) |
+
+El navegador solo envía GET y POST: el formulario de edición hace `POST /ciudadanos/{identificacion}` a la web y la web hace el `PUT` a la API.
 
 - **Sesión:** el token JWT se guarda en la sesión del servidor web (`SesionAdmin`); el navegador solo recibe la cookie `JSESSIONID` (`HttpOnly`, `SameSite=Lax`, sin `;jsessionid` en las URL).
 - **Solo administradores:** la respuesta del login no incluye el rol, así que tras el login se hace una consulta que exige `ADMINISTRADOR`; si la API responde 403 se cierra la sesión y se muestra "Su usuario no tiene permisos de administrador".
@@ -73,6 +77,7 @@ Sin backend, para una demo: `SPRING_PROFILES_ACTIVE=mock ./mvnw spring-boot:run`
 | `ClientesRestTest` | Clientes REST contra un servidor HTTP simulado: URL, token, JSON del contrato y traducción de 400/401/403/404/409/5xx/red |
 | `AccesoYEstadosTest` | Redirección al login, solo administradores, 401/403 en pantallas, estados vacío y error |
 | `RegistroCiudadanoTest` | Validaciones del formulario y registro con confirmación (mock) |
+| `ConsultaYEdicionTest` | Consulta por identificación, detalle y edición con confirmación (mock) |
 | `VistasTest` | Cada pantalla responde y renderiza su vista |
 
 ## Estructura
@@ -108,7 +113,7 @@ src/main/resources/
 ## Registro y validaciones
 
 - **Registrar** envía `POST /api/ciudadanos` (perfil `api`) y vuelve al listado con un mensaje de confirmación y la fila nueva resaltada. Con el perfil `mock` se guarda solo en memoria y se pierde al reiniciar. Una identificación repetida (409) muestra "Ya existe un ciudadano con esta identificación."
-- **Guardar cambios** (edición) sigue siendo simulado.
+- **Guardar cambios** envía `PUT` y vuelve al detalle con "Cambios guardados para …". Si el backend rechaza datos (400) los errores se muestran en cada campo y no se confirma nada; si el ciudadano ya no existe (404) vuelve al listado; si la API no responde se conservan los cambios escritos.
 - Las reglas viven en `form/ReglasCiudadano.java` y se aplican en dos capas:
   1. **Navegador** (`static/js/validacion.js`): atributos HTML5 (`required`, `pattern`, `min`, `max`, `step`, `maxlength`) con mensajes en español junto a cada campo. Valida al salir del campo y al enviar.
   2. **Servidor web** (`CiudadanoForm` con Bean Validation): mismas reglas, por si el navegador no ejecuta JavaScript.
@@ -132,9 +137,13 @@ src/main/resources/
 |-------------------------------------|--------------------------------------|
 | `/login`                            | Ingreso del administrador            |
 | `/`                                 | Panel principal                      |
-| `/ciudadanos?busqueda=`             | Listado y búsqueda                   |
+| `/ciudadanos?busqueda=&pagina=`     | Listado con filtro parcial y paginación |
+| `/ciudadanos/consulta?identificacion=` | Consulta exacta (acepta puntos y espacios) → detalle |
+| `/ciudadanos/{identificacion}`      | Detalle del ciudadano                |
 | `/ciudadanos/nuevo`                 | Registrar ciudadano                  |
-| `/ciudadanos/{identificacion}/editar` | Editar ciudadano                   |
+| `/ciudadanos/{identificacion}/editar` | Editar ciudadano (precargado)      |
+
+Las rutas con `{identificacion}` solo aceptan 6 a 10 dígitos; otra cosa da 404 con la página `error.html`.
 | `/reportes`                         | Solicitar reporte (Requerido / No requerido) |
 
 ## Datos simulados

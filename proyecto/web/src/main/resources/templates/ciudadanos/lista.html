@@ -7,9 +7,11 @@
     <header th:replace="~{fragments/layout :: encabezado('Listado de ciudadanos')}"></header>
     <div th:replace="~{fragments/componentes :: alertas}"></div>
 
+    <form th:replace="~{fragments/componentes :: consultaIdentificacion}"></form>
+
     <form th:action="@{/ciudadanos}" method="get" class="busqueda" data-cargando>
-      <input name="busqueda" type="search" th:value="${busqueda}" aria-label="Buscar"
-             placeholder="Buscar por identificación, nombres o apellidos">
+      <input name="busqueda" type="search" th:value="${busqueda}" aria-label="Filtrar el listado"
+             placeholder="Filtrar por parte de la identificación, nombres o apellidos">
       <button type="submit">Buscar</button>
       <a th:if="${busqueda}" th:href="@{/ciudadanos}" class="boton" data-cargando>Limpiar</a>
       <a th:href="@{/ciudadanos/nuevo}" class="boton primario">Registrar ciudadano</a>
@@ -46,7 +48,10 @@
               <td th:text="${#temporals.format(c.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
               <td th:text="${c.grupoSanguineo + c.rh}">O+</td>
               <td th:text="${c.estatura} + ' m'">1.70 m</td>
-              <td><a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}">Editar</a></td>
+              <td class="acciones-fila">
+                <a th:href="@{/ciudadanos/{id}(id=${c.identificacion})}" data-cargando>Ver</a>
+                <a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}" data-cargando>Editar</a>
+              </td>
             </tr>
           </th:block>
         </div>

@@ -4,11 +4,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +19,7 @@ import co.edu.konrad.consultaciudadano.web.dto.PaginaCiudadanos;
 import co.edu.konrad.consultaciudadano.web.service.ApiAccesoDenegadoException;
 import co.edu.konrad.consultaciudadano.web.service.ApiNoAutorizadoException;
 import co.edu.konrad.consultaciudadano.web.service.ApiNoDisponibleException;
+import co.edu.konrad.consultaciudadano.web.service.ApiNoEncontradoException;
 import co.edu.konrad.consultaciudadano.web.service.ApiValidacionException;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoApiClient;
 import java.util.List;
@@ -28,6 +31,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
  * Control de acceso y estados de la interfaz. El cliente de ciudadanos se reemplaza por un doble
@@ -177,8 +181,59 @@ class AccesoYEstadosTest {
                 .andExpect(content().string(containsString("value=\"Tunja\"")));
     }
 
-    private static org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder registroValido() {
-        return post("/ciudadanos")
+    @Test
+    void validacionDelBackendAlEditarSeMuestraEnElCampoYNoConfirma() throws Exception {
+        MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
+        // Regla que solo valida el backend (sin detalles por campo): se muestra como mensaje general.
+        when(ciudadanos.actualizar(eq("1000000099"), any())).thenThrow(new ApiValidacionException(
+                "La fecha de expedicion debe ser posterior a la fecha de nacimiento",
+                List.of("apellidos: tamaño máximo 100")));
+        mvc.perform(edicionValida().session(sesion))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("modoEdicion", true))
+                .andExpect(model().attributeHasFieldErrorCode("ciudadanoForm", "apellidos", "api"))
+                .andExpect(content().string(containsString("El servidor rechazó los datos: La fecha de expedicion")))
+                .andExpect(content().string(containsString("tamaño máximo 100")))
+                .andExpect(content().string(not(containsString("Cambios guardados"))));
+    }
+
+    @Test
+    void editarCiudadanoQueYaNoExisteVuelveAlListado() throws Exception {
+        MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
+        when(ciudadanos.actualizar(eq("1000000099"), any())).thenThrow(new ApiNoEncontradoException("Ciudadano no encontrado"));
+        mvc.perform(edicionValida().session(sesion))
+                .andExpect(redirectedUrl("/ciudadanos"))
+                .andExpect(flash().attribute("mensajeError", containsString("No se encontró")));
+    }
+
+    @Test
+    void apiCaidaAlEditarConservaLosCambiosEscritos() throws Exception {
+        MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
+        when(ciudadanos.actualizar(eq("1000000099"), any())).thenThrow(new ApiNoDisponibleException());
+        mvc.perform(edicionValida().session(sesion))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Los datos no se guardaron.")))
+                .andExpect(content().string(containsString("value=\"Tunja\"")));
+    }
+
+    @Test
+    void api401AlGuardarCambiosVuelveAlLogin() throws Exception {
+        MockHttpSession sesion = MvcConSesion.iniciarSesion(mvc);
+        when(ciudadanos.actualizar(eq("1000000099"), any())).thenThrow(new ApiNoAutorizadoException("No autenticado"));
+        mvc.perform(edicionValida().session(sesion)).andExpect(redirectedUrl("/login?expirada"));
+    }
+
+    private static MockHttpServletRequestBuilder edicionValida() {
+        return formularioValido("/ciudadanos/1000000099");
+    }
+
+    private static MockHttpServletRequestBuilder registroValido() {
+        return formularioValido("/ciudadanos");
+    }
+
+    /** Los 10 campos con valores válidos y ficticios, enviados a la URL indicada. */
+    private static MockHttpServletRequestBuilder formularioValido(String url) {
+        return post(url)
                 .param("identificacion", "1000000099")
                 .param("nombres", "Prueba Nueva")
                 .param("apellidos", "Simulado Mock")

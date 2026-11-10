@@ -6,6 +6,7 @@
   <main>
     <header th:replace="~{fragments/layout :: encabezado('Panel principal')}"></header>
     <div th:replace="~{fragments/componentes :: alertas}"></div>
+    <form th:replace="~{fragments/componentes :: consultaIdentificacion}"></form>
 
     <section class="accesos">
       <a class="tarjeta" th:href="@{/ciudadanos}" data-cargando>

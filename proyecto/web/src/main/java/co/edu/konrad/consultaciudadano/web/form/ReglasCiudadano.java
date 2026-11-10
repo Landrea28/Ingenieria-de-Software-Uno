@@ -12,7 +12,9 @@ import java.util.Map;
 public final class ReglasCiudadano {
 
     public static final String PATRON_IDENTIFICACION = "[0-9]{6,10}";
-    public static final String PATRON_SOLO_LETRAS = "[\\p{L} ]+";
+    // "*" y no "+" (el backend usa "+"): el vacío ya lo rechaza @NotBlank / required, y así un campo
+    // vacío muestra solo "obligatorio" y no también "solo letras". El resultado combinado es el mismo.
+    public static final String PATRON_SOLO_LETRAS = "[\\p{L} ]*";
     public static final int MAX_NOMBRES = 100;
     public static final int MAX_LUGAR = 150;
     public static final String ESTATURA_MIN = "0.50";
