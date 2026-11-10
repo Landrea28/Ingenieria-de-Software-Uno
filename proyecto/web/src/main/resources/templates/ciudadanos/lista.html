@@ -7,31 +7,59 @@
     <header th:replace="~{fragments/layout :: encabezado('Listado de ciudadanos')}"></header>
     <div th:replace="~{fragments/componentes :: alertas}"></div>
 
-    <form th:action="@{/ciudadanos}" method="get" class="busqueda">
+    <form th:action="@{/ciudadanos}" method="get" class="busqueda" data-cargando>
       <input name="busqueda" type="search" th:value="${busqueda}" aria-label="Buscar"
              placeholder="Buscar por identificación, nombres o apellidos">
       <button type="submit">Buscar</button>
+      <a th:if="${busqueda}" th:href="@{/ciudadanos}" class="boton" data-cargando>Limpiar</a>
       <a th:href="@{/ciudadanos/nuevo}" class="boton primario">Registrar ciudadano</a>
     </form>
 
-    <!-- El bloque interno define las filas; el componente 'tabla' las pinta dentro de su <tbody>. -->
-    <div th:replace="~{fragments/componentes :: tabla(
-           ${ {'Identificación', 'Nombres', 'Apellidos', 'Fecha de nacimiento', 'Grupo / RH', 'Estatura', 'Acciones'} },
-           ~{::filasCiudadanos},
-           ${#lists.isEmpty(ciudadanos)},
-           'No se encontraron ciudadanos.')}">
-      <th:block th:fragment="filasCiudadanos">
-        <tr th:each="c : ${ciudadanos}" th:classappend="${c.identificacion == resaltado} ? 'resaltado'">
-          <td th:text="${c.identificacion}">1000000001</td>
-          <td th:text="${c.nombres}">Nombres</td>
-          <td th:text="${c.apellidos}">Apellidos</td>
-          <td th:text="${#temporals.format(c.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
-          <td th:text="${c.grupoSanguineo + c.rh}">O+</td>
-          <td th:text="${c.estatura} + ' m'">1.70 m</td>
-          <td><a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}">Editar</a></td>
-        </tr>
-      </th:block>
+    <!-- Estado de error: la API no respondió -->
+    <div th:if="${errorCarga}" class="estado estado-error" role="alert">
+      <p th:text="${errorCarga}">No fue posible conectar con el servidor.</p>
+      <a th:href="@{/ciudadanos(busqueda=${busqueda})}" class="boton" data-cargando>Reintentar</a>
     </div>
+
+    <th:block th:if="${pagina}">
+      <!-- Estado vacío: dos casos distintos (sin registros / sin resultados de la búsqueda) -->
+      <div th:if="${pagina.vacia()}" class="estado">
+        <p th:if="${busqueda}" th:text="|No hay resultados para «${busqueda}».|">No hay resultados.</p>
+        <p th:unless="${busqueda}">Aún no hay ciudadanos registrados.</p>
+        <a th:href="@{/ciudadanos/nuevo}" class="boton primario">Registrar ciudadano</a>
+      </div>
+
+      <th:block th:unless="${pagina.vacia()}">
+        <p class="resumen" th:text="|Mostrando ${pagina.desde()}–${pagina.hasta()} de ${pagina.totalElements}|">Mostrando 1–3 de 3</p>
+
+        <!-- El bloque interno define las filas; el componente 'tabla' las pinta dentro de su <tbody>. -->
+        <div th:replace="~{fragments/componentes :: tabla(
+               ${ {'Identificación', 'Nombres', 'Apellidos', 'Fecha de nacimiento', 'Grupo / RH', 'Estatura', 'Acciones'} },
+               ~{::filasCiudadanos},
+               false,
+               '')}">
+          <th:block th:fragment="filasCiudadanos">
+            <tr th:each="c : ${pagina.content}" th:classappend="${c.identificacion == resaltado} ? 'resaltado'">
+              <td th:text="${c.identificacion}">1000000001</td>
+              <td th:text="${c.nombres}">Nombres</td>
+              <td th:text="${c.apellidos}">Apellidos</td>
+              <td th:text="${#temporals.format(c.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
+              <td th:text="${c.grupoSanguineo + c.rh}">O+</td>
+              <td th:text="${c.estatura} + ' m'">1.70 m</td>
+              <td><a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}">Editar</a></td>
+            </tr>
+          </th:block>
+        </div>
+
+        <nav class="paginacion" aria-label="Paginación" th:if="${pagina.totalPages > 1}">
+          <a th:unless="${pagina.first}" class="boton" data-cargando
+             th:href="@{/ciudadanos(busqueda=${busqueda}, pagina=${pagina.number - 1})}">← Anterior</a>
+          <span th:text="|Página ${pagina.number + 1} de ${pagina.totalPages}|">Página 1 de 2</span>
+          <a th:unless="${pagina.last}" class="boton" data-cargando
+             th:href="@{/ciudadanos(busqueda=${busqueda}, pagina=${pagina.number + 1})}">Siguiente →</a>
+        </nav>
+      </th:block>
+    </th:block>
   </main>
 </body>
 </html>

@@ -8,9 +8,9 @@
     <div th:replace="~{fragments/componentes :: alertas}"></div>
 
     <section class="accesos">
-      <a class="tarjeta" th:href="@{/ciudadanos}">
+      <a class="tarjeta" th:href="@{/ciudadanos}" data-cargando>
         <h2>Ciudadanos</h2>
-        <p class="cifra" th:text="${totalCiudadanos}">0</p>
+        <p class="cifra" th:text="${totalCiudadanos} ?: '—'">0</p>
         <p>registrados<span th:if="${modoMock}"> (simulados)</span>. Consultar, buscar y actualizar.</p>
       </a>
       <a class="tarjeta" th:href="@{/ciudadanos/nuevo}">

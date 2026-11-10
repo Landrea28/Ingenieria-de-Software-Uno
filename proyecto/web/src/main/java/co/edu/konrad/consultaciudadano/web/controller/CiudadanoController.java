@@ -3,6 +3,8 @@ package co.edu.konrad.consultaciudadano.web.controller;
 import co.edu.konrad.consultaciudadano.web.dto.CiudadanoDto;
 import co.edu.konrad.consultaciudadano.web.form.CiudadanoForm;
 import co.edu.konrad.consultaciudadano.web.form.ReglasCiudadano;
+import co.edu.konrad.consultaciudadano.web.service.ApiNoDisponibleException;
+import co.edu.konrad.consultaciudadano.web.service.ApiValidacionException;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoApiClient;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoDuplicadoException;
 import jakarta.validation.Valid;
@@ -26,7 +28,7 @@ public class CiudadanoController {
 
     private static final String VISTA_FORMULARIO = "ciudadanos/formulario";
     private static final String MENSAJE_SIMULADO =
-            "SIMULACIÓN: los datos no se guardaron porque la API aún no está conectada.";
+            "SIMULACIÓN: la edición aún no está conectada a la API; los cambios no se guardaron.";
 
     private final CiudadanoApiClient ciudadanos;
 
@@ -50,10 +52,17 @@ public class CiudadanoController {
         return ReglasCiudadano.GRUPOS_SANGUINEOS;
     }
 
+    // Estados de la vista: 'pagina' con datos o vacía, o 'errorCarga' si la API no respondió.
+    // 401/403 no se atrapan aquí: los maneja ManejoErroresApi (vuelta al login).
     @GetMapping
-    public String lista(@RequestParam(required = false) String busqueda, Model model) {
+    public String lista(@RequestParam(required = false) String busqueda,
+            @RequestParam(defaultValue = "0") int pagina, Model model) {
         model.addAttribute("busqueda", busqueda);
-        model.addAttribute("ciudadanos", ciudadanos.listar(busqueda));
+        try {
+            model.addAttribute("pagina", ciudadanos.listar(busqueda, Math.max(pagina, 0)));
+        } catch (ApiNoDisponibleException e) {
+            model.addAttribute("errorCarga", e.getMessage());
+        }
         return "ciudadanos/lista";
     }
 
@@ -79,11 +88,24 @@ public class CiudadanoController {
         } catch (CiudadanoDuplicadoException e) {
             resultado.rejectValue("identificacion", "duplicado", "Ya existe un ciudadano con esta identificación.");
             return mostrarErrores(model, false);
+        } catch (ApiValidacionException e) {
+            // El backend validó de nuevo y rechazó algo: se muestra en cada campo y en general.
+            aplicarErroresApi(e, resultado);
+            model.addAttribute("modoEdicion", false);
+            model.addAttribute("mensajeError", "El servidor rechazó los datos: " + e.getMessage());
+            return VISTA_FORMULARIO;
+        } catch (ApiNoDisponibleException e) {
+            // Se conserva lo escrito para que el usuario pueda reintentar.
+            model.addAttribute("modoEdicion", false);
+            model.addAttribute("mensajeError", e.getMessage() + " Los datos no se guardaron.");
+            return VISTA_FORMULARIO;
         }
         String sufijo = ciudadanos.esSimulado() ? " (SIMULADO: guardado solo en memoria, no en la API)." : ".";
         redirect.addFlashAttribute("mensajeExito", "Ciudadano registrado: " + creado.nombres() + " "
                 + creado.apellidos() + ", identificación " + creado.identificacion() + sufijo);
         redirect.addFlashAttribute("resaltado", creado.identificacion());
+        // El listado se ordena por apellidos: se filtra por la identificación para que la fila nueva se vea.
+        redirect.addAttribute("busqueda", creado.identificacion());
         return "redirect:/ciudadanos";
     }
 
@@ -123,6 +145,20 @@ public class CiudadanoController {
         if (!form.fechasCoherentes() && !resultado.hasFieldErrors("fechaExpedicion")) {
             resultado.rejectValue("fechaExpedicion", "fechas",
                     "Debe ser posterior a la fecha de nacimiento.");
+        }
+    }
+
+    // Los detalles de la API llegan como "campo: mensaje"; si el campo existe en el formulario
+    // el mensaje se muestra debajo de él.
+    private static void aplicarErroresApi(ApiValidacionException e, BindingResult resultado) {
+        for (String detalle : e.getDetalles()) {
+            int separador = detalle.indexOf(": ");
+            if (separador > 0) {
+                String campo = detalle.substring(0, separador);
+                if (resultado.getFieldType(campo) != null && !resultado.hasFieldErrors(campo)) {
+                    resultado.rejectValue(campo, "api", detalle.substring(separador + 2));
+                }
+            }
         }
     }
 

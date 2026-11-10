@@ -1,5 +1,6 @@
 package co.edu.konrad.consultaciudadano.web.controller;
 
+import co.edu.konrad.consultaciudadano.web.service.ApiNoDisponibleException;
 import co.edu.konrad.consultaciudadano.web.service.CiudadanoApiClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,7 +17,13 @@ public class PanelController {
 
     @GetMapping("/")
     public String panel(Model model) {
-        model.addAttribute("totalCiudadanos", ciudadanos.listar(null).size());
+        // Si la API no responde, el panel se muestra igual, sin el total.
+        try {
+            model.addAttribute("totalCiudadanos", ciudadanos.listar(null, 0).totalElements());
+        } catch (ApiNoDisponibleException e) {
+            model.addAttribute("mensajeError", "No fue posible consultar el total de ciudadanos. "
+                    + ApiNoDisponibleException.MENSAJE);
+        }
         return "panel";
     }
 }

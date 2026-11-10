@@ -1,25 +1,30 @@
 package co.edu.konrad.consultaciudadano.web.service;
 
 import co.edu.konrad.consultaciudadano.web.dto.CiudadanoDto;
-import java.util.List;
+import co.edu.konrad.consultaciudadano.web.dto.PaginaCiudadanos;
 import java.util.Optional;
 
 /**
  * Contrato del cliente de la API de ciudadanos (/api/ciudadanos).
- * Los controladores dependen solo de esta interfaz; hoy la implementa un mock
- * y más adelante una versión que llama al backend con RestClient.
+ * Los controladores dependen solo de esta interfaz: con el perfil "api" la implementa
+ * CiudadanoApiClientRest (backend real) y con "mock", CiudadanoApiClientMock.
+ * Todos los métodos pueden lanzar ApiNoAutorizadoException (401), ApiAccesoDenegadoException (403)
+ * o ApiNoDisponibleException (red o 5xx).
  */
 public interface CiudadanoApiClient {
 
-    /** GET /api/ciudadanos?busqueda= */
-    List<CiudadanoDto> listar(String busqueda);
+    int TAMANO_PAGINA = 20;
 
-    /** GET /api/ciudadanos/{identificacion} */
+    /** GET /api/ciudadanos?busqueda=&pagina=&tamano= (pagina base 0). */
+    PaginaCiudadanos listar(String busqueda, int pagina);
+
+    /** GET /api/ciudadanos/{identificacion}; vacío si no existe. */
     Optional<CiudadanoDto> buscar(String identificacion);
 
     /**
      * POST /api/ciudadanos. Devuelve el ciudadano creado (con id).
-     * @throws CiudadanoDuplicadoException si la identificación ya existe
+     * @throws CiudadanoDuplicadoException si la identificación ya existe (409)
+     * @throws ApiValidacionException si el backend rechaza los datos (400)
      */
     CiudadanoDto registrar(CiudadanoDto ciudadano);
 

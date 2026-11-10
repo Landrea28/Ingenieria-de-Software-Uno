@@ -1,8 +1,10 @@
 package co.edu.konrad.consultaciudadano.web.service;
 
 import co.edu.konrad.consultaciudadano.web.dto.CiudadanoDto;
+import co.edu.konrad.consultaciudadano.web.dto.PaginaCiudadanos;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -33,16 +35,21 @@ public class CiudadanoApiClientMock implements CiudadanoApiClient {
 
     private final AtomicLong siguienteId = new AtomicLong(ciudadanos.size() + 1);
 
+    // Imita al backend: filtra, ordena por apellidos y nombres, y pagina.
     @Override
-    public List<CiudadanoDto> listar(String busqueda) {
-        if (busqueda == null || busqueda.isBlank()) {
-            return List.copyOf(ciudadanos);
-        }
-        String texto = busqueda.trim().toLowerCase(Locale.ROOT);
-        return ciudadanos.stream()
-                .filter(c -> c.identificacion().contains(texto)
+    public PaginaCiudadanos listar(String busqueda, int pagina) {
+        String texto = busqueda == null ? "" : busqueda.trim().toLowerCase(Locale.ROOT);
+        List<CiudadanoDto> filtrados = ciudadanos.stream()
+                .filter(c -> texto.isEmpty() || c.identificacion().contains(texto)
                         || (c.nombres() + " " + c.apellidos()).toLowerCase(Locale.ROOT).contains(texto))
+                .sorted(Comparator.comparing(CiudadanoDto::apellidos).thenComparing(CiudadanoDto::nombres))
                 .toList();
+        int total = filtrados.size();
+        int desde = Math.min(pagina * TAMANO_PAGINA, total);
+        int hasta = Math.min(desde + TAMANO_PAGINA, total);
+        int totalPaginas = (total + TAMANO_PAGINA - 1) / TAMANO_PAGINA;
+        return new PaginaCiudadanos(filtrados.subList(desde, hasta), total, totalPaginas, TAMANO_PAGINA, pagina,
+                pagina == 0, pagina >= totalPaginas - 1);
     }
 
     @Override

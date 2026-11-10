@@ -1,7 +1,6 @@
 package co.edu.konrad.consultaciudadano.web.controller;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -11,25 +10,38 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 
-/** Comprueba que cada pantalla del esqueleto responde y renderiza su vista con datos mock. */
+/** Comprueba que cada pantalla responde y renderiza su vista con datos mock (con sesión iniciada). */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("mock")
 class VistasTest {
 
     @Autowired
+    private WebApplicationContext contexto;
+
+    @Autowired
+    private MockMvc mvcSinSesion;
+
+    /** Con sesión de administrador iniciada (login simulado). */
     private MockMvc mvc;
+
+    @BeforeEach
+    void iniciarSesion() throws Exception {
+        mvc = MvcConSesion.crear(contexto);
+    }
 
     @Test
     void loginMuestraFormulario() throws Exception {
-        mvc.perform(get("/login"))
+        mvcSinSesion.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"));
     }
@@ -47,14 +59,15 @@ class VistasTest {
         mvc.perform(get("/ciudadanos"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("ciudadanos/lista"))
-                .andExpect(model().attribute("ciudadanos", hasSize(3)));
+                .andExpect(content().string(containsString("Mostrando 1–3 de 3")))
+                .andExpect(content().string(containsString("Prueba Dos")));
     }
 
     @Test
     void busquedaFiltraPorIdentificacion() throws Exception {
         mvc.perform(get("/ciudadanos").param("busqueda", "1000000002"))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("ciudadanos", hasSize(1)));
+                .andExpect(content().string(containsString("Mostrando 1–1 de 1")));
     }
 
     @Test
@@ -110,7 +123,7 @@ class VistasTest {
     void cerrarSesionMuestraMensajeEnLogin() throws Exception {
         mvc.perform(post("/logout"))
                 .andExpect(redirectedUrl("/login?salida"));
-        mvc.perform(get("/login").param("salida", ""))
+        mvcSinSesion.perform(get("/login").param("salida", ""))
                 .andExpect(content().string(containsString("Sesión cerrada")));
     }
 

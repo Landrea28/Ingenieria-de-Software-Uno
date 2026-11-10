@@ -2,7 +2,6 @@ package co.edu.konrad.consultaciudadano.web.controller;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -14,13 +13,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
@@ -28,13 +28,19 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * prueba porque registrar agrega ciudadanos a la lista en memoria.
  */
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("mock")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class RegistroCiudadanoTest {
 
     @Autowired
+    private WebApplicationContext contexto;
+
     private MockMvc mvc;
+
+    @BeforeEach
+    void iniciarSesion() throws Exception {
+        mvc = MvcConSesion.crear(contexto);
+    }
 
     /** Los 10 campos con valores válidos y ficticios. */
     private static MockHttpServletRequestBuilder registroValido() {
@@ -68,14 +74,14 @@ class RegistroCiudadanoTest {
     void registroValidoConfirmaYApareceEnElListado() throws Exception {
         mvc.perform(registroValido())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ciudadanos"))
+                .andExpect(redirectedUrl("/ciudadanos?busqueda=1000000099"))
                 .andExpect(flash().attribute("mensajeExito",
                         allOf(containsString("Ciudadano registrado"), containsString("1000000099"),
                                 containsString("SIMULADO"))))
                 .andExpect(flash().attribute("resaltado", "1000000099"));
 
         mvc.perform(get("/ciudadanos"))
-                .andExpect(model().attribute("ciudadanos", hasSize(4)))
+                .andExpect(content().string(containsString("Mostrando 1–4 de 4")))
                 .andExpect(content().string(containsString("Prueba Nueva")));
     }
 
