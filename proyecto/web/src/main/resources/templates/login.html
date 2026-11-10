@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ingreso')}"></head>
+<body class="pagina-login">
+  <main class="tarjeta login">
+    <h1>Consulta Ciudadano</h1>
+    <p class="sub">Ingreso del administrador</p>
+    <span th:if="${modoMock}" class="aviso-mock">DATOS SIMULADOS — PRUEBA</span>
+
+    <!-- Placeholder: aún no valida credenciales contra la API -->
+    <form th:action="@{/login}" method="post">
+      <label for="identificacion">Identificación</label>
+      <input id="identificacion" name="identificacion" type="text" inputmode="numeric" autocomplete="username">
+
+      <label for="contrasena">Contraseña</label>
+      <input id="contrasena" name="contrasena" type="password" autocomplete="current-password">
+
+      <button type="submit" class="primario">Ingresar</button>
+    </form>
+  </main>
+</body>
+</html>

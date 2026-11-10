@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reportes')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('reportes')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado('Reportes')}"></header>
+
+    <!-- Placeholder: el PDF lo generará el backend. Valores iguales a EstadoAntecedente. -->
+    <form class="tarjeta formulario" onsubmit="return false;">
+      <label>Estado
+        <select name="estado">
+          <option value="REQUERIDO">Requerido</option>
+          <option value="NO_REQUERIDO">No requerido</option>
+        </select>
+      </label>
+      <div class="acciones">
+        <button type="submit" class="primario" disabled title="Disponible cuando el backend exponga el reporte">Generar PDF</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ciudadanos')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('ciudadanos')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado('Listado de ciudadanos')}"></header>
+
+    <form th:action="@{/ciudadanos}" method="get" class="busqueda">
+      <input name="busqueda" type="search" th:value="${busqueda}"
+             placeholder="Buscar por identificación, nombres o apellidos">
+      <button type="submit">Buscar</button>
+      <a th:href="@{/ciudadanos/nuevo}" class="boton primario">Registrar ciudadano</a>
+    </form>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Identificación</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Fecha de nacimiento</th>
+            <th>RH</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="c : ${ciudadanos}">
+            <td th:text="${c.identificacion}">1000000001</td>
+            <td th:text="${c.nombres}">Nombres</td>
+            <td th:text="${c.apellidos}">Apellidos</td>
+            <td th:text="${#temporals.format(c.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
+            <td th:text="${c.grupoSanguineo + c.rh}">O+</td>
+            <td><a th:href="@{/ciudadanos/{id}/editar(id=${c.identificacion})}">Editar</a></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(ciudadanos)}">
+            <td colspan="6" class="vacio">No se encontraron ciudadanos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- Fragmentos comunes del panel. Cada página los incluye con th:replace. -->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${titulo} + ' · Consulta Ciudadano'">Consulta Ciudadano</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+  <!-- Menú lateral: el parámetro 'activo' resalta la opción actual -->
+  <nav th:fragment="menu(activo)" class="menu">
+    <div class="marca">Registraduría<br><small>Panel administrador</small></div>
+    <a th:href="@{/}" th:classappend="${activo == 'panel'} ? 'activo'">Panel</a>
+    <a th:href="@{/ciudadanos}" th:classappend="${activo == 'ciudadanos'} ? 'activo'">Ciudadanos</a>
+    <a th:href="@{/ciudadanos/nuevo}" th:classappend="${activo == 'nuevo'} ? 'activo'">Registrar ciudadano</a>
+    <a th:href="@{/reportes}" th:classappend="${activo == 'reportes'} ? 'activo'">Reportes</a>
+    <form th:action="@{/logout}" method="post" class="salir">
+      <button type="submit">Cerrar sesión</button>
+    </form>
+  </nav>
+
+  <header th:fragment="encabezado(titulo)" class="encabezado">
+    <h1 th:text="${titulo}">Título</h1>
+    <span th:if="${modoMock}" class="aviso-mock">DATOS SIMULADOS — PRUEBA</span>
+  </header>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+server:
+  # El backend usa 8080; la web usa 8081 para que ambos corran a la vez.
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: sistema-consulta-ciudadano-web
+  profiles:
+    # "mock" = datos simulados. Cuando exista el cliente real se cambia a "api".
+    active: ${SPRING_PROFILES_ACTIVE:mock}
+
+api:
+  # URL base del backend; se toma de la variable de entorno API_BASE_URL.
+  base-url: ${API_BASE_URL:http://localhost:8080}
