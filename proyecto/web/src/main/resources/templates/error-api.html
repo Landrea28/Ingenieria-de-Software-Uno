@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Servidor no disponible')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado('Servidor no disponible')}"></header>
+    <!-- Estado de error genérico: la API no respondió o respondió con error 5xx -->
+    <div class="estado estado-error" role="alert">
+      <p th:text="${mensajeError}">No fue posible conectar con el servidor.</p>
+      <a th:href="${reintentar}" class="boton primario" data-cargando>Reintentar</a>
+      <a th:href="@{/}" class="boton">Ir al panel</a>
+    </div>
+  </main>
+</body>
+</html>

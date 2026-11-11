@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Panel')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('panel')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado('Panel principal')}"></header>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
+    <form th:replace="~{fragments/componentes :: consultaIdentificacion}"></form>
+
+    <section class="accesos">
+      <a class="tarjeta" th:href="@{/ciudadanos}" data-cargando>
+        <h2>Ciudadanos</h2>
+        <p class="cifra" th:text="${totalCiudadanos} ?: '—'">0</p>
+        <p>registrados<span th:if="${modoMock}"> (simulados)</span>. Consultar, buscar y actualizar.</p>
+      </a>
+      <a class="tarjeta" th:href="@{/ciudadanos/nuevo}">
+        <h2>Registrar ciudadano</h2>
+        <p>Agregar un nuevo ciudadano con sus 10 datos.</p>
+      </a>
+      <a class="tarjeta" th:href="@{/reportes}">
+        <h2>Reportes</h2>
+        <p>Solicitar reportes en PDF por estado: Requerido / No requerido.</p>
+      </a>
+    </section>
+  </main>
+</body>
+</html>

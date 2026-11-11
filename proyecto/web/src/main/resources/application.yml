@@ -1,0 +1,28 @@
+server:
+  # El backend usa 8080; la web usa 8081 para que ambos corran a la vez.
+  port: ${SERVER_PORT:8081}
+  servlet:
+    session:
+      timeout: 30m
+      # Solo por cookie: evita que Tomcat agregue ";jsessionid=..." a las URLs (quedaría en historial y logs).
+      tracking-modes: cookie
+      cookie:
+        http-only: true
+        # Lax: el navegador no envía la cookie en POST desde otros sitios (protección CSRF básica).
+        same-site: lax
+
+spring:
+  application:
+    name: sistema-consulta-ciudadano-web
+  profiles:
+    # "api" = API REST real (por defecto). "mock" = datos simulados, sin backend.
+    active: ${SPRING_PROFILES_ACTIVE:api}
+  http:
+    client:
+      # Si el backend no responde a tiempo, la interfaz muestra un error en lugar de quedarse colgada.
+      connect-timeout: 3s
+      read-timeout: 10s
+
+api:
+  # URL base del backend; se toma de la variable de entorno API_BASE_URL.
+  base-url: ${API_BASE_URL:http://localhost:8080}

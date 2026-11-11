@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ingreso')}"></head>
+<body class="pagina-login">
+  <main class="tarjeta login">
+    <h1>Consulta Ciudadano</h1>
+    <p class="sub">Ingreso del administrador</p>
+    <span th:if="${modoMock}" class="aviso-mock">DATOS SIMULADOS — PRUEBA</span>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
+
+    <!-- Se valida contra POST /api/auth/login. Solo usuarios con rol ADMINISTRADOR pueden entrar. -->
+    <form th:action="@{/login}" method="post" data-cargando>
+      <label for="identificacion">Identificación</label>
+      <input id="identificacion" name="identificacion" type="text" inputmode="numeric" autocomplete="username"
+             required th:value="${identificacion}">
+
+      <label for="contrasena">Contraseña</label>
+      <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" required>
+
+      <label class="recordar">
+        <input type="checkbox" name="recordarContrasena" value="true"> Recordar contraseña
+      </label>
+
+      <button type="submit" class="primario">Ingresar</button>
+    </form>
+  </main>
+</body>
+</html>
