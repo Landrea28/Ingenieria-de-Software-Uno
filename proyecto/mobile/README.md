@@ -11,7 +11,8 @@ App para el personal de la fuerza pública: se registra, inicia sesión y consul
 | Login, con «Recordar contraseña» y token en almacenamiento seguro | Implementado |
 | Escáner de código de barras, permisos de cámara e ingreso manual alternativo | Implementado |
 | Consulta de antecedentes y manejo de errores (sin información, red, tiempo de espera, servidor) | Implementado |
-| Mockups, supuestos y manual de usuario | Ver [docs/](docs/) |
+| Integración con el backend real (registro, correo, login, antecedentes, logout) | Verificada con `npm run test:api` (ver [docs/pruebas.md](docs/pruebas.md)) |
+| Mockups, casos de uso, supuestos, pruebas y manual de usuario | Ver [docs/](docs/) |
 
 ## Requisitos
 
@@ -61,6 +62,8 @@ Casos de prueba incluidos (ver cabecera de [mock-server/servidor.js](mock-server
 | Error del servidor | `9000000500` | `500` |
 | Tiempo de espera agotado | `9000000600` | tarda 15 s (para probar el timeout del cliente) |
 
+Las identificaciones de personal de esta tabla son propias del servidor falso. Con el backend real y el perfil `demo`, las identidades SIMULADAS de Defensa están en `backend/src/main/resources/db/demo/V101__defensa_personal_ficticio.sql` y la contraseña llega a Mailpit (`http://localhost:8025`).
+
 ## Pruebas
 
 ```bash
@@ -68,7 +71,19 @@ npm test        # pruebas unitarias (node --test) sobre validaciones, tiempo de 
 npm run typecheck
 ```
 
-Las pruebas cubren lógica pura (validaciones de formulario, cálculo de expiración de sesión, extracción de la identificación desde el código de barras). No hay pruebas de componentes de React Native en este proyecto; la interacción de pantallas se verifica manualmente en el emulador o dispositivo.
+Las pruebas unitarias cubren lógica pura (validaciones de formulario, cálculo de expiración de sesión, extracción de la identificación desde el código de barras). No hay pruebas de componentes de React Native en este proyecto; la interacción de pantallas se verifica manualmente en el emulador o dispositivo.
+
+### Prueba de integración contra el backend real
+
+```bash
+npm run test:api
+```
+
+Ejecuta el flujo completo con el mismo cliente HTTP y los mismos servicios que usan las pantallas (`src/api`), contra el backend real: catálogo, registro validado contra Defensa (SIMULADA), contraseña de 6 caracteres recibida en Mailpit, login con y sin «Recordar contraseña», consulta de antecedentes (requerido, no requerido, sin información) y cierre de sesión. No usa el servidor falso.
+
+Requiere el [backend](../backend/README.md) con los perfiles `demo,dev` sobre una base limpia y Mailpit (`docker compose up -d`). Variables opcionales: `EXPO_PUBLIC_API_URL` (por defecto `http://127.0.0.1:8080`) y `MAILPIT_URL` (por defecto `http://127.0.0.1:8025`).
+
+Los casos, el resultado de la última ejecución y la lista de pruebas manuales en dispositivo están en [docs/pruebas.md](docs/pruebas.md). Los códigos de barras para probar el escáner están en [docs/codigos-prueba.md](docs/codigos-prueba.md).
 
 ## Escáner de código de barras
 
@@ -88,10 +103,14 @@ src/
 ├── types/        # tipos del contrato HTTP
 └── utils/        # validaciones, tiempo de expiración, extracción del código de barras
 docs/
-├── mockups.md y mockups/   # bocetos de las cinco pantallas
-├── supuestos.md            # decisiones y supuestos (S-01 a S-10)
-└── manual-usuario.md       # guía para el personal que usa la app
+├── mockups.md y mockups/                  # bocetos de las cinco pantallas
+├── casos-de-uso.md                        # diagrama y especificación de casos de uso
+├── supuestos.md                           # decisiones y supuestos (S-01 a S-10)
+├── pruebas.md                             # casos de prueba y resultados
+├── codigos-prueba.md y codigos-prueba/    # códigos de barras ficticios para el escáner
+└── manual-usuario.md                      # guía para el personal que usa la app
 mock-server/      # servidor falso para desarrollar sin depender del backend
+pruebas-api/      # prueba de integración contra el backend real
 ```
 
 No subir contraseñas, tokens, archivos `.env` reales ni datos personales reales al repositorio.
