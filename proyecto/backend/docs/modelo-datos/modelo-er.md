@@ -10,8 +10,8 @@ Todos los datos de demostración son **ficticios** (perfil `demo`).
 erDiagram
     ciudadano ||--o| antecedente : "tiene estado"
     fuerza_publica ||--o{ rango : "agrupa"
-    fuerza_publica ||--o{ usuario : "pertenece"
-    rango ||--o{ usuario : "tiene"
+    fuerza_publica |o--o{ usuario : "pertenece"
+    rango |o--o{ usuario : "tiene"
     fuerza_publica ||--o{ defensa_personal_simulado : "pertenece"
     rango ||--o{ defensa_personal_simulado : "tiene"
     usuario ||--o{ usuario_perfil : "asigna"
@@ -32,7 +32,7 @@ erDiagram
         VARCHAR(150) lugar_expedicion
         VARCHAR(1) rh
         VARCHAR(2) grupo_sanguineo
-        NUMERIC(3_2) estatura
+        DECIMAL estatura
     }
 
     antecedente {
@@ -133,12 +133,13 @@ erDiagram
     }
 ```
 
-En el diagrama, `NUMERIC(3_2)` es `NUMERIC(3,2)`: la coma se reemplazó por guion bajo porque el graficador no la admite.
+En el diagrama, `estatura` aparece como `DECIMAL`. En la base de datos es `NUMERIC(3,2)`, con valores entre 0.50 y 2.50 metros.
 
 ## Cómo leerlo
 
 - **PK** es clave primaria, **FK** es clave foránea y **UK** es valor único.
 - Un ciudadano tiene **como máximo un** antecedente (`antecedente.ciudadano_id` es único). Un ciudadano sin fila en `antecedente` significa «sin información» y nunca se interpreta como NO_REQUERIDO.
+- La relación de `usuario` con `fuerza_publica` y con `rango` es **opcional** (el símbolo con círculo junto a `fuerza_publica` y `rango`): el administrador inicial no pertenece a ninguna fuerza. En `defensa_personal_simulado` sí es obligatoria.
 - `usuario` se relaciona con `perfil` mediante `usuario_perfil`. `perfil` se relaciona con `permiso` mediante `perfil_permiso`. `opcion` (opción de menú) se relaciona con `permiso` mediante `opcion_permiso`. Son tres relaciones muchos a muchos.
 - `defensa_personal_simulado` es el dataset **ficticio** que simula al Departamento de Defensa. El registro de personal se valida contra él.
 - Las tablas `token_revocado`, `auth_login_intento` y `auth_registro_intento` son de apoyo a la seguridad (logout, bloqueo de login y límite de registros). No tienen clave foránea. `auth_login_intento.identificacion` coincide por valor con `usuario.identificacion`, pero no se declara como FK.
