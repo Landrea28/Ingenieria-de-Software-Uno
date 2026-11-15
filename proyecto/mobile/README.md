@@ -41,6 +41,14 @@ Desde la terminal de Expo: `a` para abrir en el emulador Android, `i` para iOS, 
 
 El emulador Android accede al backend del equipo anfitrión en `10.0.2.2`. En un dispositivo físico, reemplaza esa IP por la IP LAN del equipo donde corre el backend o el servidor falso. En modo `mock`, la interfaz siempre muestra un aviso visible para no confundirlo con el backend real.
 
+### Si la app dice «El servidor tardó demasiado en responder» en Android reciente
+
+Las versiones recientes de Android exigen el permiso de **red local** para que una app se conecte a direcciones privadas como `10.0.2.2` o la IP LAN del equipo (comprobado en el emulador con Android 17, API 37). Sin ese permiso las peticiones al backend expiran aunque el backend esté corriendo. En un teléfono, acepta el aviso de «dispositivos en la red local» de Expo Go (o actívalo en Ajustes → Apps → Expo Go → Permisos). En el emulador se puede conceder desde la terminal:
+
+```bash
+adb shell pm grant host.exp.exponent android.permission.ACCESS_LOCAL_NETWORK
+```
+
 ## Servidor falso (`npm run mock`)
 
 Simula el contrato OpenAPI del backend (catálogo, registro, login, antecedentes) para avanzar sin depender de que el backend esté corriendo. **No es el backend real**: todo vive en memoria y se reinicia al reiniciar el proceso.
