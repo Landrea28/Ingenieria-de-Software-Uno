@@ -11,4 +11,3 @@
 6. **Razones para adquirirla:** PENDIENTE — equipo.
 7. **Límites conocidos:** PENDIENTE — equipo.
 8. **Próximos pasos:** PENDIENTE — equipo.
-

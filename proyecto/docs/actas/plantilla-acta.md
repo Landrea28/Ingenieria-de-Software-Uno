@@ -23,4 +23,3 @@
 | Bloqueo | Impacto | Responsable / siguiente paso |
 |---|---|---|
 |  |  |  |
-

@@ -6,4 +6,3 @@
 | Fecha | Trabajo restante acordado | Trabajo restante real | Nota del equipo |
 |---|---:|---:|---|
 |  |  |  |  |
-

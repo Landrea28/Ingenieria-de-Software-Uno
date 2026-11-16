@@ -6,4 +6,3 @@
 | ID | Historia / trabajo | Prioridad | Criterios de aceptación | Responsable | Estado |
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
-

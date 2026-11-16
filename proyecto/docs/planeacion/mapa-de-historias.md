@@ -11,4 +11,3 @@
 ## Flujo y cortes de entrega
 
 **PENDIENTE — equipo.**
-

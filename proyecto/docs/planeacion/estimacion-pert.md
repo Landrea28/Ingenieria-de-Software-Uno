@@ -6,4 +6,3 @@
 | Historia / tarea | Optimista (O) | Más probable (M) | Pesimista (P) | PERT (O + 4M + P) / 6 | Responsable |
 |---|---:|---:|---:|---:|---|
 |  |  |  |  |  |  |
-
