@@ -108,7 +108,7 @@ export function RegistroScreen({ navigation }: Props) {
             de la configuración SMTP del entorno.
           </Text>
         </View>
-        <Boton titulo="Ir a iniciar sesión" onPress={() => navigation.navigate('Login')} />
+        <Boton titulo="Ir a iniciar sesión" onPress={() => navigation.popTo('Login')} />
       </Pantalla>
     );
   }

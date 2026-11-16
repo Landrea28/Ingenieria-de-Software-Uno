@@ -27,8 +27,8 @@ export function validarIdentificacion(valor: string): string | undefined {
 
 function validarNombre(valor: string, campo: string): string | undefined {
   const v = valor.trim();
-  if (!v) return `${campo} es obligatorio`;
-  if (v.length > 100) return `${campo} admite máximo 100 caracteres`;
+  if (!v) return `${campo} son obligatorios`;
+  if (v.length > 100) return `${campo} admiten máximo 100 caracteres`;
   return undefined;
 }
 
