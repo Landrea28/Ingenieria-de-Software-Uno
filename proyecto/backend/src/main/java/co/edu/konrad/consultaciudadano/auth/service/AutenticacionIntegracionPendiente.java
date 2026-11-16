@@ -6,6 +6,10 @@ import co.edu.konrad.consultaciudadano.common.error.CodigoError;
 import co.edu.konrad.consultaciudadano.common.error.NegocioException;
 import org.springframework.http.HttpStatus;
 
+/**
+ * Implementación de respaldo que responde 503 INTEGRACION_PENDIENTE.
+ * Solo se activa si no existe {@link AutenticacionService} en el contexto.
+ */
 public class AutenticacionIntegracionPendiente implements AutenticacionIntegracion {
     private NegocioException pendiente() {
         return new NegocioException(HttpStatus.SERVICE_UNAVAILABLE,

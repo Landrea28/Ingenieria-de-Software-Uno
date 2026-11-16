@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Consulta el catálogo de fuerzas y rangos y valida que un rango pertenezca a la fuerza indicada.
+ */
 @Service
 @RequiredArgsConstructor
 public class CatalogoService {

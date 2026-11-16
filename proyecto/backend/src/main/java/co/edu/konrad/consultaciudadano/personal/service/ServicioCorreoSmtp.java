@@ -5,6 +5,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Envía por SMTP el correo con las credenciales temporales. En desarrollo apunta a Mailpit; el asunto se marca como SIMULADO.
+ */
 @Service
 public class ServicioCorreoSmtp implements ServicioCorreo {
     private final JavaMailSender mailSender;

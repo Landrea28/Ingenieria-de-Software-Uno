@@ -22,6 +22,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Filtro que valida el JWT de cada petición, descarta tokens revocados o de usuarios cuya versión de seguridad cambió,
+ * y carga los permisos del usuario en el contexto de Spring Security.
+ */
 @Component
 public class FiltroJwt extends OncePerRequestFilter {
     private final ServicioJwt jwt;

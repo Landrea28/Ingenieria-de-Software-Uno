@@ -5,6 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * Acceso a datos de los perfiles, con sus permisos.
+ */
 public interface PerfilRepository extends JpaRepository<Perfil, Long> {
     Optional<Perfil> findByCodigo(String codigo);
 

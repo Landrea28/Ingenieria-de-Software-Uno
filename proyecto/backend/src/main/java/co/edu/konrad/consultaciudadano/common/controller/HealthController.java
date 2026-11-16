@@ -4,6 +4,9 @@ import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoint de salud ({@code /api/health}) para comprobar que el servicio está activo.
+ */
 @RestController
 public class HealthController {
     @GetMapping("/api/health")

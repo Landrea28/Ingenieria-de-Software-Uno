@@ -14,6 +14,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * Bloqueo temporal de una identificación tras varios intentos fallidos de inicio de sesión.
+ * El estado se guarda en PostgreSQL para que sobreviva a reinicios.
+ */
 @Service
 public class ServicioBloqueoLogin {
     private static final int MAX_INTENTOS = 6;

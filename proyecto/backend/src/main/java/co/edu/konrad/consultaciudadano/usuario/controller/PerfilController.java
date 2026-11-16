@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoints de perfiles y permisos ({@code /api/perfiles} y {@code /api/permisos}), solo para administradores.
+ */
 @Validated
 @RestController
 @RequestMapping("/api")

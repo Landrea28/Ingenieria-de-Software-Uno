@@ -22,6 +22,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA de una cuenta de usuario: datos personales, perfil, estado, hash de la contraseña
+ * y versión de seguridad, que invalida los tokens anteriores cuando cambian el perfil o el estado.
+ */
 @Entity
 @Table(name = "usuario")
 @Getter

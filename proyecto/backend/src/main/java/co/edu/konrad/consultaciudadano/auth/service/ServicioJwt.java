@@ -14,6 +14,9 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Emite y valida los tokens JWT firmados con el secreto configurado.
+ */
 @Service
 public class ServicioJwt {
     private final SecretKey clave;

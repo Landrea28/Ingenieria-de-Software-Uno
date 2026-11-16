@@ -23,6 +23,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Reglas de negocio de usuarios: creación con credenciales temporales, actualización, cambio de perfil y de estado,
+ * sin permitir que el sistema quede sin un administrador activo.
+ */
 @Service
 public class UsuarioService {
     private static final String PERFIL_ADMINISTRADOR = "ADMINISTRADOR";

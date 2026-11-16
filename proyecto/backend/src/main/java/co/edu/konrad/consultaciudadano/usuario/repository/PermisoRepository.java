@@ -4,6 +4,9 @@ import co.edu.konrad.consultaciudadano.usuario.entity.Permiso;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
+/**
+ * Acceso a datos de los permisos.
+ */
 public interface PermisoRepository extends JpaRepository<Permiso, Long> {
     List<Permiso> findAllByOrderByCodigoAsc();
 }

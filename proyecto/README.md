@@ -9,4 +9,4 @@ documentación están en el [README de la raíz](../README.md).
 | [web/](web/README.md) | Aplicación web administrativa (Spring MVC + Thymeleaf) |
 | [mobile/](mobile/README.md) | Aplicación móvil (React Native + Expo) |
 | [scripts/](scripts/) | Prueba de humo contra la API real |
-| [docs/](docs/checklist-final.md) | Checklist final del proyecto |
+| [docs/](docs/) | [Registro de supuestos](docs/supuestos.md) y [checklist final](docs/checklist-final.md) |

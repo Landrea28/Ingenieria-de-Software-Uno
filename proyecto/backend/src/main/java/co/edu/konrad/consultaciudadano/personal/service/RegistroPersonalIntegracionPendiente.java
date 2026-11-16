@@ -5,6 +5,10 @@ import co.edu.konrad.consultaciudadano.common.error.NegocioException;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
 import org.springframework.http.HttpStatus;
 
+/**
+ * Implementación de respaldo que responde 503 INTEGRACION_PENDIENTE.
+ * Solo se activa si no existe {@link RegistroPersonalSeguridad} en el contexto.
+ */
 public class RegistroPersonalIntegracionPendiente implements RegistroPersonalIntegracion {
     private NegocioException pendiente() {
         return new NegocioException(HttpStatus.SERVICE_UNAVAILABLE,

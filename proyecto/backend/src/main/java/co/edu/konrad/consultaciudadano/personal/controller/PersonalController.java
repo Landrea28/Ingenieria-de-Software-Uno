@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Endpoint público de registro del personal de la fuerza pública ({@code /api/personal/registro}).
+ */
 @RestController
 @RequestMapping("/api/personal")
 @RequiredArgsConstructor

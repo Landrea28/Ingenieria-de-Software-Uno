@@ -16,6 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Reglas de negocio de ciudadanos: alta con identificación única, coherencia de fechas, listado paginado, búsqueda y actualización.
+ */
 @Service
 @RequiredArgsConstructor
 public class CiudadanoService {

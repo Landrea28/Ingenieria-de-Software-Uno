@@ -15,6 +15,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA de un perfil (rol) con sus permisos. Los perfiles son fijos: ADMINISTRADOR y PERSONAL_FUERZA_PUBLICA.
+ */
 @Entity
 @Table(name = "perfil")
 @Getter

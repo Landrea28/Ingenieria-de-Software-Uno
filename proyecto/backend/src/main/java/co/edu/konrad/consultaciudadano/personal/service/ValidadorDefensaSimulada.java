@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Validación SIMULADA contra Defensa: compara los datos del registro con el dataset ficticio.
+ */
 @Service
 public class ValidadorDefensaSimulada implements ValidadorDefensa {
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidadorDefensaSimulada.class);

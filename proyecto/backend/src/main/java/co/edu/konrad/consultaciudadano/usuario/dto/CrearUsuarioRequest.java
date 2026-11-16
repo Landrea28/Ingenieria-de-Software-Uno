@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Datos para crear un usuario desde la administración.
+ */
 public record CrearUsuarioRequest(
         @NotBlank @Pattern(regexp = "[0-9]{6,10}") String identificacion,
         @NotBlank @Size(max = 100) String nombres,

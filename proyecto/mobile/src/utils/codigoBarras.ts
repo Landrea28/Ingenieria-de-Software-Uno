@@ -1,5 +1,5 @@
 // Extracción de la identificación a partir de los datos crudos del código de
-// barras. Ver docs/supuestos.md (S-10) para el supuesto sobre el formato real
+// barras. Ver proyecto/docs/supuestos.md (MOV-08) para el supuesto sobre el formato real
 // del símbolo de la cédula y cómo se validó con códigos de prueba.
 
 const SEPARADORES = /[\s.-]/g;

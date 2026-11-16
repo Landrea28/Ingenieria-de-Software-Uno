@@ -13,6 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Autenticación real: valida credenciales contra el hash BCrypt, aplica el bloqueo por intentos fallidos,
+ * emite el JWT (con mayor vigencia si se pide recordar) y revoca el token al cerrar sesión.
+ */
 @Service
 public class AutenticacionService implements AutenticacionIntegracion {
     private static final String MENSAJE_CREDENCIALES_INVALIDAS = "Credenciales inválidas";

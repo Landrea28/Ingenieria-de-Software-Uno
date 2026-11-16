@@ -16,8 +16,8 @@
 
 | Id | Requisito | Meta medible |
 |---|---|---|
-| RNF-R1 | Rendimiento | Consultas por identificación y listados paginados responden en menos de 1 s en entorno local con los datos demo |
-| RNF-R2 | Rendimiento | Generación del PDF en menos de 3 s con los datos demo |
+| RNF-R1 | Rendimiento | Consultas por identificación y listados paginados responden en menos de 1 s en entorno local con los datos demo. Medido: máximo de 124 ms ([rendimiento.md](pruebas/rendimiento.md)) |
+| RNF-R2 | Rendimiento | Generación del PDF en menos de 3 s con los datos demo. Medido: máximo de 1,6 s ([rendimiento.md](pruebas/rendimiento.md)) |
 | RNF-P1 | Portabilidad | Funciona en cualquier sistema con JDK 21 y PostgreSQL 15+; no depende del sistema operativo |
 | RNF-P2 | Portabilidad | Configuración solo por variables de entorno (`.env.example`) |
 | RNF-D1 | Disponibilidad | Arranque con un comando (`./mvnw spring-boot:run`) y base reconstruible desde cero con Flyway |

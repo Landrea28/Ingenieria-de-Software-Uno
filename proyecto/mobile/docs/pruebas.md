@@ -25,7 +25,7 @@ Entorno de la integración: backend del repositorio en `develop` (commit `e8c409
 |---|---|
 | `src/utils/validaciones.test.ts` | Registro correcto, campos obligatorios vacíos, identificación de 6 a 10 dígitos, formato de correo y caracteres admitidos en nombres y apellidos |
 | `src/utils/tiempo.test.ts` | Cálculo del vencimiento de la sesión, token vigente, vencido o con fecha inválida, y lectura del vencimiento de un JWT |
-| `src/utils/codigoBarras.test.ts` | Extracción de la identificación: valor simple, con separadores, ruido no numérico y longitudes fuera de rango (supuesto S-10) |
+| `src/utils/codigoBarras.test.ts` | Extracción de la identificación: valor simple, con separadores, ruido no numérico y longitudes fuera de rango (supuesto MOV-08) |
 
 ## 2. Integración contra el backend real
 

@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * Acceso a datos de antecedentes con Spring Data JPA, incluido el listado por estado que usa el reporte PDF.
+ */
 public interface AntecedenteRepository extends JpaRepository<Antecedente, Long> {
     @Query("select a from Antecedente a join fetch a.ciudadano c where c.identificacion = :identificacion")
     Optional<Antecedente> buscarPorIdentificacion(@Param("identificacion") String identificacion);

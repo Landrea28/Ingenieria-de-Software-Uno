@@ -11,6 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 
+/**
+ * Acceso a datos de usuarios: búsquedas por identificación, listado y las consultas que protegen
+ * la regla de que siempre exista un administrador activo.
+ */
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @EntityGraph(attributePaths = "perfiles")
     Optional<Usuario> findByIdentificacion(String identificacion);
