@@ -12,3 +12,5 @@
 | S-08 | Esquema gestionado con Flyway; Hibernate solo valida | Base reconstruible desde cero; cambios de esquema con migración nueva |
 | S-09 | El perfil `demo` carga datos ficticios y solo debe usarse sobre una base limpia | Evita mezclar datos de prueba con datos que se deban conservar |
 | S-10 | El servidor escucha en `127.0.0.1` por defecto | Limita la exposición de desarrollo; la seguridad de rutas JWT está habilitada, pero las integraciones externas siguen siendo simuladas |
+| S-11 | Si no hay ciudadanos para el filtro solicitado, el reporte responde HTTP 404 con código `SIN_RESULTADOS` en lugar de generar un PDF vacío | Distingue una consulta válida sin datos de un reporte generado y permite que la web muestre un aviso informativo claro al administrador |
+| S-12 | Los perfiles son fijos; el administrador puede consultar perfiles y administrar los permisos asociados, pero no crear ni eliminar perfiles | Mantiene estable el catálogo de roles que utiliza la autorización y evita que la administración de seguridad introduzca roles sin reglas de acceso definidas |
