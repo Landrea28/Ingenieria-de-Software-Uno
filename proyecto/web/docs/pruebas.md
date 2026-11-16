@@ -124,3 +124,46 @@ verificaron en el navegador y fueron correctos.
   así que esos datos no llegan a la API.
 - El listado espera el formato de página actual de Spring Data (`content`, `totalElements`…). Si el backend cambia la
   serialización a `VIA_DTO`, hay que ajustar `PaginaCiudadanos`.
+
+## 6. Evidencias
+
+Nueva ejecución del 2026-11-16 con el código de `develop` (commit `a9ccb66`): backend con perfiles `demo,dev` sobre
+una base PostgreSQL limpia y web en perfil `api`. Todos los datos son ficticios. Para el rol incorrecto se creó en
+esa base un usuario con perfil `PERSONAL_FUERZA_PUBLICA`.
+
+| Evidencia | Resultado |
+|---|---|
+| [evidencias/mvn-test-salida.txt](evidencias/mvn-test-salida.txt) | `./mvnw test`: **83 de 83** pruebas automáticas (con dobles, sin backend) |
+| [evidencias/prueba-humo-salida.txt](evidencias/prueba-humo-salida.txt) | `scripts/prueba-humo.sh` contra el backend real, con rol incorrecto y `ESCRITURA=1`: **26 de 26 OK** |
+
+Capturas tomadas en Firefox contra el backend real. La columna «Casos» remite a los identificadores de la sección 2.
+
+| Id | Qué se hizo | Resultado observado | Casos | Captura |
+|---|---|---|---|---|
+| W-01 | Abrir `/ciudadanos` sin sesión | Redirige al login | P01 | [captura](evidencias/W-01-sin-sesion-redirige-al-login.png) |
+| W-02 | Login con contraseña incorrecta | «Identificación o contraseña incorrectas.» | P04 | [captura](evidencias/W-02-login-credenciales-incorrectas.png) |
+| W-03 | Login de un usuario de fuerza pública | «Su usuario no tiene permisos de administrador.» | P05 | [captura](evidencias/W-03-login-rol-sin-permisos.png) |
+| W-04 | Login del administrador | Panel principal con «Sesión: …» y el total de ciudadanos | P07 | [captura](evidencias/W-04-panel-principal.png) |
+| W-05 | Abrir el listado | Tabla paginada, «Mostrando 1–20 de 22» | — | [captura](evidencias/W-05-listado.png) |
+| W-06 | Buscar `90000000` | Solo los ciudadanos que coinciden | — | [captura](evidencias/W-06-listado-filtrado.png) |
+| W-07 | Buscar algo que no existe | «No hay resultados para …» | — | [captura](evidencias/W-07-busqueda-sin-resultados.png) |
+| W-08 | Consultar `9.000.000.001` | Abre el detalle de `9000000001` | R04 | [captura](evidencias/W-08-consulta-detalle.png) |
+| W-09 | Consultar `12ab` | «Identificación inválida…» | — | [captura](evidencias/W-09-consulta-identificacion-invalida.png) |
+| W-10 | Enviar el registro vacío | Los 10 campos marcados (validación en el navegador) | F01 | [captura](evidencias/W-10-registro-campos-obligatorios.png) |
+| W-11 | Identificación `12ab56`, nombres con números, expedición anterior al nacimiento, estatura 3.10 | Un mensaje por campo; lo demás se conserva | F02, F04, F07, F08, F11 | [captura](evidencias/W-11-registro-formatos-invalidos.png) |
+| W-12 | Registrar la identificación `9000000001`, que ya existe | «Ya existe un ciudadano con esta identificación.» (409 del backend) | R03 | [captura](evidencias/W-12-registro-identificacion-duplicada.png) |
+| W-13 | Registro válido | Confirmación y fila resaltada | R01 | [a](evidencias/W-13a-registro-diligenciado.png), [b](evidencias/W-13b-registro-confirmado.png) |
+| W-14 | Editar el lugar de nacimiento | Formulario precargado con la identificación bloqueada; «Cambios guardados para …» | R05 | [a](evidencias/W-14a-edicion-precargada.png), [b](evidencias/W-14b-edicion-guardada.png) |
+| W-15 | Abrir Reportes | Filtro Requerido / No requerido, Ver PDF y Descargar PDF | — | [captura](evidencias/W-15-reportes-filtro.png) |
+| W-16 | Pedir el reporte con un estado inválido | «Seleccione un estado: Requerido o No requerido.» | T02 | [captura](evidencias/W-16-reportes-estado-invalido.png) |
+| W-17 | Reporte «No requerido» con todos los antecedentes en «Requerido» | «No hay ciudadanos con estado «No requerido». No se generó el reporte.» (datos restaurados después) | Sin resultados | [captura](evidencias/W-17-reportes-sin-resultados.png) |
+| W-18 | Abrir `/ciudadanos?pagina=99` | «La página solicitada no existe.» | S03 | [captura](evidencias/W-18-pagina-inexistente.png) |
+| W-19 | Abrir `/ciudadanos/abc` | Página «Página no encontrada» (404) | S04 | [captura](evidencias/W-19-ruta-invalida-404.png) |
+| W-20 | Backend apagado: abrir el listado | «No fue posible conectar…» con **Reintentar** | N03 | [captura](evidencias/W-20-backend-apagado-listado.png) |
+| W-21 | Backend apagado: registrar | Mensaje de error y los datos escritos se conservan | N04 | [captura](evidencias/W-21-backend-apagado-registro-conserva-datos.png) |
+| W-22 | Backend apagado: pedir el reporte | «…No se generó el reporte.» | N05 | [captura](evidencias/W-22-backend-apagado-reporte.png) |
+| W-23 | Cerrar sesión | Vuelve al login con «Sesión cerrada.» | N01 | [captura](evidencias/W-23-sesion-cerrada.png) |
+| W-24 | Backend apagado: login | «No fue posible conectar…» sin entrar | N06 | [captura](evidencias/W-24-backend-apagado-login.png) |
+
+Sin captura en esta ejecución: el PDF del reporte «Requerido» (lo verifica el caso C03 del script de humo, que
+comprueba que la respuesta empieza por `%PDF-`; los PDF no se versionan) y el token rechazado con 401.

@@ -7,7 +7,10 @@ no accede directamente a la base de datos. La lógica de negocio y la seguridad 
 | Documento | Para qué |
 |---|---|
 | [docs/manual-usuario.md](docs/manual-usuario.md) | Manual breve para el administrador |
-| [docs/pruebas.md](docs/pruebas.md) | Casos de prueba, resultados y defectos corregidos |
+| [docs/pruebas.md](docs/pruebas.md) | Casos de prueba, resultados, defectos corregidos y [evidencias](docs/evidencias/) |
+| [docs/casos-de-uso.md](docs/casos-de-uso.md) | Diagrama y especificación de los casos de uso del administrador |
+| [docs/casos-de-uso-usuarios-perfiles.md](docs/casos-de-uso-usuarios-perfiles.md) | Casos de uso de usuarios y perfiles (MVP 2, borrador) |
+| [docs/mockups.md](docs/mockups.md) | Prototipos de las pantallas |
 | [docs/demo.md](docs/demo.md) | Guion de la demo, plan B y lista de verificación para la integración |
 
 ## Estado de implementación
@@ -142,7 +145,7 @@ src/main/resources/
 ├── static/      css/admin.css, js/validacion.js, js/estados.js
 └── messages.properties
 scripts/prueba-humo.sh
-docs/            manual-usuario.md, pruebas.md, demo.md
+docs/            manual-usuario.md, pruebas.md, demo.md, casos-de-uso*.md, mockups.md, mockups/, evidencias/
 ```
 
 ### Componentes reutilizables (`templates/fragments`)
