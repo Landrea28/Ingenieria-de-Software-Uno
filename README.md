@@ -119,7 +119,7 @@ proyecto/
 ├── web/       # aplicación web administrativa: Spring MVC + Thymeleaf, consume la API
 ├── mobile/    # app móvil: React Native + Expo (Android; el mismo código corre en iOS)
 ├── scripts/   # prueba de humo contra la API real (Bash y PowerShell)
-└── docs/      # checklist final de la entrega
+└── docs/      # registro de supuestos y checklist final de la entrega
 ```
 
 La web y la app móvil son clientes del mismo backend; ninguna accede directamente
@@ -148,7 +148,7 @@ a la base de datos.
 | Casos de uso del móvil y prototipos | [casos-de-uso.md](proyecto/mobile/docs/casos-de-uso.md) · [mockups.md](proyecto/mobile/docs/mockups.md) |
 | Manuales de usuario | [web](proyecto/web/docs/manual-usuario.md) · [móvil](proyecto/mobile/docs/manual-usuario.md) |
 | Pruebas y resultados | [backend](proyecto/backend/docs/pruebas/plan-de-pruebas.md) · [seguridad](proyecto/backend/docs/pruebas/resultados-seguridad.md) · [web](proyecto/web/docs/pruebas.md) · [móvil](proyecto/mobile/docs/pruebas.md) |
-| Supuestos | [backend](proyecto/backend/docs/supuestos.md) · [seguridad](proyecto/backend/docs/decisiones/supuestos.md) · [móvil](proyecto/mobile/docs/supuestos.md) |
+| Supuestos y decisiones | [supuestos.md](proyecto/docs/supuestos.md): registro único de simulaciones, datos y API, seguridad y app móvil |
 | Estado de la entrega | [checklist-final.md](proyecto/docs/checklist-final.md) |
 
 La planeación con Scrum (backlog, estimación, sprints, burndown y actas), la

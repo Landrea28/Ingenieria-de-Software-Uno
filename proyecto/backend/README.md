@@ -70,6 +70,6 @@ Variables principales: `JWT_SECRET`, `ADMIN_INITIAL_*`, `MAIL_*` y `CORS_ALLOWED
 - `./mvnw clean verify` ejecuta pruebas JUnit, Mockito, MockMvc, persistencia con H2, reglas de arquitectura con ArchUnit y empaquetado.
 - [Pruebas Postman/Newman](docs/pruebas/README.md): `newman run docs/pruebas/postman/seguridad.postman_collection.json -e docs/pruebas/postman/seguridad.postman_environment.json`.
 - [Plan de pruebas](docs/pruebas/plan-de-pruebas.md) y [resultados medidos de Surefire](docs/pruebas/resultados-seguridad.md).
-- Más detalle en `docs/`: arquitectura, requisitos, especificación de clases y supuestos.
+- Más detalle en `docs/`: arquitectura, requisitos y especificación de clases. Los supuestos del proyecto están en el [registro único](../docs/supuestos.md).
 - [Reconstrucción de base de datos](docs/modelo-datos/reconstruccion-base.md),
   [diccionario](docs/modelo-datos/diccionario-datos.md) y [modelo ER](docs/modelo-datos/modelo-er.md).

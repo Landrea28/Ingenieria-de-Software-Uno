@@ -1,6 +1,6 @@
 # Códigos de barras de prueba
 
-Códigos generados a partir de las identificaciones **ficticias** del dataset demo del backend (`backend/src/main/resources/db/demo/V100__datos_ficticios.sql`). No corresponden a cédulas reales (supuestos S-04 y S-10). Sirven para probar el escáner en dispositivo o emulador: abre esta página en otra pantalla, o imprímela, y apunta la cámara al código.
+Códigos generados a partir de las identificaciones **ficticias** del dataset demo del backend (`backend/src/main/resources/db/demo/V100__datos_ficticios.sql`). No corresponden a cédulas reales (supuestos SIM-03 y MOV-08). Sirven para probar el escáner en dispositivo o emulador: abre esta página en otra pantalla, o imprímela, y apunta la cámara al código.
 
 El estado esperado es el que devuelve el backend con el perfil `demo`; la app solo lo muestra.
 

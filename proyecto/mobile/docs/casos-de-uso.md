@@ -99,7 +99,7 @@ El Departamento de Defensa y el servicio de correo son actores externos **simula
 - **2a. La validación no está disponible.** El backend responde 503 y la app informa que la función no está disponible, sin dar el registro por hecho.
 - **1b. Demasiados intentos desde el mismo origen.** El backend limita los intentos de registro; la app muestra el mensaje del servidor.
 
-**Reglas**: la respuesta de la API nunca incluye la contraseña; la app nunca la muestra ni la almacena (supuestos S-02, S-03 y S-05).
+**Reglas**: la respuesta de la API nunca incluye la contraseña; la app nunca la muestra ni la almacena (supuestos SEG-01, MOV-02 y MOV-05).
 
 ## CU-M03 — Iniciar sesión
 
@@ -149,7 +149,7 @@ El Departamento de Defensa y el servicio de correo son actores externos **simula
 - **4b. El backend rechaza el token (401) en cualquier consulta.** La app interpreta sesión vencida o revocada, borra el token y vuelve al login.
 - **3a. El almacenamiento seguro falla.** La sesión sigue activa en memoria y la app avisa que no se pudo guardar para la próxima apertura.
 
-**Reglas**: la contraseña no se guarda en ningún lugar del dispositivo (supuesto S-06 del plan; S-02 del módulo).
+**Reglas**: la contraseña no se guarda en ningún lugar del dispositivo (supuestos SEG-02 y MOV-02).
 
 ## CU-M05 — Consultar antecedentes por código de barras
 
@@ -180,7 +180,7 @@ El Departamento de Defensa y el servicio de correo son actores externos **simula
 - **5a. Sin conexión, tiempo de espera o error del servidor.** La app muestra un mensaje distinto para cada caso y un botón **Reintentar**.
 - **5b. Sesión vencida o revocada (401).** La app vuelve al login (CU-M04, flujo 4b).
 
-**Reglas**: la app no decide el estado ni lo infiere; solo envía la identificación y presenta la respuesta (supuestos S-05 del plan y S-08 del módulo). Los datos de antecedentes son ficticios y su fuente es `SIMULADA`.
+**Reglas**: la app no decide el estado ni lo infiere; solo envía la identificación y presenta la respuesta (supuestos SIM-03 y DAT-04). Los datos de antecedentes son ficticios y su fuente es `SIMULADA`.
 
 ## CU-M06 — Ingresar identificación manualmente
 

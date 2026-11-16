@@ -16,7 +16,7 @@ trabajo que aún no tiene evidencia de ejecución.
 | PDF con ambos filtros y caso sin resultados | Hecho | [salida del smoke test](../backend/docs/evidencias/smoke-test-salida.txt): ambos PDF válidos y 404 `SIN_RESULTADOS` |
 | Autorización 401/403 | Hecho | [salida del smoke test](../backend/docs/evidencias/smoke-test-salida.txt), matrices parametrizadas en `SeguridadIntegracionTest` y 136 pruebas backend aprobadas |
 | Sin secretos versionados ni datos personales reales | Hecho | `.gitignore`, `.env.example`, datos ficticios en `backend/src/main/resources/db/demo/`; se comprobó que no hay `.env` real en el índice con `git ls-files | grep -E '(^|/)\.env$'` |
-| Simulaciones identificadas | Hecho | `backend/docs/supuestos.md`, `backend/docs/decisiones/supuestos.md`, OpenAPI y README de backend etiquetan Defensa, correo y datos de demo como simulados |
+| Simulaciones identificadas | Hecho | [registro de supuestos](supuestos.md), OpenAPI y README de backend etiquetan Defensa, correo y datos de demo como simulados |
 | Evidencias de pruebas | Hecho | [backend/docs/evidencias/](../backend/docs/evidencias/), [mobile/docs/evidencias/](../mobile/docs/evidencias/), reportes locales `backend/target/surefire-reports/` y `web/target/surefire-reports/` |
 | Actas de reuniones | Hecho — fuera del repositorio | `00_Consolidado_Entrega.xlsx` (entrega, fuera del repositorio), hoja «Actas»: ceremonias de los tres sprints y sesión de integración, elaboradas a partir de los acuerdos del equipo y del historial del repositorio |
 | Backlog y mapa de historias | Hecho — fuera del repositorio | `00_Consolidado_Entrega.xlsx` (entrega, fuera del repositorio), hojas «Product_Backlog», «Story_Map» y «Sprint_Backlog» |

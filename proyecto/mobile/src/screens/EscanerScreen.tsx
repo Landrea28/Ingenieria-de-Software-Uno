@@ -14,7 +14,7 @@ import { validarIdentificacion } from '../utils/validaciones';
 
 type Props = NativeStackScreenProps<PrincipalStackParamList, 'Escaner'>;
 
-// Supuesto S-10 (docs/supuestos.md): la cédula codifica la identificación en
+// Supuesto MOV-08 (proyecto/docs/supuestos.md): la cédula codifica la identificación en
 // un símbolo 1D; se admiten los formatos más comunes para ese uso.
 const TIPOS_CODIGO = ['code128', 'pdf417', 'code39', 'code93', 'itf14', 'codabar'] as const;
 

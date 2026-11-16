@@ -95,7 +95,7 @@ Los casos, el resultado de la última ejecución y la lista de pruebas manuales 
 
 ## Escáner de código de barras
 
-Usa `expo-camera`. Ver [docs/supuestos.md](docs/supuestos.md) (supuesto S-10) para el formato de identificación asumido y cómo se validó con códigos de prueba ficticios, ya que no se contó con una cédula física. Si la lectura automática no resulta confiable con un código real, la pantalla de escaneo siempre ofrece el ingreso manual de la identificación como alternativa.
+Usa `expo-camera`. Ver el [registro de supuestos](../docs/supuestos.md) (supuesto MOV-08) para el formato de identificación asumido y cómo se validó con códigos de prueba ficticios, ya que no se contó con una cédula física. Si la lectura automática no resulta confiable con un código real, la pantalla de escaneo siempre ofrece el ingreso manual de la identificación como alternativa.
 
 ## Estructura
 
@@ -113,7 +113,6 @@ src/
 docs/
 ├── mockups.md y mockups/                  # bocetos de las cinco pantallas
 ├── casos-de-uso.md                        # diagrama y especificación de casos de uso
-├── supuestos.md                           # decisiones y supuestos (S-01 a S-10)
 ├── pruebas.md                             # casos de prueba y resultados
 ├── codigos-prueba.md y codigos-prueba/    # códigos de barras ficticios para el escáner
 └── manual-usuario.md                      # guía para el personal que usa la app
