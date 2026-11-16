@@ -57,40 +57,49 @@ export async function solicitar<T>(ruta: string, opciones: Opciones = {}): Promi
       signal: controlador.signal,
     });
   } catch (error) {
+    clearTimeout(temporizador);
     if (controlador.signal.aborted) {
       throw new ApiError('timeout', null, null, 'El servidor tardó demasiado en responder');
     }
     throw new ApiError('red', null, null, 'No hay conexión con el servidor');
+  }
+
+  try {
+    if (respuesta.ok) {
+      if (respuesta.status === 204) return undefined as T;
+      try {
+        return (await respuesta.json()) as T;
+      } catch {
+        if (controlador.signal.aborted) {
+          throw new ApiError('timeout', null, null, 'El servidor tardó demasiado en responder');
+        }
+        throw new ApiError('respuesta', respuesta.status, null, 'Respuesta inesperada del servidor');
+      }
+    }
+
+    // Error HTTP: el backend responde con el formato ErrorResponse; si no, se degrada con gracia.
+    let cuerpoError: Partial<ErrorResponse> = {};
+    try {
+      cuerpoError = (await respuesta.json()) as Partial<ErrorResponse>;
+    } catch {
+      if (controlador.signal.aborted) {
+        throw new ApiError('timeout', null, null, 'El servidor tardó demasiado en responder');
+      }
+      // cuerpo vacío o no JSON
+    }
+
+    // 401 con token enviado = sesión vencida o revocada → volver al login.
+    // (Un 401 sin token, p. ej. credenciales malas en el login, NO dispara esto.)
+    if (respuesta.status === 401 && enviaToken) alExpirarSesion?.();
+
+    throw new ApiError(
+      'http',
+      respuesta.status,
+      cuerpoError.codigo ?? null,
+      cuerpoError.mensaje ?? `Error ${respuesta.status}`,
+      cuerpoError.detalles ?? [],
+    );
   } finally {
     clearTimeout(temporizador);
   }
-
-  if (respuesta.ok) {
-    if (respuesta.status === 204) return undefined as T;
-    try {
-      return (await respuesta.json()) as T;
-    } catch {
-      throw new ApiError('respuesta', respuesta.status, null, 'Respuesta inesperada del servidor');
-    }
-  }
-
-  // Error HTTP: el backend responde con el formato ErrorResponse; si no, se degrada con gracia.
-  let cuerpoError: Partial<ErrorResponse> = {};
-  try {
-    cuerpoError = (await respuesta.json()) as Partial<ErrorResponse>;
-  } catch {
-    // cuerpo vacío o no JSON
-  }
-
-  // 401 con token enviado = sesión vencida o revocada → volver al login.
-  // (Un 401 sin token, p. ej. credenciales malas en el login, NO dispara esto.)
-  if (respuesta.status === 401 && enviaToken) alExpirarSesion?.();
-
-  throw new ApiError(
-    'http',
-    respuesta.status,
-    cuerpoError.codigo ?? null,
-    cuerpoError.mensaje ?? `Error ${respuesta.status}`,
-    cuerpoError.detalles ?? [],
-  );
 }

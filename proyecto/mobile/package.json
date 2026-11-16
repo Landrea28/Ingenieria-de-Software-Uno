@@ -27,6 +27,7 @@
     "web": "expo start --web",
     "test": "node --test",
     "typecheck": "tsc --noEmit",
+    "test:api": "tsc -p pruebas-api && node --test .tmp-pruebas-api/pruebas-api/flujo-real.js",
     "mock": "node mock-server/servidor.js"
   },
   "private": true

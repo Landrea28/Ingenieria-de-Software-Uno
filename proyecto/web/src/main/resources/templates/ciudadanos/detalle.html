@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Detalle de ciudadano')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('ciudadanos')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado(|${ciudadano.nombres} ${ciudadano.apellidos}|)}"></header>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
+
+    <!-- Datos de GET /api/ciudadanos/{identificacion}, agrupados igual que el formulario -->
+    <article class="tarjeta detalle" th:object="${ciudadano}">
+      <section>
+        <h2>Datos personales</h2>
+        <dl>
+          <dt>Identificación</dt><dd th:text="*{identificacion}">9000000001</dd>
+          <dt>Nombres</dt><dd th:text="*{nombres}">Clara</dd>
+          <dt>Apellidos</dt><dd th:text="*{apellidos}">Rivera</dd>
+          <dt>Fecha de nacimiento</dt><dd th:text="*{#temporals.format(fechaNacimiento, 'dd/MM/yyyy')}">14/02/1995</dd>
+          <dt>Lugar de nacimiento</dt><dd th:text="*{lugarNacimiento}">Bogota</dd>
+        </dl>
+      </section>
+      <section>
+        <h2>Documento</h2>
+        <dl>
+          <dt>Fecha de expedición</dt><dd th:text="*{#temporals.format(fechaExpedicion, 'dd/MM/yyyy')}">22/03/2013</dd>
+          <dt>Lugar de expedición</dt><dd th:text="*{lugarExpedicion}">Bogota</dd>
+        </dl>
+      </section>
+      <section>
+        <h2>Datos físicos</h2>
+        <dl>
+          <dt>Grupo sanguíneo</dt><dd th:text="*{grupoSanguineo}">B</dd>
+          <dt>RH</dt><dd th:text="*{rh}">+</dd>
+          <dt>Estatura</dt><dd th:text="*{estatura} + ' m'">1.71 m</dd>
+        </dl>
+      </section>
+
+      <div class="acciones">
+        <a th:href="@{/ciudadanos}" class="boton" data-cargando>Volver al listado</a>
+        <a th:href="@{/ciudadanos/{id}/editar(id=*{identificacion})}" class="boton primario" data-cargando>Editar</a>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

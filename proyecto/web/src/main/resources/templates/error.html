@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<!-- Spring Boot usa esta plantilla para errores sin manejar (p. ej. 404 en /ciudadanos/abc). -->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Página no encontrada')}"></head>
+<body class="pagina-login">
+  <main class="tarjeta login">
+    <h1 th:text="${status == 404} ? 'Página no encontrada' : 'Ocurrió un error'">Página no encontrada</h1>
+    <p class="sub" th:text="${status == 404} ? 'La dirección no existe o la identificación no es válida.' : 'Intente de nuevo en unos minutos.'">
+      La dirección no existe.</p>
+    <a th:href="@{/}" class="boton primario">Ir al panel</a>
+  </main>
+</body>
+</html>

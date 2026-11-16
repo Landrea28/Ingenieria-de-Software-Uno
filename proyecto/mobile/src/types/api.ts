@@ -6,10 +6,21 @@ export interface Rango {
   nombre: string;
 }
 
+export interface RangoResponse {
+  id?: number;
+  nombre?: string;
+}
+
 export interface Fuerza {
   codigo: CodigoFuerza;
   nombre: string;
   rangos: Rango[];
+}
+
+export interface FuerzaResponse {
+  codigo?: string;
+  nombre?: string;
+  rangos?: RangoResponse[];
 }
 
 export interface RegistroPersonalRequest {
@@ -23,7 +34,7 @@ export interface RegistroPersonalRequest {
 }
 
 export interface RegistroPersonalResponse {
-  mensaje: string;
+  mensaje?: string;
 }
 
 export interface LoginRequest {
@@ -33,18 +44,18 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
-  tipo: string;
-  expiraEnSegundos: number;
+  token?: string;
+  tipo?: string;
+  expiraEnSegundos?: number;
 }
 
 export type EstadoAntecedente = 'REQUERIDO' | 'NO_REQUERIDO';
 
 export interface AntecedenteResponse {
-  identificacion: string;
-  estado: EstadoAntecedente;
-  fuente: string;
-  fechaActualizacion: string;
+  identificacion?: string;
+  estado?: EstadoAntecedente;
+  fuente?: string;
+  fechaActualizacion?: string;
 }
 
 export type CodigoError =
@@ -54,14 +65,12 @@ export type CodigoError =
   | 'SIN_INFORMACION'
   | 'SIN_RESULTADOS'
   | 'INTEGRACION_PENDIENTE'
-  | 'ERROR_INTERNO'
-  //Pendientes de acordar con Julián 
-  | 'CREDENCIALES_INVALIDAS'
-  | 'NO_AUTENTICADO';
+  | 'NO_AUTENTICADO'
+  | 'ACCESO_DENEGADO'
+  | 'ERROR_INTERNO';
 
 export interface ErrorResponse {
-  codigo: CodigoError | string;
+  codigo: CodigoError;
   mensaje: string;
   detalles: string[];
-  fecha: string;
 }

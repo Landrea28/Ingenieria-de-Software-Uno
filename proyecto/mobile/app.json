@@ -10,7 +10,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "La cámara se usa únicamente para leer el código de barras de la cédula."
+          "cameraPermission": "La cámara se usa únicamente para leer el código de barras de la cédula.",
+          "recordAudioAndroid": false
         }
       ],
       "expo-secure-store"
