@@ -118,8 +118,12 @@ export function EscanerScreen({ navigation }: Props) {
           </View>
         )}
         {estado === 'no-legible' && (
-          <View style={estilos.centro}>
-            <Text style={estilos.texto}>No se pudo leer el código. Intenta de nuevo con buena luz y sin reflejos.</Text>
+          <View style={estilos.centro} accessibilityRole="alert">
+            <Text style={estilos.tituloSobreOscuro}>No se pudo leer el código</Text>
+            <Text style={estilos.textoSobreOscuro}>
+              Busca buena luz, evita reflejos y mantén el código dentro del marco. Si está dañado, ingresa la
+              identificación manualmente.
+            </Text>
             <Boton titulo="Reintentar" onPress={reintentar} />
           </View>
         )}
@@ -170,8 +174,17 @@ const estilos = StyleSheet.create({
     color: colores.primarioTexto,
     fontSize: 14,
     textAlign: 'center',
-    paddingHorizontal: espacio.l,
+    // Fondo semitransparente: sin él el texto se pierde sobre escenas claras.
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 8,
+    paddingVertical: espacio.s,
+    paddingHorizontal: espacio.m,
+    marginHorizontal: espacio.l,
+    overflow: 'hidden',
   },
+  // El área del mensaje es negra: el texto debe ser claro para leerse.
+  tituloSobreOscuro: { fontSize: 18, fontWeight: '700', color: colores.primarioTexto, textAlign: 'center' },
+  textoSobreOscuro: { fontSize: 16, color: colores.primarioTexto, textAlign: 'center' },
   centro: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: espacio.m, padding: espacio.l },
   panel: { padding: espacio.m, gap: espacio.s },
 });

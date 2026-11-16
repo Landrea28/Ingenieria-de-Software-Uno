@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ApiError } from '../api/cliente';
-import { mensajeDeError } from '../api/mensajes';
+import { describirErrorApi } from '../api/mensajes';
 import { Boton } from '../components/Boton';
 import { CampoTexto } from '../components/CampoTexto';
 import { BannerModo, MensajeError } from '../components/Estados';
@@ -10,6 +9,7 @@ import { Pantalla } from '../components/Pantalla';
 import { useAuth } from '../context/AuthContext';
 import type { AccesoStackParamList } from '../navigation/tipos';
 import { colores, espacio } from '../theme/colores';
+import type { ErrorUsuario } from '../utils/errores';
 import { validarIdentificacion } from '../utils/validaciones';
 
 type Props = NativeStackScreenProps<AccesoStackParamList, 'Login'>;
@@ -21,7 +21,7 @@ export function LoginScreen({ navigation }: Props) {
   const [recordar, setRecordar] = useState(false);
   const [errorId, setErrorId] = useState<string | undefined>();
   const [errorContrasena, setErrorContrasena] = useState<string | undefined>();
-  const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
+  const [errorGeneral, setErrorGeneral] = useState<ErrorUsuario | null>(null);
   const [cargando, setCargando] = useState(false);
 
   const entrar = async () => {
@@ -39,11 +39,7 @@ export function LoginScreen({ navigation }: Props) {
     } catch (error) {
       setCargando(false);
       setContrasena('');
-      setErrorGeneral(
-        error instanceof ApiError && error.tipo === 'http' && error.estado === 401
-          ? 'Identificación o contraseña incorrectas.'
-          : mensajeDeError(error),
-      );
+      setErrorGeneral(describirErrorApi(error, 'login'));
     }
   };
 
@@ -86,7 +82,7 @@ export function LoginScreen({ navigation }: Props) {
           onValueChange={setRecordar}
         />
       </View>
-      {errorGeneral && <MensajeError mensaje={errorGeneral} />}
+      {errorGeneral && <MensajeError error={errorGeneral} />}
       <Boton titulo="Iniciar sesión" cargando={cargando} onPress={() => void entrar()} />
       <Boton
         titulo="Registrarme"

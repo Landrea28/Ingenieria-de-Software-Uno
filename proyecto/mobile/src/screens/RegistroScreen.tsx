@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ApiError } from '../api/cliente';
-import { mensajeDeError } from '../api/mensajes';
+import { describirErrorApi } from '../api/mensajes';
 import { registrarPersonal } from '../api/servicios';
 import { Boton } from '../components/Boton';
 import { CampoTexto } from '../components/CampoTexto';
@@ -13,6 +12,7 @@ import { useCatalogo } from '../hooks/useCatalogo';
 import type { AccesoStackParamList } from '../navigation/tipos';
 import { colores, espacio } from '../theme/colores';
 import type { CodigoFuerza } from '../types/api';
+import type { ErrorUsuario } from '../utils/errores';
 import { validarRegistro, type DatosRegistro, type ErroresRegistro } from '../utils/validaciones';
 
 const VACIO: DatosRegistro = {
@@ -27,14 +27,12 @@ const VACIO: DatosRegistro = {
 
 type Props = NativeStackScreenProps<AccesoStackParamList, 'Registro'>;
 
-/** Estados del envío: pendiente → aceptado / rechazado / integración pendiente / error de red. */
+/** Estados del envío: pendiente → aceptado, o error con su explicación para la persona. */
 type EstadoEnvio =
   | { tipo: 'inactivo' }
   | { tipo: 'pendiente' }
   | { tipo: 'aceptado'; mensaje: string }
-  | { tipo: 'rechazado'; mensaje: string; detalles: string[] }
-  | { tipo: 'integracion-pendiente' }
-  | { tipo: 'error'; mensaje: string };
+  | { tipo: 'error'; error: ErrorUsuario };
 
 export function RegistroScreen({ navigation }: Props) {
   const { estado, recargar } = useCatalogo();
@@ -80,16 +78,7 @@ export function RegistroScreen({ navigation }: Props) {
       });
       setEnvio({ tipo: 'aceptado', mensaje: respuesta.mensaje ?? 'Registro aceptado.' });
     } catch (error) {
-      if (error instanceof ApiError && error.tipo === 'http') {
-        if (error.estado === 503 || error.codigo === 'INTEGRACION_PENDIENTE') {
-          return setEnvio({ tipo: 'integracion-pendiente' });
-        }
-        if (error.estado === 400 || error.estado === 409) {
-          // 400: datos inválidos o no figura en Defensa; 409: ya registrado.
-          return setEnvio({ tipo: 'rechazado', mensaje: error.message, detalles: error.detalles });
-        }
-      }
-      setEnvio({ tipo: 'error', mensaje: mensajeDeError(error) });
+      setEnvio({ tipo: 'error', error: describirErrorApi(error, 'registro') });
     }
   };
 
@@ -101,11 +90,12 @@ export function RegistroScreen({ navigation }: Props) {
           <Text style={estilos.tituloExito}>Registro aceptado</Text>
           <Text style={estilos.textoExito}>{envio.mensaje}</Text>
           <Text style={estilos.textoExito}>
-            Tu contraseña de 6 caracteres llegará a tu correo. La app nunca la muestra ni la guarda.
+            Tu contraseña de 6 caracteres llegará al correo que escribiste (revisa también el spam). La app nunca la
+            muestra ni la guarda. Con ella y tu identificación podrás iniciar sesión.
           </Text>
           <Text style={estilos.nota}>
-            La validación de identidad está simulada por el backend. La entrega del correo depende
-            de la configuración SMTP del entorno.
+            Entorno de pruebas: la validación de identidad está simulada y el correo no sale a internet; lo recibe
+            Mailpit en el computador del backend (http://localhost:8025).
           </Text>
         </View>
         <Boton titulo="Ir a iniciar sesión" onPress={() => navigation.popTo('Login')} />
@@ -114,7 +104,7 @@ export function RegistroScreen({ navigation }: Props) {
   }
 
   if (estado.tipo === 'cargando') return <Pantalla><Cargando mensaje="Cargando fuerzas y rangos…" /></Pantalla>;
-  if (estado.tipo === 'error') return <Pantalla><MensajeError mensaje={estado.mensaje} onReintentar={recargar} /></Pantalla>;
+  if (estado.tipo === 'error') return <Pantalla><MensajeError error={estado.error} onReintentar={recargar} /></Pantalla>;
 
   return (
     <Pantalla>
@@ -178,22 +168,16 @@ export function RegistroScreen({ navigation }: Props) {
         onChangeText={(v) => actualizar({ correo: v })}
         error={errores.correo}
       />
-      {envio.tipo === 'rechazado' && (
-        <View style={estilos.rechazo} accessibilityRole="alert">
-          <Text style={estilos.textoRechazo}>Registro rechazado: {envio.mensaje}</Text>
-          {envio.detalles.map((d) => (
-            <Text key={d} style={estilos.textoRechazo}>• {d}</Text>
-          ))}
-        </View>
+      {envio.tipo === 'error' && (
+        <MensajeError
+          error={envio.error}
+          accion={
+            envio.error.accion === 'ir-a-login'
+              ? { titulo: 'Ir a iniciar sesión', onPress: () => navigation.popTo('Login') }
+              : undefined
+          }
+        />
       )}
-      {envio.tipo === 'integracion-pendiente' && (
-        <View style={estilos.pendiente} accessibilityRole="alert">
-          <Text style={estilos.textoPendiente}>
-            El servidor aún no tiene habilitado el registro (integración pendiente). Intenta más tarde.
-          </Text>
-        </View>
-      )}
-      {envio.tipo === 'error' && <MensajeError mensaje={envio.mensaje} />}
       <Boton
         titulo={envio.tipo === 'pendiente' ? 'Enviando…' : 'Registrarme'}
         cargando={envio.tipo === 'pendiente'}
@@ -208,8 +192,4 @@ const estilos = StyleSheet.create({
   tituloExito: { color: colores.exito, fontSize: 18, fontWeight: '700' },
   textoExito: { color: colores.texto, fontSize: 15 },
   nota: { color: colores.textoSuave, fontSize: 13 },
-  rechazo: { backgroundColor: colores.errorFondo, borderRadius: 10, padding: espacio.m, gap: 4 },
-  textoRechazo: { color: colores.error, fontSize: 14 },
-  pendiente: { backgroundColor: colores.avisoFondo, borderRadius: 10, padding: espacio.m },
-  textoPendiente: { color: colores.aviso, fontSize: 14 },
 });

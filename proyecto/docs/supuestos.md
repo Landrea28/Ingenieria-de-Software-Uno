@@ -71,4 +71,4 @@ La extracción se probó con datos ficticios, no con una cédula real (ver `mobi
 - Ruido no numérico (por ejemplo una URL leída de un QR) o letras antes de los dígitos: se rechaza como no legible.
 - Longitud fuera de 6 a 10 dígitos: se rechaza como no legible.
 
-Los tipos de símbolo habilitados en el escáner (`code128`, `pdf417`, `code39`, `code93`, `itf14` y `codabar`) cubren los formatos más comunes; si una cédula física usa otro, basta agregarlo a la lista de `EscanerScreen.tsx` sin cambiar la extracción. La lectura con cámara de un código real queda pendiente de probar en un teléfono físico (casos M-10 a M-12 de [pruebas.md](../mobile/docs/pruebas.md)).
+Los tipos de símbolo habilitados en el escáner (`code128`, `pdf417`, `code39`, `code93`, `itf14` y `codabar`) cubren los formatos más comunes; si una cédula física usa otro, basta agregarlo a la lista de `EscanerScreen.tsx` sin cambiar la extracción. La lectura con cámara se comprobó en un teléfono físico con los códigos de prueba (casos M-10 a M-12 de [pruebas.md](../mobile/docs/pruebas.md)); con una cédula física real no se ha probado.

@@ -80,7 +80,7 @@ para consumir la API; el modo `mock` es una simulación claramente etiquetada.
 En Android reciente, Expo Go necesita el permiso de red local para alcanzar el
 backend; si la app dice que el servidor tardó demasiado en responder, vea la
 sección correspondiente del [README del móvil](proyecto/mobile/README.md).
-Las pruebas manuales móviles y los casos de cámara pendientes están en
+Los casos de prueba móviles y sus capturas (emulador y teléfono) están en
 [proyecto/mobile/docs/pruebas.md](proyecto/mobile/docs/pruebas.md).
 
 ## Pruebas y verificaciones

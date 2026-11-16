@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { obtenerFuerzasRangos } from '../api/servicios';
-import { mensajeDeError } from '../api/mensajes';
+import { describirErrorApi } from '../api/mensajes';
 import type { Fuerza } from '../types/api';
+import type { ErrorUsuario } from '../utils/errores';
 
 export type EstadoCatalogo =
   | { tipo: 'cargando' }
   | { tipo: 'listo'; fuerzas: Fuerza[] }
-  | { tipo: 'error'; mensaje: string };
+  | { tipo: 'error'; error: ErrorUsuario };
 
 /** Carga el catálogo de fuerzas y rangos desde el backend. */
 export function useCatalogo() {
@@ -17,7 +18,7 @@ export function useCatalogo() {
     try {
       setEstado({ tipo: 'listo', fuerzas: await obtenerFuerzasRangos() });
     } catch (error) {
-      setEstado({ tipo: 'error', mensaje: mensajeDeError(error) });
+      setEstado({ tipo: 'error', error: describirErrorApi(error, 'catalogo') });
     }
   }, []);
 
