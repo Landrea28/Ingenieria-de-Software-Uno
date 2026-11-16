@@ -147,7 +147,7 @@ a la base de datos.
 | Seguridad | [decisiones](proyecto/backend/docs/decisiones/seguridad.md) · [matriz rol-permiso](proyecto/backend/docs/decisiones/matriz-rol-permiso.md) |
 | Casos de uso del móvil y prototipos | [casos-de-uso.md](proyecto/mobile/docs/casos-de-uso.md) · [mockups.md](proyecto/mobile/docs/mockups.md) |
 | Manuales de usuario | [web](proyecto/web/docs/manual-usuario.md) · [móvil](proyecto/mobile/docs/manual-usuario.md) |
-| Pruebas y resultados | [backend](proyecto/backend/docs/pruebas/plan-de-pruebas.md) · [seguridad](proyecto/backend/docs/pruebas/resultados-seguridad.md) · [web](proyecto/web/docs/pruebas.md) · [móvil](proyecto/mobile/docs/pruebas.md) |
+| Pruebas y resultados | [backend](proyecto/backend/docs/pruebas/plan-de-pruebas.md) · [seguridad](proyecto/backend/docs/pruebas/resultados-seguridad.md) · [rendimiento](proyecto/backend/docs/pruebas/rendimiento.md) · [web](proyecto/web/docs/pruebas.md) · [móvil](proyecto/mobile/docs/pruebas.md) |
 | Supuestos y decisiones | [supuestos.md](proyecto/docs/supuestos.md): registro único de simulaciones, datos y API, seguridad y app móvil |
 | Estado de la entrega | [checklist-final.md](proyecto/docs/checklist-final.md) |
 

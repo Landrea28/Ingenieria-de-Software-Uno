@@ -14,7 +14,7 @@ trabajo que aún no tiene evidencia de ejecución.
 | Web registra, lista, busca y actualiza ciudadanos | Parcial | Suite web: `RegistroCiudadanoTest`, `ConsultaYEdicionTest`, `ClientesRestTest`; los tests no sustituyen una comprobación end-to-end manual en navegador contra el backend |
 | Móvil: login, escaneo y resultado | Parcial | [mobile/docs/pruebas.md](../mobile/docs/pruebas.md): integración y pruebas manuales registradas; los tres casos de escaneo M-10–M-12 están pendientes |
 | PDF con ambos filtros y caso sin resultados | Hecho | [salida del smoke test](../backend/docs/evidencias/smoke-test-salida.txt): ambos PDF válidos y 404 `SIN_RESULTADOS` |
-| Autorización 401/403 | Hecho | [salida del smoke test](../backend/docs/evidencias/smoke-test-salida.txt), matrices parametrizadas en `SeguridadIntegracionTest` y 136 pruebas backend aprobadas |
+| Autorización 401/403 | Hecho | [salida del smoke test](../backend/docs/evidencias/smoke-test-salida.txt), matrices parametrizadas en `SeguridadIntegracionTest` y 136 pruebas backend aprobadas (última ejecución: 2026-11-16) |
 | Sin secretos versionados ni datos personales reales | Hecho | `.gitignore`, `.env.example`, datos ficticios en `backend/src/main/resources/db/demo/`; se comprobó que no hay `.env` real en el índice con `git ls-files | grep -E '(^|/)\.env$'` |
 | Simulaciones identificadas | Hecho | [registro de supuestos](supuestos.md), OpenAPI y README de backend etiquetan Defensa, correo y datos de demo como simulados |
 | Evidencias de pruebas | Hecho | [backend/docs/evidencias/](../backend/docs/evidencias/), [mobile/docs/evidencias/](../mobile/docs/evidencias/), reportes locales `backend/target/surefire-reports/` y `web/target/surefire-reports/` |
@@ -23,6 +23,9 @@ trabajo que aún no tiene evidencia de ejecución.
 | Estimación PERT y burndown | Hecho — fuera del repositorio | `00_Consolidado_Entrega.xlsx` (entrega, fuera del repositorio), hojas «PERT», «Capacidad_Equipos», «Planning_Poker», «Gantt» y «Burndown» |
 | Pitch y simulacros | Parcial — Pendiente equipo | `Presentacion_Ejecutiva.pptx` en la entrega; no hay evidencia registrada de simulacros de sustentación |
 | Pruebas manuales en celular | Parcial — Pendiente equipo | [mobile/docs/pruebas.md](../mobile/docs/pruebas.md): completar los casos de escaneo M-10–M-12 en un dispositivo apto |
+| RNF de rendimiento medidos | Hecho | [backend/docs/pruebas/rendimiento.md](../backend/docs/pruebas/rendimiento.md): RNF-R1 y RNF-R2 cumplen con 30 muestras por operación (`scripts/medir-rendimiento.sh`) |
+| Supuestos en un registro único | Hecho | [supuestos.md](supuestos.md): simulaciones, datos y API, seguridad y app móvil, con identificadores sin repetir |
+| Código documentado | Hecho | Javadoc de clase en backend (89 de 89) y web (39 de 41); comentarios de documentación en los módulos del móvil |
 | Smoke test PowerShell en Windows | Falta | `proyecto/scripts/smoke-test.ps1`; no hay salida de ejecución en Windows |
 
 La planeación con Scrum, la especificación de casos de uso y la trazabilidad no se
