@@ -4,6 +4,9 @@ Monorepo académico con una API REST, aplicación web administrativa y app móvi
 para consultar datos de antecedentes **ficticios**. No usar con información real
 ni exponer en Internet. Las validaciones de Defensa y el correo son simulados.
 
+**¿Primera vez?** La [guía de uso](proyecto/docs/guia-de-uso.md) explica paso a paso cómo correr el proyecto,
+abrir el correo de pruebas, registrarse e iniciar sesión, y qué hacer cuando un mensaje de error aparece.
+
 ## Requisitos
 
 - Git.
@@ -139,6 +142,7 @@ a la base de datos.
 
 | Tema | Dónde está |
 |---|---|
+| **Guía de uso: correr, correo, registro e inicio de sesión** | [guia-de-uso.md](proyecto/docs/guia-de-uso.md) |
 | Instalación y uso de cada módulo | [backend](proyecto/backend/README.md) · [web](proyecto/web/README.md) · [móvil](proyecto/mobile/README.md) |
 | Requisitos funcionales y no funcionales | [requisitos.md](proyecto/backend/docs/requisitos.md) · [RNF de seguridad](proyecto/backend/docs/requisitos/rnf-seguridad.md) |
 | Arquitectura y clases | [arquitectura.md](proyecto/backend/docs/arquitectura.md) · [especificacion-clases.md](proyecto/backend/docs/especificacion-clases.md) |

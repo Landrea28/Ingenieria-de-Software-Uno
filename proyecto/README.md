@@ -1,7 +1,7 @@
 # Sistema de Consulta Ciudadano
 
-Las instrucciones de instalación, el orden de arranque y el índice de la
-documentación están en el [README de la raíz](../README.md).
+Para correr el proyecto, abrir el correo, registrarse e iniciar sesión, sigue la
+[guía de uso](docs/guia-de-uso.md). El índice de la documentación está en el [README de la raíz](../README.md).
 
 | Carpeta | Contenido |
 |---|---|
@@ -9,4 +9,4 @@ documentación están en el [README de la raíz](../README.md).
 | [web/](web/README.md) | Aplicación web administrativa (Spring MVC + Thymeleaf) |
 | [mobile/](mobile/README.md) | Aplicación móvil (React Native + Expo) |
 | [scripts/](scripts/) | Prueba de humo contra la API real |
-| [docs/](docs/) | [Registro de supuestos](docs/supuestos.md) y [checklist final](docs/checklist-final.md) |
+| [docs/](docs/) | [Guía de uso](docs/guia-de-uso.md), [registro de supuestos](docs/supuestos.md) y [checklist final](docs/checklist-final.md) |

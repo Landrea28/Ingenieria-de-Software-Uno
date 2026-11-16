@@ -23,6 +23,7 @@ trabajo que aún no tiene evidencia de ejecución.
 | Estimación PERT y burndown | Hecho — fuera del repositorio | `00_Consolidado_Entrega.xlsx` (entrega, fuera del repositorio), hojas «PERT», «Capacidad_Equipos», «Planning_Poker», «Gantt» y «Burndown» |
 | Pitch y simulacros | Parcial — Pendiente equipo | `Presentacion_Ejecutiva.pptx` en la entrega; no hay evidencia registrada de simulacros de sustentación |
 | Pruebas manuales en celular | Parcial — Pendiente equipo | [mobile/docs/pruebas.md](../mobile/docs/pruebas.md): completar los casos de escaneo M-10–M-12 en un dispositivo apto |
+| Guía de uso (correr, correo, registro, inicio de sesión, errores) | Hecho | [guia-de-uso.md](guia-de-uso.md) |
 | RNF de rendimiento medidos | Hecho | [backend/docs/pruebas/rendimiento.md](../backend/docs/pruebas/rendimiento.md): RNF-R1 y RNF-R2 cumplen con 30 muestras por operación (`scripts/medir-rendimiento.sh`) |
 | Supuestos en un registro único | Hecho | [supuestos.md](supuestos.md): simulaciones, datos y API, seguridad y app móvil, con identificadores sin repetir |
 | Código documentado | Hecho | Javadoc de clase en backend (89 de 89) y web (39 de 41); comentarios de documentación en los módulos del móvil |
