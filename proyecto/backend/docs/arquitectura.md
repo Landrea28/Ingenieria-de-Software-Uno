@@ -52,4 +52,7 @@ El estado de antecedentes se guarda en una tabla separada con un registro por ci
 
 `PUT /api/antecedentes/{identificacion}/estado` es una operación adicional para las demostraciones y está limitada a administradores.
 
-Las migraciones V1 y V2 se aplican siempre. V100 solo se incluye con perfil `demo`. Las entidades JPA se validan contra el esquema y no lo generan automáticamente.
+Las migraciones V1 a V7 crean el esquema y se aplican siempre. Las migraciones
+de datos ficticios V100 (ciudadanos y antecedentes) y V101 (personal de Defensa
+SIMULADO) se aplican con el perfil `demo`. Las entidades JPA se validan contra
+el esquema y no lo generan automáticamente.

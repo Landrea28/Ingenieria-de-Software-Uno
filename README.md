@@ -1,192 +1,121 @@
 # Sistema de Consulta Ciudadano
 
-Sistema para la **Registraduría** que permite al personal de la fuerza pública consultar, leyendo el código de barras de la cédula, si un ciudadano está **Requerido** o **No requerido**. También permite a un administrador gestionar ciudadanos y generar reportes en PDF.
+Monorepo académico con una API REST, aplicación web administrativa y app móvil
+para consultar datos de antecedentes **ficticios**. No usar con información real
+ni exponer en Internet. Las validaciones de Defensa y el correo son simulados.
 
-> Proyecto académico de **Ingeniería de Software I** — Fundación Universitaria Konrad Lorenz.
+## Requisitos
 
----
+- Git.
+- JDK 21.
+- Docker y Docker Compose para PostgreSQL y Mailpit.
+- Node.js y npm para la app móvil.
+- Bash para `smoke-test.sh`; Windows PowerShell para `smoke-test.ps1`.
 
-## Objetivo
+Backend y web incluyen Maven Wrapper (`./mvnw`), no es necesario instalar Maven.
+En Windows use `mvnw.cmd`.
 
-Ofrecer una consulta rápida y confiable del estado de un ciudadano en campo, con un módulo administrativo centralizado para mantener la información actualizada y generar reportes.
+## Configuración
 
-## Actores
+1. En `proyecto/backend`, copie `.env.example` a `.env`.
+2. Defina valores locales para `DB_PASSWORD`, `JWT_SECRET` (aleatorio, al menos
+   32 caracteres), `ADMIN_INITIAL_IDENTIFICACION`, `ADMIN_INITIAL_EMAIL`,
+   `ADMIN_INITIAL_PASSWORD` y las variables `MAIL_*` si difieren de Mailpit.
+3. No incluya `.env`, contraseñas, tokens ni datos personales reales en commits.
 
-| Actor | Descripción |
-|---|---|
-| Personal de la fuerza pública | Se registra, se autentica y consulta ciudadanos escaneando la cédula desde la app móvil. |
-| Administrador del sistema | Gestiona ciudadanos, usuarios y perfiles, y solicita reportes PDF desde la app web. |
-| Departamento de Defensa | Valida al personal de la fuerza pública. **Integración simulada** (ver [Servicios externos](#servicios-externos-simulados)). |
+## Orden de arranque
 
-## Arquitectura
+Mantenga los servicios en ejecución en terminales separadas.
 
-Monorepo con un **backend único (API REST)** consumido por dos clientes:
-
-```
- App web (admin) ──┐
-                   ├──► API REST (Spring Boot) ──► ORM (Hibernate/JPA) ──► PostgreSQL
- App móvil ────────┘
-```
-
-- La **lógica de negocio y las reglas de acceso viven en el servidor**, no en los clientes.
-- El backend es el único que accede a la base de datos, y lo hace mediante ORM.
-
-## Funcionalidades por entrega
-
-| Entrega | Funcionalidades |
-|---|---|
-| **MVP 1** | Registro y autenticación del personal · Registro de ciudadanos · Consulta de antecedentes por código de barras |
-| **MVP 2** | Administración y control de usuarios y perfiles |
-| **MVP 3** | Reporte PDF filtrado por estado (Requerido / No requerido) |
-
-## Stack tecnológico
-
-| Capa | Tecnología |
-|---|---|
-| Backend | Java + Spring Boot (Spring MVC) + API REST |
-| Web | Spring MVC + Thymeleaf (vistas del lado servidor), consume la API REST |
-| Móvil | React Native + Expo (Android como plataforma de prueba) |
-| Base de datos | PostgreSQL |
-| ORM | Hibernate (Spring Data JPA) |
-| Servidor de aplicaciones | Tomcat (embebido en Spring Boot) |
-| Seguridad | Spring Security · contraseñas cifradas con bcrypt |
-
-## Estructura del repositorio
-
-```
-Ingenieria-de-Software-Uno/
-├── proyecto/
-│   ├── backend/ # API REST con Spring Boot
-│   ├── web/     # App web administrativa (Spring MVC + Thymeleaf)
-│   └── mobile/  # App móvil (React Native + Expo)
-├── .gitignore
-└── README.md
-```
-
-Cada subproyecto tiene sus propios archivos de dependencias y sus propios comandos de ejecución. Las instrucciones detalladas están en:
-
-- [backend/README.md](backend/README.md)
-- [web/README.md](web/README.md)
-- [mobile/README.md](mobile/README.md)
-
-## Requisitos previos
-
-| Herramienta | Versión | Usada en |
-|---|---|---|
-| Git | — | Todo el repo |
-| Java (JDK) | <<COMPLETAR>> | backend, web |
-| Maven / Gradle | <<COMPLETAR: cuál y versión>> | backend, web |
-| PostgreSQL | <<COMPLETAR>> | database |
-| Node.js + npm | <<COMPLETAR>> | mobile |
-| Expo (Expo Go en Android) | <<COMPLETAR>> | mobile |
-
-## Instalación y orden de arranque
+### 1. PostgreSQL y Mailpit
 
 ```bash
-git clone https://github.com/Landrea28/Ingenieria-de-Software-Uno.git
-cd Ingenieria-de-Software-Uno
+cd proyecto/backend
+docker compose up -d
 ```
 
-Los componentes se levantan **en este orden**, porque cada uno depende del anterior.
+Mailpit queda en <http://localhost:8025>; SMTP en `localhost:1025`.
 
-### 1. Base de datos
+### 2. Backend
+
+Desde otra terminal, cargue las variables del archivo local y arranque el
+backend con los perfiles `demo,dev` para instalar datos ficticios y habilitar
+Swagger solo en desarrollo:
 
 ```bash
-# Crear la base de datos
-<<COMPLETAR: p. ej. createdb nombre_bd>>
-
-# Crear las tablas
-<<COMPLETAR: p. ej. psql -d nombre_bd -f database/schema.sql>>
-
-# Cargar datos de prueba
-<<COMPLETAR: p. ej. psql -d nombre_bd -f database/seed.sql>>
+cd proyecto/backend
+set -a
+. ./.env
+set +a
+./mvnw spring-boot:run -Dspring-boot.run.profiles=demo,dev
 ```
 
-### 2. Backend (API REST)
+La API escucha en <http://localhost:8080>; health:
+<http://localhost:8080/api/health>. `demo` solo debe usarse con una base limpia.
+No arranque un perfil demo sobre datos que quiera conservar.
+
+### 3. Web
 
 ```bash
-cd backend
-<<COMPLETAR: comando de ejecución>>
+cd proyecto/web
+API_BASE_URL=http://localhost:8080 ./mvnw spring-boot:run
 ```
 
-La API queda disponible en: <<COMPLETAR: URL y puerto>>
+Abra <http://localhost:8081/login> e ingrese con el usuario administrador
+configurado mediante `ADMIN_INITIAL_*`.
 
-### 3. Clientes (con el backend ya en ejecución)
-
-**Web:**
+### 4. Móvil
 
 ```bash
-cd web
-<<COMPLETAR: comando de ejecución>>
+cd proyecto/mobile
+npm ci
+npm start
 ```
 
-**Móvil:**
+La configuración está en `proyecto/mobile/.env.example`. Para un emulador
+Android, la URL local del host suele ser `http://10.0.2.2:8080`; en un teléfono,
+configure la IP accesible del equipo que ejecuta el backend. Use modo `real`
+para consumir la API; el modo `mock` es una simulación claramente etiquetada.
+
+## Pruebas y verificaciones
 
 ```bash
-cd mobile
-<<COMPLETAR: instalar dependencias>>
-<<COMPLETAR: iniciar Expo>>
+cd proyecto/backend
+./mvnw clean verify
+
+cd ../web
+./mvnw clean verify
+
+cd ../mobile
+npm ci
+npm test
+npm run typecheck
 ```
 
-## Variables de entorno y secretos
+Para una prueba de humo contra la API real, arranque backend, PostgreSQL y
+Mailpit; defina `SMOKE_ADMIN_IDENTIFICACION` y `SMOKE_ADMIN_PASSWORD` solo en la
+sesión de terminal y ejecute desde la raíz:
 
-- Cada subproyecto que lo necesite tiene un **`.env.example`** con los nombres de las variables y valores de ejemplo, **sin datos reales**.
-- Para ejecutar en local, copia `.env.example` a **`.env`** y completa tus valores.
-- **No subas al repositorio** archivos `.env`, credenciales, tokens, contraseñas ni datos personales reales. Los datos de prueba de `seed.sql` deben ser ficticios.
+```bash
+bash proyecto/scripts/smoke-test.sh
+```
 
-## Servicios externos (simulados)
+En Windows, defina las mismas variables de entorno y ejecute
+`proyecto/scripts/smoke-test.ps1` desde PowerShell. La ejecución Windows aún
+está pendiente; la salida Bash guardada está en
+[proyecto/backend/docs/evidencias/smoke-test-salida.txt](proyecto/backend/docs/evidencias/smoke-test-salida.txt).
 
-Los siguientes servicios **no son integraciones reales**: están **simulados** para el alcance académico del proyecto.
+## Estructura y documentación
 
-- **Departamento de Defensa:** validación del personal de la fuerza pública.
-- **Correo electrónico:** envío de notificaciones.
-
-Su diseño y la justificación de la simulación están documentados en [docs/decisiones](docs/decisiones).
-
-## Estrategia de ramas (Git)
-
-| Rama | Propósito |
+| Ruta | Contenido |
 |---|---|
-| `main` | Versión estable. Solo recibe cambios desde `develop` al cerrar una entrega. |
-| `develop` | Rama de integración del trabajo del equipo. |
-| `feature/<id>-<descripcion>` | Una funcionalidad concreta. Se crea desde `develop`. |
+| [proyecto/backend/](proyecto/backend/) | API, migraciones Flyway, contrato OpenAPI y documentación |
+| [proyecto/web/](proyecto/web/) | Cliente web administrativo Spring MVC/Thymeleaf |
+| [proyecto/mobile/](proyecto/mobile/) | Cliente React Native/Expo y pruebas manuales de dispositivo |
+| [proyecto/docs/](proyecto/docs/) | Checklist final y plantillas pendientes del equipo |
+| [proyecto/backend/docs/pruebas/](proyecto/backend/docs/pruebas/) | Plan de pruebas y resultados medidos de Surefire |
 
-Ejemplos de ramas `feature`: `feature/HU04-registro-ciudadano`, `feature/web-ciudadanos`, `feature/HU07-escaneo`, `feature/RF07-reporte-pdf`.
-
-**Flujo:** cada `feature/...` se integra a `develop` mediante **Pull Request**, que debe ser **revisado y aprobado por al menos un compañero** antes de hacer merge.
-
-```bash
-git checkout develop
-git pull
-git checkout -b feature/HU04-registro-ciudadano
-# ... cambios y commits ...
-git push -u origin feature/HU04-registro-ciudadano
-# Abrir Pull Request hacia develop
-```
-
-## Equipo
-
-| Integrante | Módulo |
-|---|---|
-| Sebastián | Backend / API REST |
-| Lina | Aplicación web |
-| Mariana | Aplicación móvil |
-| Julián | Seguridad |
-| David | Datos / ORM / Reporte PDF |
-
-## Estado del proyecto
-
-🚧 **En desarrollo.**
-
-| Versión | Entrega |
-|---|---|
-| v0.1 | MVP 1 |
-| v0.2 | MVP 2 |
-| v1.0 | MVP 3 |
-
-Versión actual: <<COMPLETAR>>
-
-## Backend y seguridad
-
-- [README del backend](proyecto/backend/README.md)
-- [Documentación del backend y seguridad](proyecto/backend/docs/)
+Las pruebas manuales móviles y las pendientes de cámara están descritas en
+[proyecto/mobile/docs/pruebas.md](proyecto/mobile/docs/pruebas.md). Defensa,
+correo y datos semilla se mantienen simulados; consulte los supuestos del
+[backend](proyecto/backend/docs/supuestos.md).

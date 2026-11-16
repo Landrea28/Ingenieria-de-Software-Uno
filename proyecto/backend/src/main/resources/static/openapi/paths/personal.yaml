@@ -29,13 +29,13 @@ registro:
             schema:
               $ref: '../schemas/errores.yaml#/ErrorResponse'
       '503':
-        description: El adaptador SIMULADO no esta disponible
+        description: El adaptador SIMULADO o el servicio de correo no esta disponible
         content:
           application/json:
             schema:
               $ref: '../schemas/errores.yaml#/ErrorResponse'
       '500':
-        description: Fallo al persistir o enviar el correo SMTP
+        description: Error interno no recuperable
         content:
           application/json:
             schema:

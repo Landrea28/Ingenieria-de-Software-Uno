@@ -20,21 +20,25 @@ API REST del sistema de consulta ciudadana. Java 21, Spring Boot (Spring MVC, To
 ## Requisitos
 
 - JDK 21
-- Maven 3.9 o posterior
 - PostgreSQL 15+ o Docker con Docker Compose
+
+Se incluye Maven Wrapper (`./mvnw`; en Windows, `mvnw.cmd`), por lo que no es
+necesario instalar Maven.
 
 ## Ejecutar
 
-1. Copiar `.env.example` a `.env`, definir un `DB_PASSWORD` local y arrancar PostgreSQL: `docker compose up -d`.
-2. Exportar las variables de `.env.example` a la consola. Maven no carga `.env` automáticamente. Definir un `JWT_SECRET` aleatorio de al menos 32 bytes. Para crear el administrador inicial, configurar `ADMIN_INITIAL_IDENTIFICACION`, `ADMIN_INITIAL_EMAIL` y `ADMIN_INITIAL_PASSWORD`.
-3. Ejecutar `mvn spring-boot:run -Dspring-boot.run.profiles=dev`.
+1. Copiar `.env.example` a `.env`, definir valores locales, incluido `DB_PASSWORD`, y arrancar PostgreSQL y Mailpit: `docker compose up -d`.
+2. Exportar las variables de `.env.example` a la consola. Maven no carga `.env` automáticamente. Definir un `JWT_SECRET` aleatorio de al menos 32 caracteres. Para crear el administrador inicial, configurar `ADMIN_INITIAL_IDENTIFICACION`, `ADMIN_INITIAL_EMAIL` y `ADMIN_INITIAL_PASSWORD`.
+3. Ejecutar `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`.
 4. Abrir `http://localhost:8080/swagger-ui.html` y usar **Try it out**. Swagger y actuator solo se habilitan con el perfil `dev`.
 
-Las migraciones SQL se aplican al arrancar. El servidor es Tomcat embebido: `mvn package` genera un JAR ejecutable en `target/`. El archivo `.env` local está ignorado por Git y no debe versionarse.
+Las migraciones SQL se aplican al arrancar. El servidor es Tomcat embebido:
+`./mvnw package` genera un JAR ejecutable en `target/`. El archivo `.env` local
+está ignorado por Git y no debe versionarse.
 
 ## Datos de demostración
 
-`docker compose up -d` inicia PostgreSQL y Mailpit (interfaz en `http://localhost:8025`). `mvn spring-boot:run -Dspring-boot.run.profiles=demo,dev` carga 20 ciudadanos, 19 antecedentes y diez identidades **SIMULADAS** de personal distribuidas en cuatro fuerzas. El ciudadano `9000000020` no tiene estado a propósito y produce 404 `SIN_INFORMACION`. Usar el perfil `demo` solo sobre una base limpia.
+`docker compose up -d` inicia PostgreSQL y Mailpit (interfaz en `http://localhost:8025`). `./mvnw spring-boot:run -Dspring-boot.run.profiles=demo,dev` carga 20 ciudadanos, 19 antecedentes y diez identidades **SIMULADAS** de personal distribuidas en cuatro fuerzas. El ciudadano `9000000020` no tiene estado a propósito y produce 404 `SIN_INFORMACION`. Usar el perfil `demo` solo sobre una base limpia.
 
 Sin `demo` se cargan únicamente el esquema, los catálogos de fuerzas y rangos, y los perfiles y permisos básicos. Todos los estados de antecedentes son ficticios.
 
@@ -63,8 +67,9 @@ Variables principales: `JWT_SECRET`, `ADMIN_INITIAL_*`, `MAIL_*` y `CORS_ALLOWED
 ## Documentación y calidad
 
 - Contrato OpenAPI: `src/main/resources/static/openapi/openapi.yaml`; operaciones en `openapi/paths`, esquemas en `openapi/schemas`. Los controladores no llevan anotaciones de documentación.
-- `mvn test` ejecuta pruebas JUnit, Mockito, MockMvc, persistencia con H2 y reglas de arquitectura con ArchUnit.
-- `mvn clean package` valida el empaquetado completo.
+- `./mvnw clean verify` ejecuta pruebas JUnit, Mockito, MockMvc, persistencia con H2, reglas de arquitectura con ArchUnit y empaquetado.
 - [Pruebas Postman/Newman](docs/pruebas/README.md): `newman run docs/pruebas/postman/seguridad.postman_collection.json -e docs/pruebas/postman/seguridad.postman_environment.json`.
 - [Plan de pruebas](docs/pruebas/plan-de-pruebas.md) y [resultados medidos de Surefire](docs/pruebas/resultados-seguridad.md).
 - Más detalle en `docs/`: arquitectura, requisitos, especificación de clases y supuestos.
+- [Reconstrucción de base de datos](docs/modelo-datos/reconstruccion-base.md),
+  [diccionario](docs/modelo-datos/diccionario-datos.md) y [modelo ER](docs/modelo-datos/modelo-er.md).
