@@ -77,6 +77,12 @@ Android, la URL local del host suele ser `http://10.0.2.2:8080`; en un teléfono
 configure la IP accesible del equipo que ejecuta el backend. Use modo `real`
 para consumir la API; el modo `mock` es una simulación claramente etiquetada.
 
+En Android reciente, Expo Go necesita el permiso de red local para alcanzar el
+backend; si la app dice que el servidor tardó demasiado en responder, vea la
+sección correspondiente del [README del móvil](proyecto/mobile/README.md).
+Las pruebas manuales móviles y los casos de cámara pendientes están en
+[proyecto/mobile/docs/pruebas.md](proyecto/mobile/docs/pruebas.md).
+
 ## Pruebas y verificaciones
 
 ```bash
@@ -105,17 +111,67 @@ En Windows, defina las mismas variables de entorno y ejecute
 está pendiente; la salida Bash guardada está en
 [proyecto/backend/docs/evidencias/smoke-test-salida.txt](proyecto/backend/docs/evidencias/smoke-test-salida.txt).
 
-## Estructura y documentación
+## Estructura del repositorio
 
-| Ruta | Contenido |
+```
+proyecto/
+├── backend/   # API REST: Java 21, Spring Boot (Spring MVC, Tomcat embebido), PostgreSQL, Hibernate/JPA, Flyway
+├── web/       # aplicación web administrativa: Spring MVC + Thymeleaf, consume la API
+├── mobile/    # app móvil: React Native + Expo (Android; el mismo código corre en iOS)
+├── scripts/   # prueba de humo contra la API real (Bash y PowerShell)
+└── docs/      # checklist final del proyecto
+```
+
+La web y la app móvil son clientes del mismo backend; ninguna accede directamente
+a la base de datos.
+
+## Equipo y módulos
+
+| Integrante | Módulo |
 |---|---|
-| [proyecto/backend/](proyecto/backend/) | API, migraciones Flyway, contrato OpenAPI y documentación |
-| [proyecto/web/](proyecto/web/) | Cliente web administrativo Spring MVC/Thymeleaf |
-| [proyecto/mobile/](proyecto/mobile/) | Cliente React Native/Expo y pruebas manuales de dispositivo |
-| [proyecto/docs/](proyecto/docs/) | Checklist final y plantillas pendientes del equipo |
-| [proyecto/backend/docs/pruebas/](proyecto/backend/docs/pruebas/) | Plan de pruebas y resultados medidos de Surefire |
+| Sebastián | Backend, arquitectura y API |
+| Lina | Aplicación web administrativa |
+| Mariana | Aplicación móvil |
+| Julián | Seguridad, autenticación y autorización |
+| David | Modelo de datos, ORM, consultas y PDF |
 
-Las pruebas manuales móviles y las pendientes de cámara están descritas en
-[proyecto/mobile/docs/pruebas.md](proyecto/mobile/docs/pruebas.md). Defensa,
-correo y datos semilla se mantienen simulados; consulte los supuestos del
-[backend](proyecto/backend/docs/supuestos.md).
+## Documentación
+
+| Tema | Dónde está |
+|---|---|
+| Instalación y uso de cada módulo | [backend](proyecto/backend/README.md) · [web](proyecto/web/README.md) · [móvil](proyecto/mobile/README.md) |
+| Requisitos funcionales y no funcionales | [requisitos.md](proyecto/backend/docs/requisitos.md) · [RNF de seguridad](proyecto/backend/docs/requisitos/rnf-seguridad.md) |
+| Arquitectura y clases | [arquitectura.md](proyecto/backend/docs/arquitectura.md) · [especificacion-clases.md](proyecto/backend/docs/especificacion-clases.md) |
+| Contrato de la API | `proyecto/backend/src/main/resources/static/openapi/` (Swagger en `/swagger-ui.html` con el perfil `dev`) |
+| Modelo de datos | [modelo ER](proyecto/backend/docs/modelo-datos/modelo-er.md) · [modelo conceptual](proyecto/backend/docs/modelo-datos/modelo-conceptual.md) · [diccionario](proyecto/backend/docs/modelo-datos/diccionario-datos.md) · [reconstrucción de la base](proyecto/backend/docs/modelo-datos/reconstruccion-base.md) |
+| Seguridad | [decisiones](proyecto/backend/docs/decisiones/seguridad.md) · [matriz rol-permiso](proyecto/backend/docs/decisiones/matriz-rol-permiso.md) |
+| Casos de uso del móvil y prototipos | [casos-de-uso.md](proyecto/mobile/docs/casos-de-uso.md) · [mockups.md](proyecto/mobile/docs/mockups.md) |
+| Manuales de usuario | [web](proyecto/web/docs/manual-usuario.md) · [móvil](proyecto/mobile/docs/manual-usuario.md) |
+| Pruebas y resultados | [backend](proyecto/backend/docs/pruebas/plan-de-pruebas.md) · [seguridad](proyecto/backend/docs/pruebas/resultados-seguridad.md) · [web](proyecto/web/docs/pruebas.md) · [móvil](proyecto/mobile/docs/pruebas.md) |
+| Supuestos | [backend](proyecto/backend/docs/supuestos.md) · [seguridad](proyecto/backend/docs/decisiones/supuestos.md) · [móvil](proyecto/mobile/docs/supuestos.md) |
+| Estado de la entrega | [checklist-final.md](proyecto/docs/checklist-final.md) |
+
+La planeación con Scrum (backlog, estimación, sprints, burndown y actas), la
+especificación de casos de uso y la trazabilidad se entregan en el libro
+`00_Consolidado_Entrega.xlsx`, fuera del repositorio.
+
+## Estado del alcance
+
+| Historia | Estado |
+|---|---|
+| HU01 a HU03: registro, validación y login del personal | Terminadas (móvil y backend) |
+| HU04 a HU06: registro, consulta y actualización de ciudadanos | Terminadas (web y backend) |
+| HU07: escaneo de cédula y consulta de antecedentes | Terminada (móvil y backend) |
+| HU08 y HU09: usuarios, perfiles y permisos | Parcial: disponibles como API; sin pantalla web |
+| HU10: reporte PDF por estado | Terminada (web y backend) |
+
+Defensa, el correo y los datos semilla son **simulados**; los supuestos explican
+por qué y cómo se reemplazarían por integraciones reales.
+
+## Ramas
+
+- `main`: versión estable y entregable.
+- `develop`: integración del equipo.
+- `feature/<módulo>`: trabajo de cada módulo (`backend`, `web`, `movil`, `seguridad`, `datos`), que se integra a `develop`.
+
+No se suben archivos `.env`, contraseñas, tokens ni datos personales reales.
