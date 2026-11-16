@@ -16,7 +16,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import co.edu.konrad.consultaciudadano.catalogo.repository.RangoRepository;
+import co.edu.konrad.consultaciudadano.ciudadano.dto.CiudadanoRequest;
+import co.edu.konrad.consultaciudadano.ciudadano.entity.GrupoSanguineo;
 import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
+import co.edu.konrad.consultaciudadano.usuario.dto.ActualizarPermisosRequest;
 import co.edu.konrad.consultaciudadano.usuario.dto.ActualizarUsuarioRequest;
 import co.edu.konrad.consultaciudadano.usuario.dto.CrearUsuarioRequest;
 import co.edu.konrad.consultaciudadano.usuario.dto.EstadoUsuario;
@@ -36,9 +39,13 @@ import java.time.Instant;
 import java.time.Duration;
 import java.util.Date;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -61,6 +68,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 
 @SpringBootTest
@@ -223,9 +231,15 @@ class SeguridadIntegracionTest {
             var hash = jdbc.queryForObject("SELECT password_hash FROM usuario WHERE identificacion = ?",
                     String.class, "8000000005");
             assertTrue(hash.startsWith("$2"));
-            assertFalse(eventos.list.stream()
-                    .map(ILoggingEvent::getFormattedMessage)
-                    .anyMatch(mensaje -> mensaje.contains(contrasenaGenerada)));
+            assertFalse(respuesta.contains(hash));
+            assertFalse(eventos.list.stream().anyMatch(evento -> {
+                var mensaje = evento.getFormattedMessage();
+                if (evento.getThrowableProxy() != null) {
+                    mensaje += ch.qos.logback.classic.spi.ThrowableProxyUtil
+                            .asString(evento.getThrowableProxy());
+                }
+                return mensaje.contains(contrasenaGenerada) || mensaje.contains(hash);
+            }));
 
             mvc.perform(post("/api/personal/registro").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -257,24 +271,58 @@ class SeguridadIntegracionTest {
         assertEquals(respuestaInexistente, respuestaNoCoincidente);
     }
 
-    @Test
-    void registroConCamposExcesivosOInyeccionSqlDevuelve400() throws Exception {
-        var nombreExcesivo = "A".repeat(101);
-        var requestLongitudExcesiva = """
-                {"identificacion":"8000000011","nombres":"%s","apellidos":"Prueba",
-                 "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
-                """.formatted(nombreExcesivo);
-        var requestInyeccionSql = """
-                {"identificacion":"1' OR '1'='1","nombres":"Desconocido","apellidos":"Prueba",
-                 "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
-                """;
+    @ParameterizedTest(name = "{0}: {1}")
+    @MethodSource("payloadsManipulados")
+    void entradasManipuladasEnLoginYRegistroSiempreDevuelven400SinStackTrace(
+            String endpoint, String descripcion, String payload) throws Exception {
+        var resultado = mvc.perform(post(endpoint).contentType(MediaType.APPLICATION_JSON).content(payload))
+                .andReturn();
+        assertEquals(400, resultado.getResponse().getStatus(), descripcion);
+        var cuerpo = resultado.getResponse().getContentAsString();
+        assertFalse(cuerpo.contains("Exception"), descripcion);
+        assertFalse(cuerpo.contains("at org.springframework"), descripcion);
+        assertFalse(cuerpo.contains("StackTrace"), descripcion);
+        assertFalse(cuerpo.contains("stack trace"), descripcion);
+    }
 
-        mvc.perform(post("/api/personal/registro").contentType(MediaType.APPLICATION_JSON)
-                        .content(requestLongitudExcesiva))
-                .andExpect(status().isBadRequest());
-        mvc.perform(post("/api/personal/registro").contentType(MediaType.APPLICATION_JSON)
-                        .content(requestInyeccionSql))
-                .andExpect(status().isBadRequest());
+    static Stream<Arguments> payloadsManipulados() {
+        var nombreExcesivo = "A".repeat(101);
+        var contrasenaExcesiva = "A".repeat(129);
+        return Stream.of(
+                Arguments.of("/api/auth/login", "inyeccion SQL", """
+                        {"identificacion":"1' OR '1'='1","contrasena":"Abc123","recordarContrasena":false}
+                        """),
+                Arguments.of("/api/auth/login", "identificacion con formato invalido", """
+                        {"identificacion":"ABCDEF","contrasena":"Abc123","recordarContrasena":false}
+                        """),
+                Arguments.of("/api/auth/login", "identificacion excesiva", """
+                        {"identificacion":"12345678901","contrasena":"Abc123","recordarContrasena":false}
+                        """),
+                Arguments.of("/api/auth/login", "contrasena excesiva", """
+                        {"identificacion":"8000000001","contrasena":"%s","recordarContrasena":false}
+                        """.formatted(contrasenaExcesiva)),
+                Arguments.of("/api/auth/login", "JSON malformado", """
+                        {"identificacion":
+                        """),
+                Arguments.of("/api/personal/registro", "nombre excesivo", """
+                        {"identificacion":"8000000011","nombres":"%s","apellidos":"Prueba",
+                         "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
+                        """.formatted(nombreExcesivo)),
+                Arguments.of("/api/personal/registro", "inyeccion SQL", """
+                        {"identificacion":"1' OR '1'='1","nombres":"Desconocido","apellidos":"Prueba",
+                         "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
+                        """),
+                Arguments.of("/api/personal/registro", "identificacion con formato invalido", """
+                        {"identificacion":"ABCDEF","nombres":"Desconocido","apellidos":"Prueba",
+                         "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"rechazado@example.test"}
+                        """),
+                Arguments.of("/api/personal/registro", "correo con formato invalido", """
+                        {"identificacion":"8000000011","nombres":"Desconocido","apellidos":"Prueba",
+                         "fuerzaCodigo":"POLICIA","rangoId":1,"idFuerza":"DEMO-011","correo":"correo-invalido"}
+                        """),
+                Arguments.of("/api/personal/registro", "JSON malformado", """
+                        {"identificacion":
+                        """));
     }
 
     @Test
@@ -500,8 +548,10 @@ class SeguridadIntegracionTest {
                 && (metodo == RequestMethod.GET || metodo == RequestMethod.PUT);
     }
 
-    @Test
-    void matrizDeLecturasProtegidasCubreTodosLosTiposDeTokenYRoles() throws Exception {
+    @ParameterizedTest(name = "{0} con {1}")
+    @MethodSource("matrizLecturaPorToken")
+    void matrizDeLecturasProtegidasCubreTodosLosTiposDeTokenYRoles(
+            EndpointLectura endpoint, String nombreToken) throws Exception {
         var administrador = asegurarAdministrador();
         var tokenAdmin = token(administrador);
         var tokenPersonalValido = tokenPersonal();
@@ -509,6 +559,38 @@ class SeguridadIntegracionTest {
         var emitido = jwt.emitir(usuarioPersonal, false);
         revocacion.revocar(emitido.jti(), emitido.expiraEn());
         var perfilAdmin = perfiles.findByCodigo("ADMINISTRADOR").orElseThrow();
+        var tokens = java.util.List.of(
+                new TokenMatriz("sin token", null),
+                new TokenMatriz("invalido", "Bearer invalido"),
+                new TokenMatriz("vencido", "Bearer " + tokenExpirado()),
+                new TokenMatriz("revocado", "Bearer " + emitido.valor()),
+                new TokenMatriz("personal", "Bearer " + tokenPersonalValido),
+                new TokenMatriz("administrador", "Bearer " + tokenAdmin));
+
+        var estadoToken = tokens.stream()
+                .filter(token -> token.nombre().equals(nombreToken)).findFirst().orElseThrow();
+        var ruta = endpoint.ruta().replace("{perfilAdmin}", perfilAdmin.getId().toString());
+        var peticion = get(ruta);
+        var autorizacion = "invalido".equals(nombreToken)
+                ? "Bearer no-es-un-jwt" : estadoToken.autorizacion();
+        if (autorizacion != null) {
+            peticion.header("Authorization", autorizacion);
+        }
+        var response = mvc.perform(peticion).andReturn().getResponse();
+        var esperado = switch (estadoToken.nombre()) {
+            case "sin token", "invalido", "vencido", "revocado" -> 401;
+            case "personal" -> endpoint.permitePersonal() ? 200 : 403;
+            default -> 200;
+        };
+        assertEquals(esperado, response.getStatus(),
+                () -> endpoint.ruta() + " con " + estadoToken.nombre());
+        if (endpoint.ruta().startsWith("/api/reportes") && "administrador".equals(estadoToken.nombre())) {
+            assertEquals(MediaType.APPLICATION_PDF_VALUE, response.getContentType());
+            assertTrue(new String(response.getContentAsByteArray(), StandardCharsets.US_ASCII).startsWith("%PDF"));
+        }
+    }
+
+    static Stream<Arguments> matrizLecturaPorToken() {
         var endpoints = java.util.List.of(
                 new EndpointLectura("/api/ciudadanos", false),
                 new EndpointLectura("/api/ciudadanos/9000000001", false),
@@ -518,35 +600,144 @@ class SeguridadIntegracionTest {
                 new EndpointLectura("/api/usuarios/" + IDENTIFICACION_ADMIN, false),
                 new EndpointLectura("/api/perfiles", false),
                 new EndpointLectura("/api/permisos", false),
-                new EndpointLectura("/api/perfiles/" + perfilAdmin.getId() + "/permisos", false));
-        var tokens = java.util.List.of(
-                new TokenMatriz("sin token", null),
-                new TokenMatriz("invalido", "Bearer invalido"),
-                new TokenMatriz("vencido", "Bearer " + tokenExpirado()),
-                new TokenMatriz("revocado", "Bearer " + emitido.valor()),
-                new TokenMatriz("personal", "Bearer " + tokenPersonalValido),
-                new TokenMatriz("administrador", "Bearer " + tokenAdmin));
+                new EndpointLectura("/api/perfiles/{perfilAdmin}/permisos", false));
+        var nombresToken = java.util.List.of("sin token", "invalido", "vencido", "revocado",
+                "personal", "administrador");
+        return endpoints.stream().flatMap(endpoint -> nombresToken.stream()
+                .map(nombreToken -> Arguments.of(endpoint, nombreToken)));
+    }
 
-        for (var endpoint : endpoints) {
-            for (var estadoToken : tokens) {
-                var peticion = get(endpoint.ruta());
-                if (estadoToken.autorizacion() != null) {
-                    peticion.header("Authorization", estadoToken.autorizacion());
-                }
-                var response = mvc.perform(peticion).andReturn().getResponse();
-                var esperado = switch (estadoToken.nombre()) {
-                    case "sin token", "invalido", "vencido", "revocado" -> 401;
-                    case "personal" -> endpoint.permitePersonal() ? 200 : 403;
-                    default -> 200;
-                };
-                assertEquals(esperado, response.getStatus(),
-                        () -> endpoint.ruta() + " con " + estadoToken.nombre());
-                if (endpoint.ruta().startsWith("/api/reportes") && "administrador".equals(estadoToken.nombre())) {
-                    assertEquals(MediaType.APPLICATION_PDF_VALUE, response.getContentType());
-                    assertTrue(new String(response.getContentAsByteArray(), StandardCharsets.US_ASCII)
-                            .startsWith("%PDF"));
-                }
+    @ParameterizedTest(name = "{0} con {1}")
+    @MethodSource("matrizEscrituraPorToken")
+    @Transactional
+    void matrizParametrizadaDeEscriturasProtegidas(
+            EndpointEscritura endpoint, String estadoToken) throws Exception {
+        var administrador = asegurarAdministrador();
+        var tokenAdmin = token(administrador);
+        var tokenPersonalValido = tokenPersonal();
+        var usuarioPersonal = usuarios.findByIdentificacion(IDENTIFICACION_PERSONAL).orElseThrow();
+        var emitido = jwt.emitir(usuarioPersonal, false);
+        revocacion.revocar(emitido.jti(), emitido.expiraEn());
+        var perfilAdmin = perfiles.findByCodigo("ADMINISTRADOR").orElseThrow();
+        var perfilPersonal = perfiles.findByCodigo("PERSONAL_FUERZA_PUBLICA").orElseThrow();
+
+        var autorizacion = switch (estadoToken) {
+            case "sin token" -> null;
+            case "invalido" -> "Bearer no-es-un-jwt";
+            case "vencido" -> "Bearer " + tokenExpirado();
+            case "revocado" -> "Bearer " + emitido.valor();
+            case "PERSONAL" -> "Bearer " + tokenPersonalValido;
+            case "ADMINISTRADOR" -> "Bearer " + tokenAdmin;
+            default -> throw new IllegalArgumentException("Estado de token no contemplado: " + estadoToken);
+        };
+        var ruta = endpoint.ruta().replace("{perfilPersonal}", perfilPersonal.getId().toString());
+        var peticion = endpoint.metodo() == RequestMethod.POST ? post(ruta) : put(ruta);
+        var payload = payloadEscritura(endpoint.nombre(), perfilAdmin.getId());
+        peticion.contentType(MediaType.APPLICATION_JSON).content(payload);
+        if (autorizacion != null) {
+            peticion.header("Authorization", autorizacion);
+        }
+
+        var response = mvc.perform(peticion).andReturn().getResponse();
+        var esperado = switch (estadoToken) {
+            case "sin token", "invalido", "vencido", "revocado" -> 401;
+            case "PERSONAL" -> endpoint.permitePersonal() ? 200 : 403;
+            default -> 200;
+        };
+        if (("crear ciudadano".equals(endpoint.nombre()) || "crear usuario".equals(endpoint.nombre()))
+                && "ADMINISTRADOR".equals(estadoToken)) {
+            assertEquals(201, response.getStatus(), endpoint.nombre());
+            return;
+        }
+        assertEquals(esperado, response.getStatus(),
+                () -> endpoint.metodo() + " " + endpoint.ruta() + " con " + estadoToken);
+    }
+
+    static Stream<Arguments> matrizEscrituraPorToken() {
+        var endpoints = java.util.List.of(
+                new EndpointEscritura("crear ciudadano", RequestMethod.POST, "/api/ciudadanos", false),
+                new EndpointEscritura("actualizar ciudadano", RequestMethod.PUT,
+                        "/api/ciudadanos/9000000001", false),
+                new EndpointEscritura("actualizar antecedente", RequestMethod.PUT,
+                        "/api/antecedentes/9000000001/estado", false),
+                new EndpointEscritura("crear usuario", RequestMethod.POST, "/api/usuarios", false),
+                new EndpointEscritura("actualizar usuario", RequestMethod.PUT,
+                        "/api/usuarios/" + IDENTIFICACION_ADMIN, false),
+                new EndpointEscritura("actualizar permisos", RequestMethod.PUT,
+                        "/api/perfiles/{perfilPersonal}/permisos", false));
+        var estados = java.util.List.of("sin token", "invalido", "vencido", "revocado", "PERSONAL",
+                "ADMINISTRADOR");
+        return endpoints.stream().flatMap(endpoint -> estados.stream()
+                .map(estado -> Arguments.of(endpoint, estado)));
+    }
+
+    private String payloadEscritura(String nombre, Long perfilAdminId) throws Exception {
+        return switch (nombre) {
+            case "crear ciudadano" -> objectMapper.writeValueAsString(new CiudadanoRequest(
+                    identificacionPruebaUnica(), "Prueba", "Matriz",
+                    java.time.LocalDate.of(1990, 1, 1), "Bogota",
+                    java.time.LocalDate.of(2010, 1, 1), "Bogota", "+",
+                    GrupoSanguineo.O,
+                    new java.math.BigDecimal("1.75")));
+            case "actualizar ciudadano" -> """
+                    {"nombres":"Ciudadano Actualizado","apellidos":"Matriz",
+                     "fechaNacimiento":"1990-01-01","lugarNacimiento":"Bogota",
+                     "fechaExpedicion":"2010-01-01","lugarExpedicion":"Bogota",
+                     "rh":"+","grupoSanguineo":"O","estatura":1.75}
+                    """;
+            case "actualizar antecedente" -> "{\"estado\":\"REQUERIDO\"}";
+            case "crear usuario" -> {
+                var identificacion = identificacionPruebaUnica();
+                yield objectMapper.writeValueAsString(new CrearUsuarioRequest(
+                        identificacion, "Usuario", "Matriz",
+                        "matriz-" + identificacion + "@example.test", perfilAdminId));
             }
+            case "actualizar usuario" -> objectMapper.writeValueAsString(new ActualizarUsuarioRequest(
+                    "Administrador", "Actualizado", "admin-seguridad@example.test",
+                    perfilAdminId, EstadoUsuario.ACTIVO));
+            case "actualizar permisos" -> objectMapper.writeValueAsString(
+                    new ActualizarPermisosRequest(
+                            jdbc.queryForList("SELECT id FROM permiso", Long.class)));
+            default -> throw new IllegalArgumentException("Operacion no contemplada: " + nombre);
+        };
+    }
+
+    private String identificacionPruebaUnica() {
+        return Long.toString(10_000_000L + Math.floorMod(System.nanoTime(), 90_000_000L));
+    }
+
+    @Test
+    void reportesRespondenPdfParaResultadosY404SinResultadosSoloParaAdministrador() throws Exception {
+        var adminToken = token(asegurarAdministrador());
+        var personalToken = tokenPersonal();
+
+        mvc.perform(get("/api/reportes/ciudadanos").param("estado", "REQUERIDO")
+                        .header("Authorization", "Bearer " + personalToken))
+                .andExpect(status().isForbidden());
+
+        var pdf = mvc.perform(get("/api/reportes/ciudadanos").param("estado", "REQUERIDO")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .content().contentType(MediaType.APPLICATION_PDF))
+                .andReturn().getResponse().getContentAsByteArray();
+        assertTrue(new String(pdf, 0, 4, StandardCharsets.US_ASCII).equals("%PDF"));
+
+        var requeridos = jdbc.queryForList(
+                "SELECT id FROM antecedente WHERE estado = 'REQUERIDO'", Long.class);
+        assertFalse(requeridos.isEmpty(), "El fixture debe tener registros requeridos");
+        try {
+            jdbc.update("UPDATE antecedente SET estado = 'NO_REQUERIDO' WHERE estado = 'REQUERIDO'");
+            mvc.perform(get("/api/reportes/ciudadanos").param("estado", "REQUERIDO")
+                            .header("Authorization", "Bearer " + adminToken))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.codigo").value("SIN_RESULTADOS"));
+            mvc.perform(get("/api/reportes/ciudadanos").param("estado", "REQUERIDO")
+                            .header("Authorization", "Bearer " + personalToken))
+                    .andExpect(status().isForbidden());
+        } finally {
+            requeridos.forEach(id -> jdbc.update(
+                    "UPDATE antecedente SET estado = 'REQUERIDO' WHERE id = ?", id));
         }
     }
 
@@ -576,18 +767,9 @@ class SeguridadIntegracionTest {
                 .andExpect(jsonPath("$.codigo").value("SIN_INFORMACION"));
     }
 
-    @Test
-    void loginDevuelve400ParaIdentificacionYContrasenaDemasiadoLargas() throws Exception {
-        mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content(loginJson("12345678901", "Abc123", false)))
-                .andExpect(status().isBadRequest());
-        mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content(loginJson("8000000001", "A".repeat(129), false)))
-                .andExpect(status().isBadRequest());
-    }
-
     private record EndpointLectura(String ruta, boolean permitePersonal) {}
     private record TokenMatriz(String nombre, String autorizacion) {}
+    private record EndpointEscritura(String nombre, RequestMethod metodo, String ruta, boolean permitePersonal) {}
 
     private MvcResult respuestaLogin(String identificacion, String contrasena) throws Exception {
         return mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
