@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+/**
+ * Registra en el log los eventos de seguridad (inicios de sesión, bloqueos, accesos denegados y cambios de perfil o permisos)
+ * sin incluir contraseñas, hashes ni tokens completos.
+ */
 @Component
 public class AuditoriaSeguridad {
     private static final Logger LOG = LoggerFactory.getLogger(AuditoriaSeguridad.class);

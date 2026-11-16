@@ -8,6 +8,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA del catálogo de fuerzas públicas (Policía, Ejército, Armada y Fuerza Aérea).
+ */
 @Entity
 @Table(name = "fuerza_publica")
 @Getter

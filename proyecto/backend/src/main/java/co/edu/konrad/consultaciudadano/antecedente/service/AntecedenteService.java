@@ -12,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Reglas de negocio de antecedentes: consulta por identificación y cambio de estado.
+ * Un ciudadano inexistente o sin estado responde 404 SIN_INFORMACION.
+ */
 @Service
 @RequiredArgsConstructor
 public class AntecedenteService {

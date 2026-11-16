@@ -8,6 +8,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Crea al arrancar la cuenta de administrador inicial a partir de las variables de entorno {@code ADMIN_INITIAL_*}.
+ */
 @Configuration
 public class AdminInicialConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminInicialConfig.class);

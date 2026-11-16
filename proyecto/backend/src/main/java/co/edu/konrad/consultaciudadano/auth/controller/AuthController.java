@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoints de autenticación ({@code /api/auth}): inicio y cierre de sesión.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

@@ -4,6 +4,9 @@ import co.edu.konrad.consultaciudadano.antecedente.entity.Antecedente;
 import co.edu.konrad.consultaciudadano.antecedente.entity.EstadoAntecedente;
 import java.time.OffsetDateTime;
 
+/**
+ * Respuesta de la consulta de antecedentes: identificación, estado, fuente del dato y fecha de actualización.
+ */
 public record AntecedenteResponse(String identificacion, EstadoAntecedente estado,
         String fuente, OffsetDateTime fechaActualizacion) {
     public static AntecedenteResponse desde(Antecedente antecedente) {

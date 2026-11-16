@@ -17,6 +17,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA con el estado de antecedentes de un ciudadano (un registro por ciudadano) y la fuente de la que proviene.
+ * En este proyecto la fuente siempre es SIMULADA.
+ */
 @Entity
 @Table(name = "antecedente")
 @Getter

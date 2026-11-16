@@ -12,6 +12,9 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Datos para actualizar un ciudadano. No incluye la identificación, que no se puede modificar.
+ */
 public record CiudadanoUpdateRequest(
         @NotBlank @Size(max = 100) @Pattern(regexp = "[\\p{L} ]+") String nombres,
         @NotBlank @Size(max = 100) @Pattern(regexp = "[\\p{L} ]+") String apellidos,

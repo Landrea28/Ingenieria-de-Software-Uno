@@ -8,6 +8,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Crea el administrador inicial si aún no existe, guardando su contraseña como hash BCrypt.
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminInicialService {

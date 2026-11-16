@@ -3,6 +3,9 @@ package co.edu.konrad.consultaciudadano.common.error;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+/**
+ * Excepción de regla de negocio que lleva el código HTTP y el {@link CodigoError} con que debe responder la API.
+ */
 @Getter
 public class NegocioException extends RuntimeException {
     private final HttpStatus estadoHttp;

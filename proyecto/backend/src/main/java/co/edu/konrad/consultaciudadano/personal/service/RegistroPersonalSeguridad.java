@@ -10,6 +10,9 @@ import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementación real de los pasos de seguridad del registro: validador de Defensa, generador de contraseña, BCrypt y correo.
+ */
 @Service
 public class RegistroPersonalSeguridad implements RegistroPersonalIntegracion {
     private final ValidadorDefensa validadorDefensa;

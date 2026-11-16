@@ -10,6 +10,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA de un permiso sobre una opción del sistema.
+ */
 @Entity
 @Table(name = "permiso")
 @Getter

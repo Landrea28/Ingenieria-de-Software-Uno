@@ -1,5 +1,8 @@
 package co.edu.konrad.consultaciudadano.common.error;
 
+/**
+ * Códigos de error que la API devuelve en el cuerpo de las respuestas de error.
+ */
 public enum CodigoError {
     VALIDACION, NO_ENCONTRADO, DUPLICADO, SIN_INFORMACION, SIN_RESULTADOS,
     INTEGRACION_PENDIENTE, NO_AUTENTICADO, ACCESO_DENEGADO, ERROR_INTERNO,

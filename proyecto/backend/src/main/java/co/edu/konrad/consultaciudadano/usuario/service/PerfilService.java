@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Reglas de negocio de perfiles: listado de perfiles y permisos, y reemplazo de los permisos de un perfil.
+ */
 @Service
 public class PerfilService {
     private static final String PERFIL_ADMINISTRADOR = "ADMINISTRADOR";

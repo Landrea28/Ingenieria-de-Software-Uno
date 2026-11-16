@@ -15,6 +15,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA del dataset ficticio que SIMULA la base del Departamento de Defensa.
+ * Solo la lee el validador simulado.
+ */
 @Entity
 @Table(name = "defensa_personal_simulado")
 @Getter

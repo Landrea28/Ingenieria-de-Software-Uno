@@ -9,6 +9,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA que registra un token revocado hasta su fecha de expiración, para rechazarlo aunque su firma siga siendo válida.
+ */
 @Entity
 @Table(name = "token_revocado")
 @Getter

@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Datos del formulario de registro del personal: identificación, nombres, apellidos, fuerza, rango, ID de fuerza y correo.
+ */
 public record RegistroPersonalRequest(
         @NotBlank @Pattern(regexp = "[0-9]{6,10}") String identificacion,
         @NotBlank @Size(max = 100) String nombres,

@@ -7,6 +7,10 @@ import java.util.List;
 import co.edu.konrad.consultaciudadano.common.security.GeneradorCredenciales;
 import org.springframework.stereotype.Component;
 
+/**
+ * Genera la contraseña temporal del personal: exactamente seis caracteres alfanuméricos
+ * con al menos una mayúscula, una minúscula y un número, usando SecureRandom.
+ */
 @Component
 public class GeneradorContrasena implements GeneradorCredenciales {
     private static final String MAYUSCULAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

@@ -22,6 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Genera con OpenPDF el reporte de ciudadanos por estado (identificación, nombres y apellidos).
+ * Si no hay resultados responde 404 SIN_RESULTADOS en lugar de un PDF vacío.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReporteService {

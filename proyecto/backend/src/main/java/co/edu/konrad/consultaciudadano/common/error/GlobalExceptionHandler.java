@@ -17,6 +17,10 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+/**
+ * Convierte las excepciones de validación, de negocio e inesperadas al formato uniforme {@link ErrorResponse}
+ * con el código HTTP que corresponde.
+ */
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {

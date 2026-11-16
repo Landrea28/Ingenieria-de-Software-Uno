@@ -15,6 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Entidad JPA con la información general de un ciudadano. La identificación es única y es la clave de negocio.
+ */
 @Entity
 @Table(name = "ciudadano")
 @Getter

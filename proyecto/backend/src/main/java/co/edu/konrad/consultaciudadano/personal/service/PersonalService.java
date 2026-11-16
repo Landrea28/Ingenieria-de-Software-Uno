@@ -16,6 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Orquesta el registro del personal: valida datos y catálogo, consulta a Defensa (SIMULADA),
+ * genera la contraseña, guarda solo su hash y envía el correo.
+ */
 @Service
 @RequiredArgsConstructor
 public class PersonalService {

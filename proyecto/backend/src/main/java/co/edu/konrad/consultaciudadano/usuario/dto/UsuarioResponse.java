@@ -2,6 +2,9 @@ package co.edu.konrad.consultaciudadano.usuario.dto;
 
 import co.edu.konrad.consultaciudadano.usuario.entity.Usuario;
 
+/**
+ * Datos públicos de un usuario. Nunca incluye el hash de la contraseña.
+ */
 public record UsuarioResponse(
         String identificacion,
         String nombres,

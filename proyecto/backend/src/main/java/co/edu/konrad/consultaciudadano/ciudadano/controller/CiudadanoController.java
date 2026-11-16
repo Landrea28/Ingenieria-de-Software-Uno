@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoints de ciudadanos ({@code /api/ciudadanos}): crear, listar, buscar, consultar y actualizar.
+ * Solo traduce HTTP; las reglas están en {@link CiudadanoService}.
+ */
 @Validated
 @RestController
 @RequestMapping("/api/ciudadanos")

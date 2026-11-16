@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoints de antecedentes ({@code /api/antecedentes}): consulta el estado de un ciudadano y, solo para demostraciones, permite establecerlo.
+ * No contiene reglas de negocio: delega en {@link AntecedenteService}.
+ */
 @Validated
 @RestController
 @RequestMapping("/api/antecedentes")

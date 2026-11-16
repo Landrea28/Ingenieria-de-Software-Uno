@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Endpoint público del catálogo de fuerzas y rangos ({@code /api/catalogos/fuerzas-rangos}) que usa el registro móvil.
+ */
 @RestController
 @RequestMapping("/api/catalogos")
 @RequiredArgsConstructor

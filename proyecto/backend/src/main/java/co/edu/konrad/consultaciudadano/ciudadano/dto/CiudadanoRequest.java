@@ -12,6 +12,9 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Datos para registrar un ciudadano: identificación y los campos generales validados con Bean Validation.
+ */
 public record CiudadanoRequest(
         @NotBlank @Pattern(regexp = "[0-9]{6,10}") String identificacion,
         @NotBlank @Size(max = 100) @Pattern(regexp = "[\\p{L} ]+") String nombres,

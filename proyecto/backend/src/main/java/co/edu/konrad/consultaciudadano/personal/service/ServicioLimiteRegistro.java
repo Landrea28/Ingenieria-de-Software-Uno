@@ -16,6 +16,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * Limita los intentos de registro por dirección IP en una ventana de tiempo. El contador se guarda en PostgreSQL.
+ */
 @Service
 public class ServicioLimiteRegistro implements ControlIntentosRegistro {
     private static final int MAX_INTENTOS = 5;

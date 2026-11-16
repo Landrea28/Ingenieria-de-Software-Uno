@@ -10,6 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Revoca tokens al cerrar sesión, consulta si un token está revocado y elimina las revocaciones ya expiradas.
+ */
 @Service
 @RequiredArgsConstructor
 public class ServicioRevocacionToken {

@@ -13,6 +13,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Entidad JPA de un rango, que siempre pertenece a una fuerza pública.
+ */
 @Entity
 @Table(name = "rango")
 @Getter

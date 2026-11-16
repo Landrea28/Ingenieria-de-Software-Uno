@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Datos modificables de un usuario: datos personales, perfil y estado.
+ */
 public record ActualizarUsuarioRequest(
         @NotBlank @Size(max = 100) String nombres,
         @NotBlank @Size(max = 100) String apellidos,
