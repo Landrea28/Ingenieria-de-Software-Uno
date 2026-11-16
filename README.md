@@ -119,7 +119,7 @@ proyecto/
 ├── web/       # aplicación web administrativa: Spring MVC + Thymeleaf, consume la API
 ├── mobile/    # app móvil: React Native + Expo (Android; el mismo código corre en iOS)
 ├── scripts/   # prueba de humo contra la API real (Bash y PowerShell)
-└── docs/      # checklist final del proyecto
+└── docs/      # checklist final de la entrega
 ```
 
 La web y la app móvil son clientes del mismo backend; ninguna accede directamente
