@@ -25,17 +25,28 @@ const cliente = require('../src/api/cliente') as typeof import('../src/api/clien
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const servicios = require('../src/api/servicios') as typeof import('../src/api/servicios');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { mensajeDeError } = require('../src/api/mensajes') as typeof import('../src/api/mensajes');
+const { describirErrorApi } = require('../src/api/mensajes') as typeof import('../src/api/mensajes');
 
-/** Identidad SIMULADA del dataset demo de Defensa (V101__defensa_personal_ficticio.sql). */
+/**
+ * Identidades SIMULADAS del dataset demo de Defensa (backend: db/demo/V101__defensa_personal_ficticio.sql).
+ * Cada ejecución registra una persona, así que sobre una base ya usada hay que elegir otra con
+ * PRUEBA_IDENTIFICACION (por defecto 8000000005).
+ */
+const DATASET: Record<string, { nombres: string; apellidos: string; fuerzaCodigo: 'POLICIA' | 'EJERCITO' | 'ARMADA' | 'FUERZA_AEREA'; rango: string; idFuerza: string }> = {
+  '8000000005': { nombres: 'Ana', apellidos: 'Prueba5', fuerzaCodigo: 'POLICIA', rango: 'Subintendente', idFuerza: 'DEMO-005' },
+  '8000000006': { nombres: 'Luis', apellidos: 'Prueba6', fuerzaCodigo: 'EJERCITO', rango: 'Cabo', idFuerza: 'DEMO-006' },
+  '8000000007': { nombres: 'Mia', apellidos: 'Prueba7', fuerzaCodigo: 'ARMADA', rango: 'Cabo Primero', idFuerza: 'DEMO-007' },
+  '8000000008': { nombres: 'Juan', apellidos: 'Prueba8', fuerzaCodigo: 'FUERZA_AEREA', rango: 'Tecnico Primero', idFuerza: 'DEMO-008' },
+  '8000000009': { nombres: 'Eva', apellidos: 'Prueba9', fuerzaCodigo: 'POLICIA', rango: 'Intendente', idFuerza: 'DEMO-009' },
+  '8000000010': { nombres: 'Leo', apellidos: 'Prueba10', fuerzaCodigo: 'EJERCITO', rango: 'Sargento', idFuerza: 'DEMO-010' },
+};
+const identificacionPrueba = process.env.PRUEBA_IDENTIFICACION ?? '8000000005';
+const datosPrueba = DATASET[identificacionPrueba];
+if (!datosPrueba) throw new Error(`PRUEBA_IDENTIFICACION debe ser una de: ${Object.keys(DATASET).join(', ')}`);
 const PERSONA = {
-  identificacion: process.env.PRUEBA_IDENTIFICACION ?? '8000000005',
-  nombres: 'Ana',
-  apellidos: 'Prueba5',
-  fuerzaCodigo: 'POLICIA' as const,
-  rango: 'Subintendente',
-  idFuerza: 'DEMO-005',
-  correo: 'ana.prueba5@example.test',
+  identificacion: identificacionPrueba,
+  ...datosPrueba,
+  correo: `${datosPrueba.nombres.toLowerCase()}.${datosPrueba.apellidos.toLowerCase()}@example.test`,
 };
 
 const FORMATO_CONTRASENA = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6}$/;
@@ -95,6 +106,7 @@ test('registro rechazado: datos que Defensa (SIMULADA) no valida → 400 con men
   );
   assert.equal(error.estado, 400);
   assert.equal(error.codigo, 'VALIDACION');
+  assert.match(describirErrorApi(error, 'registro').mensaje, /Departamento de Defensa/);
 });
 
 test('registro rechazado: campos con formato inválido → 400 con detalles por campo', async () => {
@@ -111,6 +123,10 @@ test('registro rechazado: campos con formato inválido → 400 con detalles por 
   );
   assert.equal(error.estado, 400);
   assert.ok(error.detalles.length > 0, 'el backend debe listar los campos inválidos');
+  const mostrado = describirErrorApi(error, 'registro');
+  assert.ok(mostrado.detalles?.some((d) => d.startsWith('Correo electrónico:')), 'el correo inválido se nombra en español');
+  assert.ok(mostrado.detalles?.some((d) => d.startsWith('Identificación:')), 'los campos salen con su nombre en español');
+  assert.ok(!mostrado.detalles?.some((d) => /debe coincidir con|no debe estar vac/.test(d)), 'sin textos técnicos');
 });
 
 test('registro aceptado: la respuesta no trae la contraseña y esta llega por correo con 6 caracteres', async () => {
@@ -142,6 +158,7 @@ test('registro duplicado: la misma identificación se rechaza sin crear otra cue
     }),
   );
   assert.ok(error.estado === 400 || error.estado === 409, `estado inesperado ${error.estado}`);
+  assert.equal(describirErrorApi(error, 'registro').accion, 'ir-a-login', 'un duplicado lleva a iniciar sesión');
 });
 
 test('login: contraseña incorrecta → 401 sin disparar «sesión vencida»', async () => {
@@ -152,6 +169,7 @@ test('login: contraseña incorrecta → 401 sin disparar «sesión vencida»', a
   );
   assert.equal(error.estado, 401);
   assert.equal(expiraciones, 0);
+  assert.match(describirErrorApi(error, 'login').sugerencia ?? '', /correo/);
 });
 
 test('antecedentes sin sesión → 401 (la ruta está protegida en el servidor)', async () => {
@@ -222,6 +240,9 @@ test('sin conexión: el cliente lo reporta como error de red con un mensaje clar
     assert.ok(error instanceof aislado.ApiError);
     assert.equal(error.tipo, 'red');
     assert.match(error.message, /conexión/);
+    // El módulo aislado trae su propia clase ApiError: se reconstruye el error con la clase principal.
+    const mostrado = describirErrorApi(new cliente.ApiError(error.tipo, error.estado, error.codigo, error.message));
+    assert.match(mostrado.mensaje, /conexión/);
+    assert.ok(mostrado.sugerencia, 'el mensaje de red dice qué hacer');
   }
-  assert.equal(typeof mensajeDeError, 'function');
 });

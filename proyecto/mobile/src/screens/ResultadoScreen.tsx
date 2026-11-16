@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ApiError } from '../api/cliente';
-import { mensajeDeError } from '../api/mensajes';
+import { describirErrorApi } from '../api/mensajes';
 import { consultarAntecedente } from '../api/servicios';
 import { Boton } from '../components/Boton';
 import { Cargando, MensajeError } from '../components/Estados';
@@ -10,6 +10,7 @@ import { Pantalla } from '../components/Pantalla';
 import type { PrincipalStackParamList } from '../navigation/tipos';
 import { colores, espacio } from '../theme/colores';
 import type { AntecedenteResponse } from '../types/api';
+import type { ErrorUsuario } from '../utils/errores';
 
 type Props = NativeStackScreenProps<PrincipalStackParamList, 'Resultado'>;
 
@@ -17,7 +18,7 @@ type EstadoConsulta =
   | { tipo: 'cargando' }
   | { tipo: 'ok'; datos: AntecedenteResponse }
   | { tipo: 'sin-informacion' }
-  | { tipo: 'error'; mensaje: string };
+  | { tipo: 'error'; error: ErrorUsuario };
 
 export function ResultadoScreen({ route, navigation }: Props) {
   const { identificacion } = route.params;
@@ -35,7 +36,7 @@ export function ResultadoScreen({ route, navigation }: Props) {
         setEstado({ tipo: 'sin-informacion' });
         return;
       }
-      setEstado({ tipo: 'error', mensaje: mensajeDeError(error) });
+      setEstado({ tipo: 'error', error: describirErrorApi(error, 'consulta') });
     }
   }, [identificacion]);
 
@@ -74,7 +75,7 @@ export function ResultadoScreen({ route, navigation }: Props) {
         </View>
       )}
 
-      {estado.tipo === 'error' && <MensajeError mensaje={estado.mensaje} onReintentar={() => void consultar()} />}
+      {estado.tipo === 'error' && <MensajeError error={estado.error} onReintentar={() => void consultar()} />}
 
       <Boton titulo="Escanear otra cédula" onPress={() => navigation.goBack()} />
       <Boton titulo="Volver al inicio" variante="secundario" onPress={() => navigation.popToTop()} />
