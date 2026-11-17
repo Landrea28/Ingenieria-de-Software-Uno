@@ -27,7 +27,8 @@ trabajo que aún no tiene evidencia de ejecución.
 | RNF de rendimiento medidos | Hecho | [backend/docs/pruebas/rendimiento.md](../backend/docs/pruebas/rendimiento.md): RNF-R1 y RNF-R2 cumplen con 30 muestras por operación (`scripts/medir-rendimiento.sh`) |
 | Supuestos en un registro único | Hecho | [supuestos.md](supuestos.md): simulaciones, datos y API, seguridad y app móvil, con identificadores sin repetir |
 | Código documentado | Hecho | Javadoc de clase en backend (89 de 89) y web (39 de 41); comentarios de documentación en los módulos del móvil |
-| Smoke test PowerShell en Windows | Falta | `proyecto/scripts/smoke-test.ps1`; no hay salida de ejecución en Windows |
+| Smoke test PowerShell | Hecho | Ejecutado con PowerShell 7.7.0 en Linux; la validación en Windows es opcional. [Salida completa](../backend/docs/evidencias/smoke-test-salida-powershell.txt): todas las comprobaciones pasaron |
+| OWASP ZAP baseline | Hecho (escaneo pasivo, alcance anónimo) | [Salida completa](../backend/docs/evidencias/zap-baseline-salida.txt), [procedimiento y validación](../backend/docs/pruebas/zap-baseline.md): 67 PASS, 0 FAIL, 1 WARN validado manualmente |
 
 La planeación con Scrum, la especificación de casos de uso y la trazabilidad no se
 versionan aquí: se entregan en el libro de Excel consolidado. El repositorio guarda
