@@ -17,6 +17,7 @@
     <a th:href="@{/ciudadanos}" th:classappend="${activo == 'ciudadanos'} ? 'activo'">Ciudadanos</a>
     <a th:href="@{/ciudadanos/nuevo}" th:classappend="${activo == 'nuevo'} ? 'activo'">Registrar ciudadano</a>
     <a th:href="@{/reportes}" th:classappend="${activo == 'reportes'} ? 'activo'">Reportes</a>
+    <a th:href="@{/usuarios}" th:classappend="${activo == 'usuarios'} ? 'activo'">Usuarios y perfiles</a>
     <form th:action="@{/logout}" method="post" class="salir">
       <small th:if="${usuarioSesion}" class="usuario" th:text="|Sesión: ${usuarioSesion}|">Sesión: 1012345678</small>
       <button type="submit">Cerrar sesión</button>

@@ -38,6 +38,7 @@ echo "Prueba de humo contra $W"
 echo "## Permisos"
 caso P01 "Sin sesión: /ciudadanos redirige al login"           redirige_a /login "$W/ciudadanos"
 caso P02 "Sin sesión: /reportes/pdf redirige al login"          redirige_a /login "$W/reportes/pdf?estado=REQUERIDO"
+caso U01 "Sin sesión: /usuarios y /perfiles redirigen al login" bash -c "[ \"\$(curl -s -o /dev/null -w '%{redirect_url}' '$W/usuarios')\" = '$W/login' ] && [ \"\$(curl -s -o /dev/null -w '%{redirect_url}' '$W/perfiles')\" = '$W/login' ]"
 caso P03 "Login sin datos muestra mensaje"                      contiene "Ingrese identificación y contraseña." -X POST -d "identificacion=&contrasena=" "$W/login"
 if [ -n "${AGENTE_IDENTIFICACION:-}" ] && [ -n "${AGENTE_CONTRASENA:-}" ]; then
   caso P04 "Rol incorrecto (fuerza pública) no puede entrar"    contiene "no tiene permisos de administrador" -X POST --data-urlencode "identificacion=$AGENTE_IDENTIFICACION" --data-urlencode "contrasena=$AGENTE_CONTRASENA" "$W/login"
@@ -73,6 +74,15 @@ if [ "${ESCRITURA:-0}" = "1" ]; then
 else
   echo "R0x | OMITIDO | Registro y edición: ejecute con ESCRITURA=1 para incluirlos"
 fi
+
+echo "## Usuarios y perfiles (no guardan nada)"
+USUARIO="identificacion=6199999999&nombres=Prueba+Humo&apellidos=Integracion&correo=prueba.humo%40example.com&perfilId=1"
+caso U02 "El listado de usuarios carga desde la API"             contiene "Crear usuario" "$W/usuarios"
+caso U03 "Formulario de usuario vacío marca los 5 campos"       bash -c "[ \$(curl -s -b '$C' -X POST '$W/usuarios' | grep -c 'class=\"campo con-error\"') -eq 5 ]"
+caso U04 "Correo con formato inválido"                          contiene "Escriba un correo válido" -X POST -d "${USUARIO/prueba.humo%40example.com/sin-arroba}" "$W/usuarios"
+caso U05 "El formulario de usuario no pide contraseña"          bash -c "! curl -s -b '$C' '$W/usuarios/nuevo' | grep -q 'type=\"password\"'"
+caso U06 "Perfiles muestra las opciones y sus permisos"         contiene "Gestión de seguridad" "$W/perfiles"
+caso U07 "El administrador no puede desactivarse a sí mismo"    contiene "No puede desactivar su propia cuenta" -X POST -d "identificacion=$ADMIN_IDENTIFICACION&nombres=Prueba+Humo&apellidos=Integracion&correo=prueba.humo%40example.com&perfilId=1&estado=INACTIVO" "$W/usuarios/$ADMIN_IDENTIFICACION"
 
 echo "## Seguridad"
 caso S01 "Pantallas con Cache-Control: no-store"                bash -c "curl -s -D - -o /dev/null -b '$C' '$W/ciudadanos' | grep -qi '^cache-control: no-store'"

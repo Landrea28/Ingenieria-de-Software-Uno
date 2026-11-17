@@ -32,7 +32,7 @@ public class TraductorErroresApi {
             case 401 -> new ApiNoAutorizadoException(mensaje);
             case 403 -> new ApiAccesoDenegadoException(mensaje);
             case 404 -> new ApiNoEncontradoException(mensaje, error != null ? error.codigo() : null);
-            case 409 -> new ApiConflictoException(mensaje);
+            case 409 -> new ApiConflictoException(mensaje, error != null ? error.codigo() : null);
             // 5xx (incluye 503 INTEGRACION_PENDIENTE) y cualquier otro: el servidor no pudo atender.
             default -> new ApiNoDisponibleException();
         };

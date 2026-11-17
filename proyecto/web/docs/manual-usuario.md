@@ -59,3 +59,36 @@ ingresar de nuevo.
 | «Revisa los campos marcados» | Hay datos inválidos en el formulario | Corrige los campos en rojo |
 | «El servidor rechazó los datos: …» | El servidor encontró un dato inválido | Corrige el campo indicado |
 | «DATOS SIMULADOS — PRUEBA» | La web está en modo de demostración | Los datos no son reales ni se guardan |
+
+## Usuarios y perfiles
+
+Abre **Usuarios y perfiles** en el menú. Tiene dos pestañas.
+
+### Usuarios
+
+- **Ver y filtrar:** el listado muestra la identificación, el nombre, el correo, el perfil y el estado de cada usuario.
+  Puedes filtrar por perfil, por estado o por ambos.
+- **Crear:** pulsa **Crear usuario** y escribe identificación, correo, nombres y apellidos, y elige el perfil. No se
+  pide contraseña: el sistema genera una temporal y la envía al correo del usuario; nunca aparece en pantalla.
+- **Editar:** pulsa **Editar** en la fila. Puedes cambiar los datos, el perfil y el estado. La identificación no se
+  puede cambiar.
+- **Retirar el acceso:** no existe «eliminar». Edita el usuario y pasa su estado a **Inactivo**; no podrá iniciar
+  sesión. Para devolverle el acceso, vuelve a ponerlo en **Activo**.
+
+Mensajes que puedes ver:
+
+| Mensaje | Qué hacer |
+|---|---|
+| Ya existe un usuario con esta identificación. | Busca al usuario en el listado y edítalo |
+| Este correo ya está registrado por otro usuario. | Usa otro correo |
+| No puede desactivar su propia cuenta ni quitarse el perfil de administrador. | Pídele el cambio a otro administrador |
+| Debe quedar al menos un administrador activo en el sistema. | Crea o activa otro administrador antes |
+
+### Perfiles y permisos
+
+1. Elige el perfil: **Administrador** o **Personal de fuerza pública**. Los perfiles son fijos; no se crean ni se borran.
+2. Marca lo que ese perfil puede hacer en cada opción del sistema (ciudadanos, antecedentes, reportes y seguridad).
+3. Pulsa **Guardar permisos**. El perfil queda exactamente con lo marcado.
+
+El permiso **Administrar usuarios y perfiles** del perfil Administrador aparece bloqueado: no se puede quitar, para
+que siempre haya quien administre el sistema.

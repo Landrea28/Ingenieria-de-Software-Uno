@@ -1,0 +1,46 @@
+# Prueba de humo contra el backend real — 2026-11-16
+# web perfil api, backend perfiles demo,dev sobre PostgreSQL temporal y un receptor SMTP de prueba
+# ADMIN_IDENTIFICACION=… ADMIN_CONTRASENA=… AGENTE_IDENTIFICACION=… AGENTE_CONTRASENA=… ESCRITURA=1 ./scripts/prueba-humo.sh
+
+Prueba de humo contra http://localhost:8081
+## Permisos
+P01 | OK    | Sin sesión: /ciudadanos redirige al login
+P02 | OK    | Sin sesión: /reportes/pdf redirige al login
+U01 | OK    | Sin sesión: /usuarios y /perfiles redirigen al login
+P03 | OK    | Login sin datos muestra mensaje
+P04 | OK    | Rol incorrecto (fuerza pública) no puede entrar
+P05 | OK    | Tras el rechazo por rol no queda sesión
+P06 | OK    | Administrador entra al panel
+## Campos obligatorios y formatos (no guardan nada)
+F01 | OK    | Formulario vacío marca los 10 campos
+F02 | OK    | Identificación con letras
+F03 | OK    | Nombres con números
+F04 | OK    | Fecha futura
+F05 | OK    | Expedición anterior al nacimiento
+F06 | OK    | Estatura fuera de rango
+F07 | OK    | Los datos escritos se conservan tras un error
+## Consulta y reportes
+C01 | OK    | El listado carga desde la API
+C02 | OK    | Identificación inválida en la consulta
+C03 | OK    | Reporte REQUERIDO devuelve un PDF
+C04 | OK    | Estado de reporte inválido pide elegir uno
+## Registro y edición (crea el ciudadano ficticio 6794877690)
+R01 | OK    | Registro válido con confirmación
+R02 | OK    | Identificación duplicada
+R03 | OK    | Detalle del registrado
+R04 | OK    | Edición con confirmación
+R05 | OK    | No se puede cambiar la identificación
+## Usuarios y perfiles (no guardan nada)
+U02 | OK    | El listado de usuarios carga desde la API
+U03 | OK    | Formulario de usuario vacío marca los 5 campos
+U04 | OK    | Correo con formato inválido
+U05 | OK    | El formulario de usuario no pide contraseña
+U06 | OK    | Perfiles muestra las opciones y sus permisos
+U07 | OK    | El administrador no puede desactivarse a sí mismo
+## Seguridad
+S01 | OK    | Pantallas con Cache-Control: no-store
+S02 | OK    | El panel no se puede incrustar en otro sitio
+S03 | OK    | Cerrar sesión lleva al login
+S04 | OK    | La sesión cerrada ya no da acceso
+
+Total: 33 OK, 0 FALLA
