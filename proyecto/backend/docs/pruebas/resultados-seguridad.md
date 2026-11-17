@@ -36,9 +36,12 @@ La salida completa del smoke test Bash está en
 [evidencias/smoke-test-salida.txt](../evidencias/smoke-test-salida.txt); reporta
 health, autenticación, CRUD de ciudadano, registro con Defensa SIMULADO y
 Mailpit, antecedentes, PDF con y sin resultados, perfiles/usuarios y negativos
-como aprobados. El smoke test PowerShell **queda pendiente de ejecución en Windows**: este entorno Linux
-no tiene `pwsh`. Comando para ejecutarlo en Windows:
-`pwsh -File proyecto/scripts/smoke-test.ps1`. No se generó una salida ficticia.
+como aprobados. El smoke test PowerShell se ejecutó en Linux con PowerShell
+7.7.0 y todas las comprobaciones pasaron. La salida completa, sin tokens ni
+contraseñas, está en
+[evidencias/smoke-test-salida-powershell.txt](../evidencias/smoke-test-salida-powershell.txt).
+La validación en Windows es opcional; se usaron las URLs configurables del
+script para el backend local y Mailpit aislado.
 
 Las pruebas móviles, en especial las que dependen de cámara/dispositivo, se
 registran manualmente en
@@ -61,7 +64,8 @@ los totales Surefire.
 
 Los nombres exactos de las pruebas, el criterio de cada caso y su estado se
 mantienen en el [plan de pruebas](./plan-de-pruebas.md). El contrato del smoke
-test Bash está documentado por su salida guardada; la ejecución equivalente en
-Windows y los casos manuales de cámara siguen pendientes. ZAP terminó con
-código 2 por el aviso, sin alertas `FAIL`; véase el procedimiento y alcance en
+test Bash y PowerShell está documentado por sus salidas guardadas; la validación
+en Windows es opcional y los casos manuales de cámara siguen pendientes. ZAP
+terminó con código 2 por el aviso, sin alertas `FAIL`; véase el procedimiento y
+alcance en
 [zap-baseline.md](./zap-baseline.md).
