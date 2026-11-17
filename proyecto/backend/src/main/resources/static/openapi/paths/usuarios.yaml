@@ -1,0 +1,127 @@
+usuarios:
+  get:
+    tags: [Usuarios]
+    summary: Listar usuarios
+    description: Solo ADMINISTRADOR. La respuesta no incluye contrasenas ni hashes.
+    parameters:
+      - name: estado
+        in: query
+        schema:
+          type: string
+          enum: [ACTIVO, INACTIVO]
+      - name: perfil
+        in: query
+        schema:
+          type: string
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: size
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+    responses:
+      '200':
+        description: Pagina de usuarios
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: ../schemas/usuarios.yaml#/UsuarioResponse
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+      '400':
+        $ref: ../schemas/errores.yaml#/BadRequest
+    security:
+      - bearerAuth: []
+  post:
+    tags: [Usuarios]
+    summary: Crear usuario
+    description: Genera una contrasena temporal de seis caracteres y la envia por correo SIMULADO. Nunca se devuelve.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/usuarios.yaml#/CrearUsuarioRequest
+    responses:
+      '201':
+        description: Usuario creado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/usuarios.yaml#/UsuarioResponse
+      '400':
+        $ref: ../schemas/errores.yaml#/BadRequest
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+      '409':
+        $ref: ../schemas/errores.yaml#/Conflict
+    security:
+      - bearerAuth: []
+usuario:
+  get:
+    tags: [Usuarios]
+    summary: Consultar usuario por identificacion
+    parameters:
+      - $ref: ../schemas/usuarios.yaml#/IdentificacionPath
+    responses:
+      '200':
+        description: Usuario encontrado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/usuarios.yaml#/UsuarioResponse
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+      '404':
+        $ref: ../schemas/errores.yaml#/NotFound
+    security:
+      - bearerAuth: []
+  put:
+    tags: [Usuarios]
+    summary: Actualizar datos, perfil y estado
+    description: No permite eliminar usuarios, desactivar al administrador autenticado ni dejar el sistema sin administrador activo.
+    parameters:
+      - $ref: ../schemas/usuarios.yaml#/IdentificacionPath
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/usuarios.yaml#/ActualizarUsuarioRequest
+    responses:
+      '200':
+        description: Usuario actualizado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/usuarios.yaml#/UsuarioResponse
+      '400':
+        $ref: ../schemas/errores.yaml#/BadRequest
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+      '404':
+        $ref: ../schemas/errores.yaml#/NotFound
+      '409':
+        $ref: ../schemas/errores.yaml#/Conflict
+    security:
+      - bearerAuth: []

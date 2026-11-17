@@ -1,0 +1,94 @@
+perfiles:
+  get:
+    tags: [Perfiles y permisos]
+    summary: Listar perfiles
+    responses:
+      '200':
+        description: Perfiles disponibles
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../schemas/perfiles.yaml#/PerfilResponse
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+    security:
+      - bearerAuth: []
+permisos:
+  get:
+    tags: [Perfiles y permisos]
+    summary: Listar permisos
+    responses:
+      '200':
+        description: Permisos disponibles
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../schemas/perfiles.yaml#/PermisoResponse
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+    security:
+      - bearerAuth: []
+permisosPerfil:
+  get:
+    tags: [Perfiles y permisos]
+    summary: Consultar permisos de un perfil
+    parameters:
+      - $ref: ../schemas/perfiles.yaml#/PerfilIdPath
+    responses:
+      '200':
+        description: Permisos asociados
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../schemas/perfiles.yaml#/PermisoResponse
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+      '404':
+        $ref: ../schemas/errores.yaml#/NotFound
+    security:
+      - bearerAuth: []
+  put:
+    tags: [Perfiles y permisos]
+    summary: Reemplazar permisos de un perfil
+    description: No puede quitarse el permiso SEGURIDAD_ADMINISTRAR al perfil ADMINISTRADOR.
+    parameters:
+      - $ref: ../schemas/perfiles.yaml#/PerfilIdPath
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/perfiles.yaml#/ActualizarPermisosRequest
+    responses:
+      '200':
+        description: Permisos reemplazados
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: ../schemas/perfiles.yaml#/PermisoResponse
+      '400':
+        $ref: ../schemas/errores.yaml#/BadRequest
+      '401':
+        $ref: ../schemas/errores.yaml#/Unauthorized
+      '403':
+        $ref: ../schemas/errores.yaml#/Forbidden
+      '404':
+        $ref: ../schemas/errores.yaml#/NotFound
+      '409':
+        $ref: ../schemas/errores.yaml#/Conflict
+    security:
+      - bearerAuth: []

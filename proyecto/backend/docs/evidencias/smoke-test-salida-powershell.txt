@@ -1,0 +1,19 @@
+Smoke test contra http://127.0.0.1:8080
+PASS: health 200
+PASS: login administrador
+PASS: ciudadano: crear (10 campos), listar, buscar y actualizar
+PASS: registro personal validado con Defensa SIMULADO
+PASS: contraseña extraida de Mailpit: 6 caracteres con mayuscula, minuscula y numero
+PASS: login personal con recordarContrasena=true y false
+PASS: PERSONAL recibe 403 en rutas admin de usuarios, perfiles y permisos
+PASS: antecedentes REQUERIDO, NO_REQUERIDO y 404
+PASS: PDF REQUERIDO valido
+PASS: PDF NO_REQUERIDO valido
+PASS: Filtro PDF REQUERIDO sin resultados: HTTP 404 SIN_RESULTADOS
+PASS: perfiles: lectura y permisos
+PASS: usuarios admin: crear, leer, actualizar; sin passwordHash
+PASS: rutas admin: 401 sin token y con token invalido
+PASS: credenciales incorrectas: 401 y mensaje generico
+PASS: bloqueo de login tras 6 fallos
+PASS: logout y revocacion del token (401)
+RESULTADO: todas las comprobaciones del smoke test finalizaron correctamente.

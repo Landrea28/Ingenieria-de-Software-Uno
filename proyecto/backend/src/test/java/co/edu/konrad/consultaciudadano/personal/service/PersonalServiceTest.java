@@ -1,0 +1,47 @@
+package co.edu.konrad.consultaciudadano.personal.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import co.edu.konrad.consultaciudadano.catalogo.repository.FuerzaPublicaRepository;
+import co.edu.konrad.consultaciudadano.catalogo.repository.RangoRepository;
+import co.edu.konrad.consultaciudadano.catalogo.service.CatalogoService;
+import co.edu.konrad.consultaciudadano.common.error.CodigoError;
+import co.edu.konrad.consultaciudadano.common.error.NegocioException;
+import co.edu.konrad.consultaciudadano.common.security.AuditoriaSeguridad;
+import org.springframework.http.HttpStatus;
+import co.edu.konrad.consultaciudadano.personal.service.ControlIntentosRegistro;
+import co.edu.konrad.consultaciudadano.personal.dto.RegistroPersonalRequest;
+import co.edu.konrad.consultaciudadano.usuario.entity.Usuario;
+import co.edu.konrad.consultaciudadano.usuario.repository.UsuarioRepository;
+import co.edu.konrad.consultaciudadano.usuario.repository.PerfilRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class PersonalServiceTest {
+    @Mock CatalogoService catalogo;
+    @Mock FuerzaPublicaRepository fuerzas;
+    @Mock RangoRepository rangos;
+    @Mock UsuarioRepository usuarios;
+    @Mock PerfilRepository perfiles;
+    @Mock ControlIntentosRegistro controlIntentos;
+
+    @Test
+    void noPersisteUsuarioSiFaltaValidacionDeSeguridad() {
+        when(controlIntentos.permitido("local")).thenReturn(true);
+        var service = new PersonalService(catalogo, fuerzas, rangos, usuarios, perfiles,
+                new RegistroPersonalIntegracionPendiente(), new AuditoriaSeguridad(), controlIntentos);
+        var request = new RegistroPersonalRequest("8000000001", "Usuario", "Prueba1", "POLICIA", 1L,
+                "DEMO-001", "demo@example.test");
+        var error = assertThrows(NegocioException.class, () -> service.registrar(request));
+        assertEquals(CodigoError.INTEGRACION_PENDIENTE, error.getCodigo());
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, error.getEstadoHttp());
+        verify(usuarios, never()).saveAndFlush(any(Usuario.class));
+    }
+}

@@ -1,0 +1,40 @@
+RegistroPersonalRequest:
+  type: object
+  required: [identificacion, nombres, apellidos, fuerzaCodigo, rangoId, idFuerza, correo]
+  properties:
+    identificacion:
+      type: string
+      pattern: '^[0-9]{6,10}$'
+      example: '8000000001'
+    nombres:
+      type: string
+      maxLength: 100
+      example: Usuario
+    apellidos:
+      type: string
+      maxLength: 100
+      example: Prueba1
+    fuerzaCodigo:
+      type: string
+      enum: [POLICIA, EJERCITO, ARMADA, FUERZA_AEREA]
+      example: POLICIA
+    rangoId:
+      type: integer
+      format: int64
+      description: Debe pertenecer a la fuerza indicada. Consultar GET /api/catalogos/fuerzas-rangos.
+      example: 1
+    idFuerza:
+      type: string
+      maxLength: 40
+      example: DEMO-001
+    correo:
+      type: string
+      format: email
+      maxLength: 200
+      example: demo@example.test
+RegistroPersonalResponse:
+  type: object
+  properties:
+    mensaje:
+      type: string
+      example: Registro aceptado. Revise el correo de confirmacion

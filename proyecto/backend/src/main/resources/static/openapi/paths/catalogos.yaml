@@ -1,0 +1,13 @@
+fuerzas:
+  get:
+    tags: [Catalogos]
+    summary: Fuerzas publicas y sus rangos
+    responses:
+      '200':
+        description: Catalogo
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/catalogos.yaml#/Fuerza'

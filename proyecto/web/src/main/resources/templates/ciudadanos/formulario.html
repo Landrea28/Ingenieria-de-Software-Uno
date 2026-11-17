@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${modoEdicion} ? 'Editar ciudadano' : 'Registrar ciudadano')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu(${modoEdicion} ? 'ciudadanos' : 'nuevo')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado(${modoEdicion} ? 'Editar ciudadano' : 'Registrar ciudadano')}"></header>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
+
+    <!-- Los 10 campos con los nombres de la API. En edición la identificación no se cambia
+         porque el backend la usa como clave (PUT /api/ciudadanos/{identificacion}).
+         data-validar activa la validación en el navegador (js/validacion.js). -->
+    <form class="tarjeta formulario" method="post" th:object="${ciudadanoForm}" data-validar
+          th:action="${modoEdicion} ? @{/ciudadanos/{id}(id=*{identificacion})} : @{/ciudadanos}">
+
+      <p class="nota">Los campos marcados con <abbr class="obligatorio" title="Obligatorio">*</abbr> son obligatorios.</p>
+      <div class="alerta error" data-resumen-errores role="alert" hidden></div>
+
+      <fieldset>
+        <legend>Datos personales</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: campo('identificacion', 'Identificación', 'text', ${reglas.identificacion}, ${modoEdicion})}"></label>
+          <label th:replace="~{fragments/componentes :: campo('nombres', 'Nombres', 'text', ${reglas.nombres}, false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('apellidos', 'Apellidos', 'text', ${reglas.apellidos}, false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('fechaNacimiento', 'Fecha de nacimiento', 'date', ${reglas.fechaNacimiento}, false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('lugarNacimiento', 'Lugar de nacimiento', 'text', ${reglas.lugarNacimiento}, false)}"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Documento</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: campo('fechaExpedicion', 'Fecha de expedición', 'date', ${reglas.fechaExpedicion}, false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('lugarExpedicion', 'Lugar de expedición', 'text', ${reglas.lugarExpedicion}, false)}"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Datos físicos</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: selector('grupoSanguineo', 'Grupo sanguíneo', ${gruposSanguineos})}"></label>
+          <label th:replace="~{fragments/componentes :: selector('rh', 'RH', ${opcionesRh})}"></label>
+          <label th:replace="~{fragments/componentes :: campo('estatura', 'Estatura (m)', 'number', ${reglas.estatura}, false)}"></label>
+        </div>
+      </fieldset>
+
+      <div class="acciones">
+        <!-- En edición, cancelar vuelve al detalle del ciudadano. -->
+        <a th:href="${modoEdicion} ? @{/ciudadanos/{id}(id=*{identificacion})} : @{/ciudadanos}" class="boton">Cancelar</a>
+        <button type="submit" class="primario"
+                th:text="${modoEdicion} ? 'Guardar cambios' : 'Registrar ciudadano'">Registrar ciudadano</button>
+      </div>
+    </form>
+  </main>
+  <script th:src="@{/js/validacion.js}" defer></script>
+</body>
+</html>

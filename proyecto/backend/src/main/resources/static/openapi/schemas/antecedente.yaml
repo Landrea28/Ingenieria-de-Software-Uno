@@ -1,0 +1,25 @@
+AntecedenteResponse:
+  type: object
+  properties:
+    identificacion:
+      type: string
+      example: '9000000001'
+    estado:
+      type: string
+      enum: [REQUERIDO, NO_REQUERIDO]
+      example: NO_REQUERIDO
+    fuente:
+      type: string
+      example: SIMULADA
+    fechaActualizacion:
+      type: string
+      format: date-time
+      example: '2026-10-30T20:30:00-05:00'
+EstadoRequest:
+  type: object
+  required: [estado]
+  properties:
+    estado:
+      type: string
+      enum: [REQUERIDO, NO_REQUERIDO]
+      example: REQUERIDO

@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0",
+    "customConditions": null,
+    "target": "es2022",
+    "rootDir": "..",
+    "outDir": "../.tmp-pruebas-api",
+    "sourceMap": false
+  },
+  "include": ["flujo-real.ts"]
+}

@@ -1,0 +1,96 @@
+CiudadanoUpdateRequest:
+  type: object
+  description: Datos modificables del ciudadano. La identificacion no se puede cambiar.
+  required: [nombres, apellidos, fechaNacimiento, lugarNacimiento, fechaExpedicion, lugarExpedicion, rh, grupoSanguineo, estatura]
+  properties:
+    nombres:
+      type: string
+      maxLength: 100
+      pattern: '^[\p{L} ]+$'
+      description: Solo letras y espacios.
+      example: Clara
+    apellidos:
+      type: string
+      maxLength: 100
+      pattern: '^[\p{L} ]+$'
+      description: Solo letras y espacios.
+      example: Rivera
+    fechaNacimiento:
+      type: string
+      format: date
+      description: No puede ser futura.
+      example: '1995-02-14'
+    lugarNacimiento:
+      type: string
+      maxLength: 150
+      example: Bogota
+    fechaExpedicion:
+      type: string
+      format: date
+      description: No puede ser futura y debe ser posterior a la fecha de nacimiento.
+      example: '2013-03-22'
+    lugarExpedicion:
+      type: string
+      maxLength: 150
+      example: Bogota
+    rh:
+      type: string
+      enum: ['+', '-']
+      example: '+'
+    grupoSanguineo:
+      type: string
+      enum: [A, B, AB, O]
+      example: A
+    estatura:
+      type: number
+      format: double
+      minimum: 0.5
+      maximum: 2.5
+      multipleOf: 0.01
+      description: En metros, maximo 2 decimales.
+      example: 1.71
+CiudadanoRequest:
+  allOf:
+    - type: object
+      required: [identificacion]
+      properties:
+        identificacion:
+          type: string
+          pattern: '^[0-9]{6,10}$'
+          description: Solo digitos, entre 6 y 10. Debe ser unica.
+          example: '9000000099'
+    - $ref: '#/CiudadanoUpdateRequest'
+CiudadanoResponse:
+  allOf:
+    - $ref: '#/CiudadanoRequest'
+    - type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+PaginaCiudadanos:
+  type: object
+  properties:
+    content:
+      type: array
+      items:
+        $ref: '#/CiudadanoResponse'
+    totalElements:
+      type: integer
+      format: int64
+    totalPages:
+      type: integer
+    size:
+      type: integer
+    number:
+      type: integer
+      description: Numero de pagina actual, base 0.
+    numberOfElements:
+      type: integer
+    first:
+      type: boolean
+    last:
+      type: boolean
+    empty:
+      type: boolean

@@ -1,0 +1,17 @@
+Fuerza:
+  type: object
+  properties:
+    codigo:
+      type: string
+    nombre:
+      type: string
+    rangos:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          nombre:
+            type: string

@@ -1,0 +1,47 @@
+<svg viewBox="0 0 320 640" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="320" height="640" fill="#F4F6F8" stroke="#1B2430" stroke-width="2"/>
+  <rect x="0" y="0" width="320" height="56" fill="#1F4E8C"/>
+  <text x="160" y="34" fill="#FFFFFF" font-size="16" font-weight="bold" text-anchor="middle">Registro de personal</text>
+
+  <!-- identificacion -->
+  <text x="20" y="80" fill="#1B2430" font-size="11" font-weight="bold">Identificación</text>
+  <rect x="20" y="86" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+
+  <!-- nombres / apellidos -->
+  <text x="20" y="134" fill="#1B2430" font-size="11" font-weight="bold">Nombres</text>
+  <rect x="20" y="140" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+  <text x="20" y="188" fill="#1B2430" font-size="11" font-weight="bold">Apellidos</text>
+  <rect x="20" y="194" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+
+  <!-- fuerza / rango -->
+  <text x="20" y="242" fill="#1B2430" font-size="11" font-weight="bold">Fuerza pública</text>
+  <rect x="20" y="248" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+  <text x="30" y="270" fill="#5B6676" font-size="11">Selecciona una opción ▾</text>
+  <text x="20" y="296" fill="#1B2430" font-size="11" font-weight="bold">Rango (depende de la fuerza)</text>
+  <rect x="20" y="302" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+
+  <!-- id fuerza / correo -->
+  <text x="20" y="350" fill="#1B2430" font-size="11" font-weight="bold">ID Fuerza</text>
+  <rect x="20" y="356" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+  <text x="20" y="404" fill="#1B2430" font-size="11" font-weight="bold">Correo electrónico</text>
+  <rect x="20" y="410" width="280" height="34" rx="8" fill="#FFFFFF" stroke="#CBD2DB"/>
+
+  <!-- aviso contraseña -->
+  <rect x="20" y="454" width="280" height="40" rx="8" fill="#FFF4DC"/>
+  <text x="30" y="470" fill="#8A5A00" font-size="9">La contraseña llega por correo.</text>
+  <text x="30" y="483" fill="#8A5A00" font-size="9">La app nunca la muestra ni la guarda.</text>
+
+  <!-- estado pendiente/aceptado/rechazado -->
+  <rect x="20" y="502" width="88" height="26" rx="13" fill="#FFF4DC"/>
+  <text x="64" y="519" fill="#8A5A00" font-size="9" text-anchor="middle">Pendiente</text>
+  <rect x="116" y="502" width="88" height="26" rx="13" fill="#E6F4EA"/>
+  <text x="160" y="519" fill="#1B7F3B" font-size="9" text-anchor="middle">Aceptado</text>
+  <rect x="212" y="502" width="88" height="26" rx="13" fill="#FDECEA"/>
+  <text x="256" y="519" fill="#B42318" font-size="9" text-anchor="middle">Rechazado</text>
+
+  <!-- boton -->
+  <rect x="20" y="546" width="280" height="46" rx="10" fill="#1F4E8C"/>
+  <text x="160" y="574" fill="#FFFFFF" font-size="14" font-weight="bold" text-anchor="middle">Enviar registro</text>
+
+  <text x="160" y="614" fill="#5B6676" font-size="10" text-anchor="middle">Mockup — registro (estados posibles abajo del formulario)</text>
+</svg>

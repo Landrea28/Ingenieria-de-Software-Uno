@@ -1,0 +1,25 @@
+# ./mvnw test — 2026-11-16, openjdk version "27.0.1.0.3" 2026-10-24
+
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.AccesoYEstadosTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.903 s — co.edu.konrad.consultaciudadano.web.controller.AccesoYEstadosTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.ConsultaYEdicionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.986 s — co.edu.konrad.consultaciudadano.web.controller.ConsultaYEdicionTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.DefectosCorregidosTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.317 s — co.edu.konrad.consultaciudadano.web.controller.DefectosCorregidosTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.RegistroCiudadanoTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.398 s — co.edu.konrad.consultaciudadano.web.controller.RegistroCiudadanoTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.ReportesTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s — co.edu.konrad.consultaciudadano.web.controller.ReportesTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.SeguridadEstadosTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.296 s — co.edu.konrad.consultaciudadano.web.controller.SeguridadEstadosTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.UsuariosYPerfilesTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.196 s — co.edu.konrad.consultaciudadano.web.controller.UsuariosYPerfilesTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.controller.VistasTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.184 s — co.edu.konrad.consultaciudadano.web.controller.VistasTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.service.ClientesRestTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.525 s — co.edu.konrad.consultaciudadano.web.service.ClientesRestTest
+[INFO] Running co.edu.konrad.consultaciudadano.web.service.SeguridadRestTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s — co.edu.konrad.consultaciudadano.web.service.SeguridadRestTest
+[INFO] Results:
+[INFO] Tests run: 125, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

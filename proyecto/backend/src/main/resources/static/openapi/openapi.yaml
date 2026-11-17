@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Consulta Ciudadano
+  version: 0.1.0
+  description: |
+    API academica con persistencia real. La consulta de antecedentes, el registro y las credenciales se apoyan en datos SIMULADOS; el control de acceso usa JWT.
+
+    **Acceso:** son publicos salud, login, registro de personal y catalogos. Personal autenticado o administradores consultan antecedentes; solo administradores acceden a ciudadanos y reportes. Use un JWT obtenido de `POST /api/auth/login` en Authorize. Para datos ficticios arranque con el perfil `demo`.
+servers:
+  - url: /
+tags:
+  - name: Salud
+  - name: Ciudadanos
+  - name: Antecedentes
+  - name: Catalogos
+  - name: Personal
+  - name: Autenticacion
+  - name: Reportes
+  - name: Usuarios
+  - name: Perfiles y permisos
+paths:
+  /api/health:
+    $ref: './paths/salud.yaml#/health'
+  /api/ciudadanos:
+    $ref: './paths/ciudadanos.yaml#/listado'
+  /api/ciudadanos/{identificacion}:
+    $ref: './paths/ciudadanos.yaml#/detalle'
+  /api/antecedentes/{identificacion}:
+    $ref: './paths/antecedentes.yaml#/consulta'
+  /api/antecedentes/{identificacion}/estado:
+    $ref: './paths/antecedentes.yaml#/estado'
+  /api/catalogos/fuerzas-rangos:
+    $ref: './paths/catalogos.yaml#/fuerzas'
+  /api/personal/registro:
+    $ref: './paths/personal.yaml#/registro'
+  /api/auth/login:
+    $ref: './paths/auth.yaml#/login'
+  /api/auth/logout:
+    $ref: './paths/auth.yaml#/logout'
+  /api/reportes/ciudadanos:
+    $ref: './paths/reportes.yaml#/ciudadanos'
+  /api/usuarios:
+    $ref: './paths/usuarios.yaml#/usuarios'
+  /api/usuarios/{identificacion}:
+    $ref: './paths/usuarios.yaml#/usuario'
+  /api/perfiles:
+    $ref: './paths/perfiles.yaml#/perfiles'
+  /api/permisos:
+    $ref: './paths/perfiles.yaml#/permisos'
+  /api/perfiles/{id}/permisos:
+    $ref: './paths/perfiles.yaml#/permisosPerfil'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

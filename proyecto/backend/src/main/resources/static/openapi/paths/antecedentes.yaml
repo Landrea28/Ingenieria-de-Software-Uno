@@ -1,0 +1,102 @@
+consulta:
+  get:
+    tags:
+    - Antecedentes
+    summary: Consultar estado de antecedentes
+    parameters:
+    - in: path
+      name: identificacion
+      required: true
+      description: Entre 6 y 10 digitos. En el perfil demo existen del 9000000001 al 9000000019.
+      schema:
+        type: string
+        pattern: ^[0-9]{6,10}$
+        example: '9000000001'
+    description: Los estados son ficticios. Requiere PERSONAL_FUERZA_PUBLICA o ADMINISTRADOR.
+    responses:
+      '200':
+        description: Estado conocido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/antecedente.yaml#/AntecedenteResponse
+      '400':
+        description: Identificacion con formato invalido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '404':
+        description: No hay informacion, nunca equivale a NO_REQUERIDO
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere PERSONAL_FUERZA_PUBLICA o ADMINISTRADOR
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []
+estado:
+  put:
+    tags:
+    - Antecedentes
+    summary: Establecer estado de prueba
+    parameters:
+    - in: path
+      name: identificacion
+      required: true
+      description: Debe corresponder a un ciudadano registrado.
+      schema:
+        type: string
+        pattern: ^[0-9]{6,10}$
+        example: '9000000001'
+    description: Endpoint adicional de demostracion. Crea el antecedente si no existia. Requiere ADMINISTRADOR.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../schemas/antecedente.yaml#/EstadoRequest
+    responses:
+      '200':
+        description: Actualizado
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/antecedente.yaml#/AntecedenteResponse
+      '400':
+        description: Identificacion o estado invalido
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '404':
+        description: Ciudadano inexistente
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '401':
+        description: Falta autenticacion
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+      '403':
+        description: Se requiere rol ADMINISTRADOR
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/errores.yaml#/ErrorResponse
+    security:
+    - bearerAuth: []
