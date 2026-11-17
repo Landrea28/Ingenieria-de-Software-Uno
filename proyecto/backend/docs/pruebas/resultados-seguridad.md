@@ -36,7 +36,9 @@ La salida completa del smoke test Bash está en
 [evidencias/smoke-test-salida.txt](../evidencias/smoke-test-salida.txt); reporta
 health, autenticación, CRUD de ciudadano, registro con Defensa SIMULADO y
 Mailpit, antecedentes, PDF con y sin resultados, perfiles/usuarios y negativos
-como aprobados. El smoke test PowerShell **no se ha ejecutado en Windows**.
+como aprobados. El smoke test PowerShell **queda pendiente de ejecución en Windows**: este entorno Linux
+no tiene `pwsh`. Comando para ejecutarlo en Windows:
+`pwsh -File proyecto/scripts/smoke-test.ps1`. No se generó una salida ficticia.
 
 Las pruebas móviles, en especial las que dependen de cámara/dispositivo, se
 registran manualmente en
@@ -52,7 +54,7 @@ los totales Surefire.
 | Media | Corregido y cubierto | El registro de personal necesitaba limitar intentos repetidos por IP. `SeguridadIntegracionTest#limitaIntentosRepetidosDeRegistroPorIp` comprueba el rechazo tras el límite configurado. |
 | Media | Corregido y cubierto | CORS no debe aceptar comodines y Swagger/actuator no deben exponerse fuera de `dev`. `CorsConfigTest#rechazaOrigenesCorsConComodin` y `SeguridadIntegracionTest#aplicaCabecerasDeSeguridadYNoExponeDocumentacionFueraDeDev` pasan. |
 | Media | Corregido; revisar despliegues externos | Se retiró la contraseña por defecto de Compose; `DB_PASSWORD` se exige en el entorno local. Evidencia: `proyecto/backend/compose.yaml`, `.env.example` y configuración de aplicación. |
-| Baja | Pendiente | No se ejecutó OWASP ZAP baseline. Procedimiento en [zap-baseline.md](./zap-baseline.md). |
+| Aviso (la salida no asigna severidad) | Ejecutado; sin hallazgo accionable | OWASP ZAP baseline: 67 reglas PASS, `FAIL-NEW=0` y `WARN-NEW=1`; salida completa en [zap-baseline-salida.txt](../evidencias/zap-baseline-salida.txt). El aviso `Non-Storable Content` afecta `/`, `/robots.txt` y `/sitemap.xml`, que responden 401 con `Cache-Control: no-cache, no-store, max-age=0, must-revalidate`; validación manual: el contenido no es almacenable. El spider no pudo explorar la raíz sin autenticación (401), por lo que la cobertura fue anónima. |
 | Baja | Pendiente de operación/equipo | Revisar en el despliegue real la rotación y gestión de secretos, acceso/retención de logs y dependencias con análisis actualizado. Las pruebas automatizadas no sustituyen esa revisión. |
 
 ## Trazabilidad
@@ -60,4 +62,6 @@ los totales Surefire.
 Los nombres exactos de las pruebas, el criterio de cada caso y su estado se
 mantienen en el [plan de pruebas](./plan-de-pruebas.md). El contrato del smoke
 test Bash está documentado por su salida guardada; la ejecución equivalente en
-Windows y los casos manuales de cámara siguen pendientes.
+Windows y los casos manuales de cámara siguen pendientes. ZAP terminó con
+código 2 por el aviso, sin alertas `FAIL`; véase el procedimiento y alcance en
+[zap-baseline.md](./zap-baseline.md).

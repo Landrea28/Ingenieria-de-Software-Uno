@@ -23,4 +23,5 @@ trabajo que aún no tiene evidencia de ejecución.
 | Estimación PERT y burndown | Falta — Pendiente equipo | [PERT](planeacion/estimacion-pert.md) y [burndown](planeacion/burndown.md), plantillas sin datos |
 | Pitch y simulacros | Falta — Pendiente equipo | [estructura del pitch](presentacion/estructura-pitch.md); preparar y ensayar el pitch/simulacros |
 | Pruebas manuales en celular | Parcial — Pendiente equipo | [mobile/docs/pruebas.md](../mobile/docs/pruebas.md): completar los casos de escaneo M-10–M-12 en un dispositivo apto |
-| Smoke test PowerShell en Windows | Falta | `proyecto/scripts/smoke-test.ps1`; no hay salida de ejecución en Windows |
+| Smoke test PowerShell en Windows | Pendiente de ejecución en Windows | No hay `pwsh` en el entorno Linux, así que no se inventó ni guardó una salida. Ejecutar en Windows: `pwsh -File proyecto/scripts/smoke-test.ps1` |
+| OWASP ZAP baseline | Hecho (escaneo pasivo, alcance anónimo) | [Salida completa](../backend/docs/evidencias/zap-baseline-salida.txt), [procedimiento y validación](../backend/docs/pruebas/zap-baseline.md): 67 PASS, 0 FAIL, 1 WARN validado manualmente |
