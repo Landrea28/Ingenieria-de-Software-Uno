@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${modoEdicion} ? 'Editar usuario' : 'Crear usuario')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('usuarios')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado(${modoEdicion} ? 'Editar usuario' : 'Crear usuario')}"></header>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
+
+    <!-- Campos de POST y PUT /api/usuarios. No hay contraseña: la genera el backend y la envía por
+         correo. En edición la identificación no se cambia porque es la clave del usuario. -->
+    <form class="tarjeta formulario" method="post" th:object="${usuarioForm}" data-validar
+          th:action="${modoEdicion} ? @{/usuarios/{id}(id=*{identificacion})} : @{/usuarios}">
+
+      <p class="nota">Los campos marcados con <abbr class="obligatorio" title="Obligatorio">*</abbr> son obligatorios.</p>
+      <div class="alerta error" data-resumen-errores role="alert" hidden></div>
+
+      <fieldset>
+        <legend>Datos del usuario</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: campo('identificacion', 'Identificación', 'text', ${reglas.identificacion}, ${modoEdicion})}"></label>
+          <label th:replace="~{fragments/componentes :: campo('correo', 'Correo electrónico', 'email', ${reglas.correo}, false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('nombres', 'Nombres', 'text', ${reglas.nombres}, false)}"></label>
+          <label th:replace="~{fragments/componentes :: campo('apellidos', 'Apellidos', 'text', ${reglas.apellidos}, false)}"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Acceso</legend>
+        <div class="campos">
+          <label th:replace="~{fragments/componentes :: selectorPares('perfilId', 'Perfil', ${opcionesPerfil})}"></label>
+          <!-- th:replace se evalúa antes que th:if: la condición va en un bloque aparte. -->
+          <th:block th:if="${modoEdicion}">
+            <label th:replace="~{fragments/componentes :: selectorPares('estado', 'Estado', ${estados})}"></label>
+          </th:block>
+        </div>
+        <p class="nota" th:unless="${modoEdicion}">El usuario se crea activo. El sistema genera una contraseña temporal
+          y la envía al correo indicado; no se muestra en pantalla.</p>
+        <p class="nota" th:if="${modoEdicion}">Un usuario inactivo no puede iniciar sesión. Al cambiar el perfil o el
+          estado, las sesiones abiertas de ese usuario dejan de servir.</p>
+      </fieldset>
+
+      <div class="acciones">
+        <a th:href="@{/usuarios}" class="boton">Cancelar</a>
+        <button type="submit" class="primario"
+                th:text="${modoEdicion} ? 'Guardar cambios' : 'Crear usuario'">Crear usuario</button>
+      </div>
+    </form>
+  </main>
+  <script th:src="@{/js/validacion.js}" defer></script>
+</body>
+</html>

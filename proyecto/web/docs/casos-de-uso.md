@@ -1,13 +1,13 @@
 # Casos de uso — Administrador (web administrativa)
 
 Diagrama y especificación de los casos de uso del actor **Administrador**. Cubre las historias HU04 a HU06
-(ciudadanos, RF05), HU10 (reporte PDF, RF07) y el ingreso del administrador (RF03). Los casos de usuarios, perfiles
-y permisos (HU08 y HU09, RF06) aparecen en el diagrama y se especifican en
-[casos-de-uso-usuarios-perfiles.md](casos-de-uso-usuarios-perfiles.md). Los casos del personal de la fuerza pública
-están en [el módulo móvil](../../mobile/docs/casos-de-uso.md).
+(ciudadanos, RF05, criterios CA15 a CA25), HU10 (reporte PDF, RF07, criterios CA39 a CA43) y el ingreso del
+administrador (RF03). Los casos de usuarios, perfiles y permisos (HU08 y HU09, RF06) aparecen en el diagrama y se
+especifican en [casos-de-uso-usuarios-perfiles.md](casos-de-uso-usuarios-perfiles.md). Los casos del personal de la
+fuerza pública están en [el módulo móvil](../../mobile/docs/casos-de-uso.md).
 
-La numeración de los criterios de aceptación (CA) de cada historia está en el libro `00_Consolidado_Entrega.xlsx`,
-junto con la trazabilidad; aquí se referencian la historia y el requisito.
+El cumplimiento de cada criterio de aceptación, con su prueba y su evidencia, está en
+[criterios-de-aceptacion.md](criterios-de-aceptacion.md).
 
 ## Diagrama de casos de uso
 
@@ -24,8 +24,8 @@ flowchart LR
         cu05(["CU-W05<br/>Consultar ciudadano<br/>por identificación"])
         cu06(["CU-W06<br/>Actualizar ciudadano"])
         cu07(["CU-W07<br/>Generar reporte PDF<br/>por estado"])
-        cu08(["CU-W08<br/>Gestionar usuarios<br/>(MVP 2)"])
-        cu09(["CU-W09<br/>Administrar permisos<br/>de un perfil (MVP 2)"])
+        cu08(["CU-W08<br/>Gestionar usuarios"])
+        cu09(["CU-W09<br/>Administrar permisos<br/>de un perfil"])
         val(["Validar los 10 campos<br/>del ciudadano"])
     end
 
@@ -57,17 +57,20 @@ de datos: cada caso se resuelve con una petición a la API REST, que es quien au
 
 ## Resumen
 
-| Id | Caso de uso | Historia | Requisito | Pantalla | Estado |
-|---|---|---|---|---|---|
-| CU-W01 | Iniciar sesión | — | RF03 | Login | Implementado |
-| CU-W02 | Cerrar sesión | — | RF03 | Menú lateral | Implementado |
-| CU-W03 | Registrar ciudadano | HU04 | RF05 | Registrar ciudadano | Implementado |
-| CU-W04 | Listar y buscar ciudadanos | HU05 | RF05 | Panel y Listado | Implementado |
-| CU-W05 | Consultar ciudadano por identificación | HU05 | RF05 | Panel, Listado y Detalle | Implementado |
-| CU-W06 | Actualizar ciudadano | HU06 | RF05 | Editar ciudadano | Implementado |
-| CU-W07 | Generar reporte PDF por estado | HU10 | RF07 | Reportes | Implementado |
-| CU-W08 | Gestionar usuarios | HU08 y HU09 | RF06 | Usuarios y perfiles | Solo API; pantalla pendiente |
-| CU-W09 | Administrar permisos de un perfil | HU08 y HU09 | RF06 | Usuarios y perfiles | Solo API; pantalla pendiente |
+| Id | Caso de uso | Historia | Requisito | Criterios | Pantalla | Estado |
+|---|---|---|---|---|---|---|
+| CU-W01 | Iniciar sesión | HU03 | RF03 | CA10 a CA14 | Login | Implementado |
+| CU-W02 | Cerrar sesión | HU03 | RF03 | — | Menú lateral | Implementado |
+| CU-W03 | Registrar ciudadano | HU04 | RF05 | CA15 a CA18 | Registrar ciudadano | Implementado |
+| CU-W04 | Listar y buscar ciudadanos | HU05 | RF05 | CA19 | Panel y Listado | Implementado |
+| CU-W05 | Consultar ciudadano por identificación | HU05 | RF05 | CA20, CA21 | Panel, Listado y Detalle | Implementado |
+| CU-W06 | Actualizar ciudadano | HU06 | RF05 | CA22 a CA25 | Editar ciudadano | Implementado |
+| CU-W07 | Generar reporte PDF por estado | HU10 | RF07 | CA39 a CA43 | Reportes | Implementado |
+| CU-W08 | Gestionar usuarios | HU08 | RF06 | CA31 a CA34 | Usuarios y perfiles | Implementado |
+| CU-W09 | Administrar permisos de un perfil | HU09 | RF06 | CA35 a CA38 | Usuarios y perfiles | Implementado, salvo crear perfiles (CA35) |
+
+HU03 está escrita para el personal de la fuerza pública; el administrador usa el mismo inicio de sesión de la API,
+por eso CU-W01 cubre los mismos criterios desde la web.
 
 Los prototipos de cada pantalla están en [mockups.md](mockups.md) y los casos de prueba en [pruebas.md](pruebas.md).
 

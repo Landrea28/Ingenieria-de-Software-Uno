@@ -1,6 +1,7 @@
 # Sistema de Consulta Ciudadano — Web administrativa
 
-Aplicación del **administrador**: inicia sesión, consulta, registra y edita ciudadanos, y solicita reportes en PDF.
+Aplicación del **administrador**: inicia sesión, consulta, registra y edita ciudadanos, solicita reportes en PDF y
+gestiona usuarios y permisos por perfil.
 Está hecha con Spring MVC + Thymeleaf (vistas del lado del servidor) y **consume la API REST de [`../backend`](../backend)**;
 no accede directamente a la base de datos. La lógica de negocio y la seguridad están en el backend.
 
@@ -9,7 +10,8 @@ no accede directamente a la base de datos. La lógica de negocio y la seguridad 
 | [docs/manual-usuario.md](docs/manual-usuario.md) | Manual breve para el administrador |
 | [docs/pruebas.md](docs/pruebas.md) | Casos de prueba, resultados, defectos corregidos y [evidencias](docs/evidencias/) |
 | [docs/casos-de-uso.md](docs/casos-de-uso.md) | Diagrama y especificación de los casos de uso del administrador |
-| [docs/casos-de-uso-usuarios-perfiles.md](docs/casos-de-uso-usuarios-perfiles.md) | Casos de uso de usuarios y perfiles (MVP 2, borrador) |
+| [docs/casos-de-uso-usuarios-perfiles.md](docs/casos-de-uso-usuarios-perfiles.md) | Casos de uso de usuarios y perfiles, y decisiones tomadas |
+| [docs/criterios-de-aceptacion.md](docs/criterios-de-aceptacion.md) | Qué criterio de aceptación se cumple, con qué prueba y qué evidencia |
 | [docs/mockups.md](docs/mockups.md) | Prototipos de las pantallas |
 | [docs/demo.md](docs/demo.md) | Guion de la demo, plan B y lista de verificación para la integración |
 
@@ -22,6 +24,8 @@ no accede directamente a la base de datos. La lógica de negocio y la seguridad 
 | Consulta por identificación y detalle | Conectado a la API |
 | Registro y edición (10 campos) con validación | Conectado a la API |
 | Reporte PDF por estado (Requerido / No requerido) | Conectado a la API (el PDF lo genera el backend) |
+| Usuarios: listar, filtrar, crear y actualizar (perfil y estado) | Conectado a la API |
+| Permisos por perfil, agrupados por opción del sistema | Conectado a la API. Crear perfiles no existe en el backend |
 
 ## Requisitos
 
@@ -63,7 +67,7 @@ todas las pantallas muestran **DATOS SIMULADOS — PRUEBA**. El reporte "Requeri
 ## Pruebas
 
 ```bash
-./mvnw test                         # 83 pruebas automáticas, no necesitan backend
+./mvnw test                         # 125 pruebas automáticas, no necesitan backend
 ```
 
 Prueba de humo contra un entorno en ejecución (integración o antes de sustentar). Las credenciales van en variables,
@@ -89,6 +93,10 @@ Detalle de casos y resultados en [docs/pruebas.md](docs/pruebas.md).
 | `/ciudadanos/{identificacion}/editar` | Editar (precargado) | `GET` y `PUT /api/ciudadanos/{identificacion}` |
 | `/reportes` | Filtro Requerido / No requerido | — |
 | `/reportes/pdf?estado=&modo=ver\|descargar` | PDF en el navegador o descargado | `GET /api/reportes/ciudadanos?estado=` |
+| `/usuarios?perfil=&estado=&pagina=` | Listado de usuarios con filtros, 20 por página | `GET /api/usuarios`, `GET /api/perfiles` |
+| `/usuarios/nuevo` | Crear usuario (sin contraseña: llega por correo) | `POST /api/usuarios` |
+| `/usuarios/{identificacion}/editar` | Editar datos, perfil y estado | `GET` y `PUT /api/usuarios/{identificacion}` |
+| `/perfiles?perfil=` | Permisos de un perfil por opción del sistema | `GET /api/perfiles`, `GET /api/permisos`, `GET` y `PUT /api/perfiles/{id}/permisos` |
 
 Las rutas con `{identificacion}` solo aceptan 6 a 10 dígitos; otra ruta da 404 con la página `error.html`.
 El navegador solo envía GET y POST: al editar, el formulario hace POST a la web y la web hace el `PUT` a la API.
@@ -102,8 +110,13 @@ El navegador solo envía GET y POST: al editar, el formulario hace POST a la web
   `ADMINISTRADOR`. Si la API responde 403, se cierra la sesión y se informa que el usuario no tiene permisos.
 - **Acceso:** `SesionInterceptor` envía al login a quien no tenga sesión. Si la API responde 401/403 en cualquier
   pantalla (token vencido, revocado o sin rol), `ManejoErroresApi` cierra la sesión y vuelve al login con un mensaje.
+- **Usuarios y perfiles:** no hay eliminar (un usuario se desactiva) ni campo de contraseña (la genera el backend y
+  la envía por correo). Cada 409 de la API tiene su mensaje: duplicados junto al campo, y «no puede desactivarse»,
+  «último administrador» y «permiso obligatorio» como aviso. La API no expone las opciones del sistema: la web las
+  deduce del código de cada permiso (`CIUDADANOS_LEER` → Gestión de ciudadanos). El permiso de seguridad del perfil
+  Administrador se muestra bloqueado, pero quien lo impide de verdad es el backend.
 - **Errores de la API:** `TraductorErroresApi` convierte cada respuesta en una excepción con nombre: 400 validación
-  (los detalles "campo: mensaje" se muestran en su campo), 404 no encontrado / sin resultados, 409 duplicado,
+  (los detalles "campo: mensaje" se muestran en su campo), 404 no encontrado / sin resultados, 409 conflicto (con su código: duplicado, último administrador…),
   5xx, red o tiempo agotado (3 s conexión, 10 s lectura) → "No fue posible conectar con el servidor".
 - **Validación en dos capas** con las reglas de `form/ReglasCiudadano.java` (copiadas de `CiudadanoRequest` del backend):
   en el navegador (`static/js/validacion.js`, mensajes en español junto a cada campo) y en el servidor web
@@ -133,19 +146,21 @@ El navegador solo envía GET y POST: al editar, el formulario hace POST a la web
 ```
 src/main/java/co/edu/konrad/consultaciudadano/web/
 ├── config/      ApiRestConfig (RestClient), TraductorErroresApi, CabecerasSeguridadFilter, WebConfig, ApiProperties
-├── controller/  Login, Panel, Ciudadano, Reporte + ModeloGlobal y ManejoErroresApi (401/403/red)
-├── dto/         CiudadanoDto, PaginaCiudadanos, LoginResponse, ErrorApi, EstadoAntecedente (contrato OpenAPI)
-├── form/        CiudadanoForm y ReglasCiudadano
+├── controller/  Login, Panel, Ciudadano, Reporte, Usuario, Perfil + ModeloGlobal y ManejoErroresApi (401/403/red)
+├── dto/         CiudadanoDto, PaginaCiudadanos, UsuarioDto, UsuarioDatos, PaginaUsuarios, PerfilDto, PermisoDto,
+│                LoginResponse, ErrorApi, EstadoAntecedente (contrato OpenAPI)
+├── form/        CiudadanoForm y ReglasCiudadano, UsuarioForm y ReglasUsuario
 ├── service/     Clientes de la API (interfaz + implementación Rest para "api" y Mock para "mock"),
 │                AccesoAdminService y excepciones Api*
 └── sesion/      SesionAdmin (token en la sesión) y SesionInterceptor (exige sesión)
 src/main/resources/
 ├── templates/   fragments/{layout,componentes}, login, panel, ciudadanos/{lista,detalle,formulario},
-│                reportes, error, error-api
+│                reportes, usuarios/{lista,formulario}, perfiles, error, error-api
 ├── static/      css/admin.css, js/validacion.js, js/estados.js
 └── messages.properties
 scripts/prueba-humo.sh
-docs/            manual-usuario.md, pruebas.md, demo.md, casos-de-uso*.md, mockups.md, mockups/, evidencias/
+docs/            manual-usuario.md, pruebas.md, demo.md, casos-de-uso*.md, criterios-de-aceptacion.md,
+                 mockups.md, mockups/, evidencias/
 ```
 
 ### Componentes reutilizables (`templates/fragments`)
@@ -157,4 +172,6 @@ docs/            manual-usuario.md, pruebas.md, demo.md, casos-de-uso*.md, mocku
 | `componentes :: tabla(columnas, ~{::filas}, vacia, 'mensaje')` | Tabla con encabezados y filas propias |
 | `componentes :: campo('propiedad', 'Etiqueta', 'tipo', reglas, soloLectura)` | Input con su mensaje de validación |
 | `componentes :: selector('propiedad', 'Etiqueta', opciones)` | Lista desplegable con su mensaje de validación |
+| `componentes :: selectorPares('propiedad', 'Etiqueta', mapa)` | Lista desplegable con valor y texto distintos (perfil, estado) |
+| `componentes :: pestanasSeguridad('usuarios'\|'perfiles')` | Pestañas Usuarios / Perfiles y permisos |
 | `componentes :: consultaIdentificacion` | Consulta exacta por identificación (panel y listado) |

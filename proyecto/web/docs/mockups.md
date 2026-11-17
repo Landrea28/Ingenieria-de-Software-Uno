@@ -22,11 +22,11 @@ Todos los datos de los bocetos son ficticios.
 | Detalle y edición | [mockups/detalle-edicion.svg](mockups/detalle-edicion.svg) | Detalle de un ciudadano y el mismo formulario precargado, con la identificación bloqueada y la confirmación al guardar | `templates/ciudadanos/detalle.html` y `formulario.html` |
 | Reportes | [mockups/reportes.svg](mockups/reportes.svg) | Filtro Requerido / No requerido, Ver PDF, Descargar PDF y el mensaje cuando no hay resultados | `templates/reportes.html` |
 
-## Seguridad (MVP 2)
+## Seguridad
 
 | Pantalla | Prototipo | Qué muestra | Implementada en |
 |---|---|---|---|
-| Usuarios y perfiles | [mockups/usuarios-perfiles.svg](mockups/usuarios-perfiles.svg) | Listado de usuarios con filtro por perfil y estado, formulario de crear / editar, y permisos por perfil | **Pendiente.** La API ya existe (`/api/usuarios`, `/api/perfiles`, `/api/permisos`); la pantalla web no. Propuesta por revisar con Julián |
+| Usuarios y perfiles | [mockups/usuarios-perfiles.svg](mockups/usuarios-perfiles.svg) | Listado de usuarios con filtro por perfil y estado, formulario de crear / editar, y permisos por perfil | `templates/usuarios/lista.html`, `usuarios/formulario.html` y `perfiles.html`. Se implementó en pantallas separadas (listado, formulario y pestaña de permisos) en lugar de todo en una, y los permisos se agrupan por opción del sistema |
 
 ## Decisiones reflejadas en los prototipos
 

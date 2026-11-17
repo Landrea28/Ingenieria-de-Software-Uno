@@ -216,3 +216,33 @@ body.pagina-login { display: grid; place-items: center; min-height: 100vh; paddi
   .menu .salir { margin: 0 0 0 auto; padding: 0; }
   main { padding: 16px; }
 }
+
+/* Usuarios y perfiles */
+.pestanas { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--borde); }
+.pestanas a {
+  padding: 8px 16px;
+  color: var(--tenue);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+.pestanas a:hover { color: var(--primario); }
+.pestanas a.activa { color: var(--primario); border-bottom-color: var(--primario); font-weight: 600; }
+
+.filtros { align-items: flex-end; }
+.filtros label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--tenue); }
+.filtros select { width: auto; min-width: 180px; }
+.filtros .primario { margin-left: auto; }
+
+.etiqueta-estado { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .85rem; }
+.etiqueta-estado.activo { background: #e8f7ee; color: #1b6e3c; }
+.etiqueta-estado.inactivo { background: #eef1f4; color: #5b6676; }
+
+.perfiles { margin-bottom: 16px; }
+a.opcion { color: inherit; text-decoration: none; }
+a.opcion.elegida { border-color: var(--primario); background: #eff6ff; font-weight: 600; }
+
+.permisos { display: grid; gap: 8px; }
+.permiso { display: flex; align-items: center; gap: 8px; }
+.permiso input[type="checkbox"] { width: auto; margin: 0; }
+.permiso small { color: var(--tenue); }

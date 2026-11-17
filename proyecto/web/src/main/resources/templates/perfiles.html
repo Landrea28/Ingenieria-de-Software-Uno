@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Perfiles y permisos')}"></head>
+<body class="panel">
+  <nav th:replace="~{fragments/layout :: menu('usuarios')}"></nav>
+  <main>
+    <header th:replace="~{fragments/layout :: encabezado('Usuarios y perfiles')}"></header>
+    <nav th:replace="~{fragments/componentes :: pestanasSeguridad('perfiles')}"></nav>
+    <div th:replace="~{fragments/componentes :: alertas}"></div>
+
+    <div th:if="${errorCarga}" class="estado estado-error" role="alert">
+      <p th:text="${errorCarga}">No fue posible conectar con el servidor.</p>
+      <a th:href="@{/perfiles}" class="boton" data-cargando>Reintentar</a>
+    </div>
+
+    <th:block th:if="${seleccionado}">
+      <!-- Perfiles de GET /api/perfiles. El catálogo es fijo: no se crean ni se eliminan perfiles. -->
+      <div class="opciones perfiles" role="group" aria-label="Perfil">
+        <a th:each="p : ${perfiles}" th:href="@{/perfiles(perfil=${p.id})}" class="opcion" data-cargando
+           th:classappend="${p.id == seleccionado.id} ? 'elegida'"
+           th:aria-current="${p.id == seleccionado.id} ? 'true'" th:text="${p.nombre}">Administrador</a>
+      </div>
+
+      <!-- Permisos de GET /api/permisos agrupados por opción del sistema; marcados los del perfil
+           (GET /api/perfiles/{id}/permisos). Guardar reemplaza la lista completa. -->
+      <form class="tarjeta formulario" method="post" th:action="@{/perfiles/{id}/permisos(id=${seleccionado.id})}">
+        <p class="nota">Marque lo que puede hacer el perfil <strong th:text="${seleccionado.nombre}">Administrador</strong>
+          en cada opción del sistema. Al guardar, el perfil queda exactamente con los permisos marcados.</p>
+
+        <fieldset th:each="grupo : ${permisosPorOpcion}">
+          <legend th:text="${grupo.key}">Gestión de ciudadanos</legend>
+          <div class="permisos">
+            <label class="permiso" th:each="permiso : ${grupo.value}"
+                   th:with="fijo=${seleccionado.administrador() and permiso.codigo == 'SEGURIDAD_ADMINISTRAR'}">
+              <input type="checkbox" name="permisosIds" th:value="${permiso.id}"
+                     th:checked="${fijo or #sets.contains(asignados, permiso.id)}" th:disabled="${fijo}">
+              <!-- Un checkbox deshabilitado no se envía: el permiso fijo viaja en un campo oculto. -->
+              <input th:if="${fijo}" type="hidden" name="permisosIds" th:value="${permiso.id}">
+              <span th:text="${permiso.nombre}">Consultar ciudadanos</span>
+              <small th:if="${fijo}">(obligatorio para este perfil)</small>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="acciones">
+          <a th:href="@{/perfiles(perfil=${seleccionado.id})}" class="boton">Descartar cambios</a>
+          <button type="submit" class="primario">Guardar permisos</button>
+        </div>
+      </form>
+    </th:block>
+  </main>
+</body>
+</html>
